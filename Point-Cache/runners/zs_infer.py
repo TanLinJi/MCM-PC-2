@@ -37,7 +37,10 @@ def infer(args, lm3d_model, test_loader, clip_weights):
         acc = cls_acc(clip_logits, target)
         accuracies.append(acc)
         
-        wandb.log({"Averaged test accuracy": sum(accuracies)/len(accuracies)}, commit=True)
+        # 修复wandb报错
+        if args.wandb:
+            wandb.log({"Averaged test accuracy": sum(accuracies)/len(accuracies)}, commit=True)
+
         if i % args.print_freq == 0:
             print("---- Zero-shot test accuracy: {:.2f}. ----\n".format(sum(accuracies)/len(accuracies)))
         
