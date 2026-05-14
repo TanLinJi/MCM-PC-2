@@ -224,8 +224,6 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
             
         acc = cls_acc(final_logits, target)  
         accuracies.append(acc)
-        
-        # 修复wandb报错
         if args.wandb:
             wandb.log({"Averaged test accuracy": sum(accuracies)/len(accuracies)}, commit=True)
 
