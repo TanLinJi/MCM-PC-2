@@ -187,3 +187,45 @@ First version recommendation:
 
 Use mean-local conflict first.
 
+
+---
+
+## E4-CANC-v0: Conservative Conflict-Aware Negative Cache
+
+### Rule
+
+\[
+I_{neg}^{E4}(x)=I_H(x)\lor(I_M(x)\land I_D(x))
+\]
+
+### Result
+
+| Corruption | Baseline | E4-CANC-v0 | Delta |
+|---|---:|---:|---:|
+| add_global_2 | 68.15 | 68.19 | +0.04 |
+| add_local_2 | 61.30 | 61.43 | +0.13 |
+| dropout_global_2 | 73.22 | 73.14 | -0.08 |
+| dropout_local_2 | 63.65 | 63.57 | -0.08 |
+| rotate_2 | 73.30 | 73.38 | +0.08 |
+| scale_2 | 70.46 | 70.54 | +0.08 |
+| jitter_2 | 29.58 | 29.58 | 0.00 |
+| **Average** | **62.81** | **62.83** | **+0.02** |
+
+### Observation
+
+E4-CANC-v0 is safe but under-active. It slightly improves the average accuracy, but the actual newly added negative samples are only about 0.78% on average.
+
+### Next
+
+E4-CANC-v1 should relax the candidate rule from:
+
+\[
+I_H\lor(I_M\land I_D)
+\]
+
+to:
+
+\[
+I_H\lor(I_D\land p_g^{(1)}>\tau_p)
+\]
+
