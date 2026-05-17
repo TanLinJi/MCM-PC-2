@@ -704,6 +704,26 @@ GPU1: 17 corruptions
 - 先讲全局方法思路，再讲当前阶段；
 - 后续 Multi-Cache Matrix 也要写入，不要只总结到当前 E4。
 
+### 14.1 HTML 视觉风格固定模板
+
+从 2026-05-17 起，用户要求后续所有由助手编写的说明文档类 HTML，统一采用下面这个文件的视觉风格和页面结构：
+
+```text
+/root/autodl-tmp/MCM-PC-2/docs/reports/2026-05-17_task_specification.html
+```
+
+后续新 HTML 报告应复用该文件的主要风格要素：
+
+1. 深色主题；
+2. 左侧 sticky 目录；
+3. `doc-header` 文档头；
+4. `tldr` 摘要块；
+5. `dashboard` 指标卡片；
+6. 深色表格、pill、callout、formula、compare、roadmap 等组件；
+7. 中文说明为主，必要位置保留英文论文标题、方法名和实验名。
+
+除非用户明确要求换风格，否则不要再使用浅色卡片式 HTML 报告模板。
+
 ---
 
 ## 15. 沟通注意事项
@@ -785,4 +805,5 @@ E4-CANC-v1 all35 自身结果是 ...
 13. 文档要详细，不要只写一句话时间线。
 14. 没有公平 baseline 时，不要声称方法超过 baseline。
 15. 阶段性结果要及时总结并归档。
+16. 说明文档类 HTML 统一采用 `docs/reports/2026-05-17_task_specification.html` 的深色目录式风格。
 ```
