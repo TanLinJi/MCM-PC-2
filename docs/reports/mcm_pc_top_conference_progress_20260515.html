@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCM-PC 顶会论文全局进展报告</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --paper: #ffffff;
+      --ink: #182230;
+      --muted: #667085;
+      --line: #d9e1ec;
+      --blue: #175cd3;
+      --teal: #0e9384;
+      --amber: #b54708;
+      --red: #b42318;
+      --green: #067647;
+      --slate: #344054;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.72;
+    }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 36px 22px 72px;
+    }
+    header {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 10px 28px rgba(16, 24, 40, 0.06);
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 31px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin: 6px 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: #f8fafc;
+      color: var(--slate);
+      font-size: 13px;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+    nav {
+      position: sticky;
+      top: 16px;
+      align-self: start;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px;
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+    }
+    nav h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      border: 0;
+      padding: 0;
+    }
+    nav a {
+      display: block;
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 5px 0;
+    }
+    section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 26px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.045);
+    }
+    h2 {
+      margin: 0 0 16px;
+      padding-left: 10px;
+      border-left: 4px solid var(--blue);
+      font-size: 23px;
+      line-height: 1.3;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 22px 0 8px;
+      font-size: 18px;
+      color: #1d2939;
+    }
+    p { margin: 9px 0; }
+    ul { padding-left: 22px; }
+    li { margin: 5px 0; }
+    code {
+      background: #f2f4f7;
+      border: 1px solid #e4e7ec;
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eef4ff;
+      color: #102a56;
+      font-weight: 650;
+    }
+    tr:nth-child(even) td { background: #fbfcfe; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfe;
+    }
+    .kpi .value {
+      font-size: 25px;
+      font-weight: 750;
+      color: var(--blue);
+    }
+    .kpi .label {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .callout {
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--blue);
+      border-radius: 8px;
+      padding: 13px 15px;
+      background: #f8fbff;
+      margin: 14px 0;
+    }
+    .good { border-left-color: var(--green); background: #f6fef9; }
+    .warn { border-left-color: var(--amber); background: #fffbeb; }
+    .risk { border-left-color: var(--red); background: #fff5f4; }
+    .muted { color: var(--muted); }
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin: 2px;
+      font-size: 12px;
+      color: var(--slate);
+      background: #f8fafc;
+    }
+    .formula {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+    }
+    .status-done { color: var(--green); font-weight: 650; }
+    .status-running { color: var(--amber); font-weight: 650; }
+    .status-risk { color: var(--red); font-weight: 650; }
+    footer {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 18px;
+    }
+    @media (max-width: 920px) {
+      main { grid-template-columns: 1fr; }
+      nav { position: static; }
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .grid { grid-template-columns: 1fr; }
+      section, header { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>MCM-PC 顶会论文全局进展报告</h1>
+    <p class="subtitle">面向 3D 点云视觉-语言模型测试时自适应的 Multi-Cache Matrix 研究路线。</p>
+    <p class="subtitle">本报告基于当前仓库、阶段文档和实验日志整理；不把仍在运行的 E1 all35 baseline 当作最终结果。</p>
+    <div class="meta">
+      <span class="pill">Project: MCM-PC</span>
+      <span class="pill">Base: Point-Cache</span>
+      <span class="pill">Backbone: ULIP-2</span>
+      <span class="pill">Dataset: ModelNet-C</span>
+      <span class="pill">Updated: 2026-05-15 15:33 CST</span>
+    </div>
+  </header>
+
+  <main>
+    <nav>
+      <h2>目录</h2>
+      <a href="#executive">1. 总体判断</a>
+      <a href="#problem">2. 论文问题定义</a>
+      <a href="#timeline">3. 已完成工作</a>
+      <a href="#results">4. 关键实验结果</a>
+      <a href="#diagnosis">5. 核心发现</a>
+      <a href="#method">6. 当前方法状态</a>
+      <a href="#gap">7. 顶会差距</a>
+      <a href="#plan">8. 下一步计划</a>
+      <a href="#paper">9. 论文结构建议</a>
+    </nav>
+
+    <div>
+      <section id="executive">
+        <h2>1. 总体判断</h2>
+        <div class="callout good">
+          <strong>当前项目已经完成从 baseline 复现、失败假设排除、诊断信号验证到第一版 conflict-aware negative cache 的完整研究闭环。</strong>
+          这已经不是单纯调参工作，而是形成了一条可写成论文故事的研究路线。
+        </div>
+        <p>
+          目前最强的科学证据不是 E4-CANC-v1 的精度提升，而是 E4-CANC-DIAG-v2 证明了
+          <strong>global-local conflict 能显著提高错误 global pseudo-label 的识别精度</strong>。
+          这为后续 negative suppression、boundary cache 和 Multi-Cache Matrix 提供了合理动机。
+        </p>
+        <div class="grid">
+          <div class="kpi"><div class="value">62.81</div><div class="label">severity _2 baseline average</div></div>
+          <div class="kpi"><div class="value">62.85</div><div class="label">E4-CANC-v1 on severity _2</div></div>
+          <div class="kpi"><div class="value">77.79%</div><div class="label">mean-conflict wrong precision</div></div>
+          <div class="kpi"><div class="value">35/35</div><div class="label">E4-CANC-v1 all35 completed</div></div>
+        </div>
+        <div class="callout warn">
+          <strong>当前不能直接宣布达到顶会主结果。</strong>
+          E4-CANC-v1 在 severity <code>_2</code> 上略优，但提升幅度只有约 <code>+0.04</code>。
+          all35 上已经有 E4-CANC-v1 结果，但 E1 baseline all35 正在运行，E4-CANC-v0 all35 仍需补齐。
+        </div>
+      </section>
+
+      <section id="problem">
+        <h2>2. 论文问题定义</h2>
+        <p>
+          项目目标是构建面向 3D point cloud vision-language model 的 test-time adaptation 框架。
+          该框架不更新 backbone，不使用测试标签，而是利用测试流中的 global feature、local part feature 和 text prototype
+          构建缓存，以缓解 corruption 导致的分布偏移。
+        </p>
+        <h3>核心科学问题</h3>
+        <div class="formula">
+How can we decide which test-time samples should be cached, suppressed, or ignored under corrupted 3D point-cloud streams?
+        </div>
+        <p>
+          原始 Point-Cache 的核心风险是 cache pollution：错误 global pseudo-label 被写入 cache 后，会影响后续样本预测。
+          因此，本项目从“如何挑选可靠 positive cache 样本”逐步转向“如何识别并抑制错误 global pseudo-label”。
+        </p>
+      </section>
+
+      <section id="timeline">
+        <h2>3. 已完成工作</h2>
+        <table>
+          <tr><th>阶段</th><th>工作内容</th><th>当前状态</th><th>结论</th></tr>
+          <tr>
+            <td>Stage 0</td>
+            <td>项目定位、文献路线、Point-Cache/MCP/BayesMM 关系梳理、Git 与实验目录建立。</td>
+            <td class="status-done">完成</td>
+            <td>主线应围绕 3D TTA cache 机制，而不是简单拼接 MCP 和 BayesMM。</td>
+          </tr>
+          <tr>
+            <td>Stage 1</td>
+            <td>复现 Point-Cache zero-shot、global cache、hierarchical cache，修复 wandb 日志问题。</td>
+            <td class="status-done">完成 severity _2；all35 正在跑</td>
+            <td>hierarchical cache 是当前主要 baseline。</td>
+          </tr>
+          <tr>
+            <td>Stage 2 / E2-EMR</td>
+            <td>把 positive cache admission 从 entropy 改为 entropy + top-1/top-2 margin。</td>
+            <td class="status-done">完成</td>
+            <td>在 add_global 上有效，但全 corruption 平均下降。</td>
+          </tr>
+          <tr>
+            <td>Stage 3 / E3-GLC</td>
+            <td>引入 global-local consistency，尝试用 local support 改 positive cache reliability。</td>
+            <td class="status-done">完成 v0/v1</td>
+            <td>直接 positive promotion 不稳定，local evidence 不应被当作正标签依据。</td>
+          </tr>
+          <tr>
+            <td>Stage 4A / E4-DIAG</td>
+            <td>不改预测，只统计 global-local conflict 是否能诊断错误 global pseudo-label。</td>
+            <td class="status-done">完成</td>
+            <td>conflict 是强诊断信号，但 local alternative 正确率低。</td>
+          </tr>
+          <tr>
+            <td>Stage 4B / E4-CANC-v0</td>
+            <td>保守 conflict-aware negative cache：只额外加入 boundary + conflict 样本。</td>
+            <td class="status-done">完成 severity _2</td>
+            <td>安全但弱，平均只提升约 +0.02。</td>
+          </tr>
+          <tr>
+            <td>Stage 4C / E4-CANC-v1</td>
+            <td>放宽 v0，使用 conflict + global top-1 confidence 触发 negative cache。</td>
+            <td class="status-done">完成 all35</td>
+            <td>severity _2 略优；all35 需要 baseline/v0 公平参照。</td>
+          </tr>
+        </table>
+      </section>
+
+      <section id="results">
+        <h2>4. 关键实验结果</h2>
+        <h3>4.1 severity _2 方法对比</h3>
+        <table>
+          <tr><th>方法</th><th>核心改动</th><th>平均准确率</th><th>判断</th></tr>
+          <tr><td>Baseline Hierarchical</td><td>原始 Point-Cache hierarchical cache</td><td>62.81</td><td>主 baseline</td></tr>
+          <tr><td>E2-EMR</td><td>entropy + margin positive admission</td><td>62.50</td><td>低于 baseline</td></tr>
+          <tr><td>E3-GLC-v0</td><td>additive global-local consistency</td><td>62.50</td><td>不稳定</td></tr>
+          <tr><td>E3-GLC-v1</td><td>non-expansive local gate</td><td>62.50</td><td>数学更合理但仍无提升</td></tr>
+          <tr><td>E4-CANC-v0</td><td>conservative conflict-aware negative cache</td><td>62.83</td><td>首次略超 baseline</td></tr>
+          <tr><td>E4-CANC-v1</td><td>conflict-gated negative cache</td><td>62.85</td><td>当前 severity _2 最好，但提升很小</td></tr>
+        </table>
+
+        <h3>4.2 E4-CANC-v1 all35 结果</h3>
+        <p>
+          E4-CANC-v1 在 <code>20260515_115306</code> 运行中完成 35/35 corruption，结果与上一轮
+          <code>20260515_101803</code> 完全一致，说明该实现当前是确定性的。
+        </p>
+        <table>
+          <tr><th>分组</th><th>平均准确率</th></tr>
+          <tr><td>all35 overall</td><td>62.50</td></tr>
+          <tr><td>add_global</td><td>68.18</td></tr>
+          <tr><td>add_local</td><td>61.39</td></tr>
+          <tr><td>dropout_global</td><td>68.12</td></tr>
+          <tr><td>dropout_local</td><td>62.76</td></tr>
+          <tr><td>rotate</td><td>72.36</td></tr>
+          <tr><td>scale</td><td>70.40</td></tr>
+          <tr><td>jitter</td><td>34.29</td></tr>
+        </table>
+        <table>
+          <tr><th>local suffix / severity index</th><th>平均准确率</th><th>解释</th></tr>
+          <tr><td>_0</td><td>70.71</td><td>最轻 corruption</td></tr>
+          <tr><td>_1</td><td>66.66</td><td>轻中度 corruption</td></tr>
+          <tr><td>_2</td><td>62.85</td><td>已和原 severity _2 实验可对齐</td></tr>
+          <tr><td>_3</td><td>58.68</td><td>高强度 corruption</td></tr>
+          <tr><td>_4</td><td>53.59</td><td>最高强度 corruption</td></tr>
+        </table>
+      </section>
+
+      <section id="diagnosis">
+        <h2>5. 核心发现</h2>
+        <h3>5.1 positive cache admission 不是当前最稳路线</h3>
+        <p>
+          E2 和 E3 说明：更复杂的 confidence、margin 或 local consistency 并不能稳定改进 positive cache。
+          原因是 corrupted point cloud 下 global prediction 和 local part evidence 都可能同时不可靠。
+        </p>
+        <h3>5.2 global-local conflict 是强诊断信号</h3>
+        <table>
+          <tr><th>指标</th><th>数值</th><th>含义</th></tr>
+          <tr><td>Global error rate</td><td>约 42.06%</td><td>global pseudo-label 的基础错误率</td></tr>
+          <tr><td>Mean-conflict wrong precision</td><td>约 77.79%</td><td>发生 mean conflict 时，global prediction 更可能错</td></tr>
+          <tr><td>Max-conflict wrong precision</td><td>约 75.59%</td><td>max-part conflict 也有效</td></tr>
+          <tr><td>Local alternative correct</td><td>约 20.64%</td><td>local alternative 不能直接作为 positive pseudo-label</td></tr>
+        </table>
+        <div class="callout good">
+          <strong>关键论文素材：</strong>
+          global-local conflict should suppress the global pseudo-label, not promote the local alternative class.
+        </div>
+      </section>
+
+      <section id="method">
+        <h2>6. 当前方法状态</h2>
+        <h3>6.1 E4-CANC-v0</h3>
+        <div class="formula">I_neg = I_H OR (I_M AND I_D)</div>
+        <p>
+          v0 是保守版本，新增 negative 样本很少，因此安全但弱。它证明 negative suppression 路线不会明显破坏 baseline。
+        </p>
+        <h3>6.2 E4-CANC-v1</h3>
+        <div class="formula">I_neg = I_H OR (I_D AND p_g_top1 &gt; tau_p)</div>
+        <p>
+          v1 去掉小 margin boundary 限制，让更多 conflict-confident 样本进入 negative cache。
+          all35 平均 extra negative rate 约 <code>2.77%</code>，比 v0 更活跃。
+        </p>
+        <div class="callout warn">
+          v1 仍是 hard negative insertion。它知道某个 global pseudo-label 可疑，但缺少 suppression 强度控制；
+          因此它更像过渡版本，而不是最终顶会方法。
+        </div>
+      </section>
+
+      <section id="gap">
+        <h2>7. 距离顶会论文还缺什么</h2>
+        <table>
+          <tr><th>缺口</th><th>当前状态</th><th>为什么重要</th></tr>
+          <tr>
+            <td>公平 all35 baseline</td>
+            <td class="status-running">E1 baseline all35 正在运行</td>
+            <td>没有它就不能判断 E4-CANC-v1 all35 是否真的优于原始 Point-Cache。</td>
+          </tr>
+          <tr>
+            <td>E4-CANC-v0 all35</td>
+            <td class="status-risk">尚未补齐</td>
+            <td>需要确认 v1 是优于保守 v0，还是只是更激进但无收益。</td>
+          </tr>
+          <tr>
+            <td>方法提升幅度</td>
+            <td class="status-risk">severity _2 只有小幅提升</td>
+            <td>顶会主结果通常需要更稳健的提升或更强诊断/理论贡献。</td>
+          </tr>
+          <tr>
+            <td>跨数据集验证</td>
+            <td class="status-risk">尚未完成</td>
+            <td>仅 ModelNet-C 不足以支撑泛化性。</td>
+          </tr>
+          <tr>
+            <td>参数敏感性</td>
+            <td class="status-risk">尚未系统扫描</td>
+            <td>需要证明 tau_d、tau_p 等超参数不是偶然调出来的。</td>
+          </tr>
+          <tr>
+            <td>完整 MCM 形态</td>
+            <td class="status-risk">仍是路线设想</td>
+            <td>如果论文名叫 Multi-Cache Matrix，需要有 matrix 化模块而不是单一规则。</td>
+          </tr>
+        </table>
+      </section>
+
+      <section id="plan">
+        <h2>8. 下一步研究计划</h2>
+        <h3>短期：补齐公平实验</h3>
+        <ol>
+          <li>等待当前 E1 baseline all35 完成，并生成 <code>summary_e1_base_dual_gpu_all35.csv</code>。</li>
+          <li>运行 E4-CANC-v0 all35，和 E1 baseline / E4-CANC-v1 使用相同 suffix <code>_0.._4</code>。</li>
+          <li>生成 all35 对比表：overall、per corruption type、per suffix severity、per corruption delta。</li>
+        </ol>
+
+        <h3>中期：从 v1 过渡到 v2</h3>
+        <p>
+          如果 E4-CANC-v1 all35 只小幅提升或不稳定，建议设计 E4-CANC-v2：soft negative suppression。
+          其核心是把 conflict 当作连续权重，而不是二值 hard insertion。
+        </p>
+        <div class="formula">w_neg(x) = sigmoid(alpha * (D_gl(x) - tau_d)) * p_g_top1(x)</div>
+        <p>
+          这样可以降低 false negative pollution 风险，也更容易写成具有方法贡献的模块。
+        </p>
+
+        <h3>长期：推进 Multi-Cache Matrix</h3>
+        <ul>
+          <li>把 negative cache 扩展为 conflict-weighted negative cache。</li>
+          <li>把 conflict 样本组织成 class-pair boundary cache，例如 global=chair、local=stool。</li>
+          <li>记录 semantic confusion matrix，支持论文可视化与分析。</li>
+          <li>后续再考虑 text prototype uncertainty / vMF text modeling，而不是现在抢先做。</li>
+        </ul>
+      </section>
+
+      <section id="paper">
+        <h2>9. 论文结构建议</h2>
+        <table>
+          <tr><th>论文部分</th><th>建议内容</th></tr>
+          <tr><td>Abstract</td><td>强调 confidence-based positive cache admission 不稳定，global-local conflict 是强错误伪标签诊断信号，并提出 conflict-aware negative suppression。</td></tr>
+          <tr><td>Introduction</td><td>从 corrupted 3D VLM 的 test-time adaptation 出发，指出 cache pollution 是核心挑战。</td></tr>
+          <tr><td>Related Work</td><td>Point-Cache、test-time adaptation、3D VLM、multi-cache methods、Bayesian/text prototype modeling。</td></tr>
+          <tr><td>Method</td><td>先介绍 Point-Cache baseline，再定义 global-local conflict，最后提出 CANC / soft suppression / boundary cache。</td></tr>
+          <tr><td>Experiments</td><td>ModelNet-C all35 主结果、severity _2 消融、E2/E3 失败分析、E4-DIAG 诊断、参数敏感性、复杂度。</td></tr>
+          <tr><td>Analysis</td><td>展示 conflict wrong precision、local alternative correct 低、jitter 失败案例、class-pair confusion。</td></tr>
+        </table>
+        <div class="callout">
+          <strong>当前推荐论文主线：</strong>
+          Failure of positive admission → conflict diagnosis → conflict-aware negative suppression → Multi-Cache Matrix extension.
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer>
+    Generated for MCM-PC project. File: docs/reports/mcm_pc_top_conference_progress_20260515.html
+  </footer>
+</div>
+</body>
+</html>

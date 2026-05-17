@@ -48,6 +48,92 @@ def infer(args, lm3d_model, test_loader, clip_weights):
     return sum(accuracies)/len(accuracies)
 
 
+
+@torch.no_grad()
+def clip_classifier_e0_tpe_v1_lite(args, classnames, template, clip_model):
+    """
+    E0-TPE-v1-lite: Lightweight Text Prototype Shrinkage.
+
+    This function keeps Point-Cache's original 64 templates and text encoder.
+    The only change is how the final text prototype is constructed from
+    the 64 normalized prompt embeddings.
+
+    Original Point-Cache:
+        text prototype = normalize(mean(64 normalized prompt embeddings))
+
+    E0-TPE-v1-lite:
+        text prototype = normalize((1 - R_bar) * base_prompt + R_bar * mean_direction)
+
+    where R_bar is the mean resultant length, measuring template consistency.
+    """
+    clip_weights = []
+
+    r_bar_values = []
+    base_mean_cos_values = []
+    proto_shift_cos_values = []
+
+    for classname in classnames:
+        cname = classname.replace('_', ' ')
+        texts = [t.format(cname) for t in template]
+
+        if args.lm3d == 'uni3d' or args.lm3d == 'ulip':
+            text_tokens = clip.tokenize(texts).cuda()
+        elif args.lm3d == 'openshape':
+            text_tokens = open_clip.tokenizer.tokenize(texts).cuda()
+        else:
+            raise ValueError(f"Unsupported lm3d type: {args.lm3d}")
+
+        # [num_templates, dim]
+        class_embeddings = clip_model.encode_text(text_tokens)
+
+        # Normalize each prompt embedding onto the unit hypersphere.
+        class_embeddings = class_embeddings / class_embeddings.norm(dim=-1, keepdim=True)
+
+        # Point-Cache's original 64-template mean direction.
+        mean_vec = class_embeddings.mean(dim=0)
+        r_bar = mean_vec.norm().clamp(min=1e-6, max=1.0)
+        mean_direction = mean_vec / r_bar
+
+        # Base prompt: the first Point-Cache template,
+        # usually "a point cloud model of {}."
+        base_direction = class_embeddings[0]
+        base_direction = base_direction / base_direction.norm()
+
+        # Lightweight shrinkage:
+        # R_bar close to 1 -> trust original mean direction.
+        # R_bar smaller    -> shrink toward the base prompt direction.
+        tpe_proto = (1.0 - r_bar) * base_direction + r_bar * mean_direction
+        tpe_proto = tpe_proto / tpe_proto.norm()
+
+        clip_weights.append(tpe_proto)
+
+        r_bar_values.append(float(r_bar.detach().cpu()))
+        base_mean_cos_values.append(float((base_direction * mean_direction).sum().detach().cpu()))
+        proto_shift_cos_values.append(float((tpe_proto * mean_direction).sum().detach().cpu()))
+
+    clip_weights = torch.stack(clip_weights, dim=1).cuda()
+
+    r_bar_tensor = torch.tensor(r_bar_values)
+    base_mean_tensor = torch.tensor(base_mean_cos_values)
+    proto_shift_tensor = torch.tensor(proto_shift_cos_values)
+
+    print("[E0-TPE-v1-lite] Text prototype shrinkage enabled.")
+    print("[E0-TPE-v1-lite] R_bar mean/min/max: "
+          f"{r_bar_tensor.mean().item():.6f} / "
+          f"{r_bar_tensor.min().item():.6f} / "
+          f"{r_bar_tensor.max().item():.6f}")
+    print("[E0-TPE-v1-lite] base-mean cosine mean/min/max: "
+          f"{base_mean_tensor.mean().item():.6f} / "
+          f"{base_mean_tensor.min().item():.6f} / "
+          f"{base_mean_tensor.max().item():.6f}")
+    print("[E0-TPE-v1-lite] tpe-vs-original cosine mean/min/max: "
+          f"{proto_shift_tensor.mean().item():.6f} / "
+          f"{proto_shift_tensor.min().item():.6f} / "
+          f"{proto_shift_tensor.max().item():.6f}")
+
+    return clip_weights
+
+
 def main(args):
     print('>>> In function `main`')
     
@@ -66,7 +152,7 @@ def main(args):
     print(f'>>> {[dataset_name]} classnames: {classnames} \n')
     
     # `clip_weights` are text features of shape (emb_dim, n_cls)
-    clip_weights = clip_classifier(args, classnames, template, clip_model)
+    clip_weights = clip_classifier_e0_tpe_v1_lite(args, classnames, template, clip_model)
     
     if args.wandb:
         if args.lm3d == 'openshape':

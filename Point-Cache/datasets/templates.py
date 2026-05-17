@@ -1,5 +1,6 @@
 import json
 
+# 64个手工设计的文本模板
 text_prompts = [
     "a point cloud model of {}.",
     "There is a {} in the scene.",
