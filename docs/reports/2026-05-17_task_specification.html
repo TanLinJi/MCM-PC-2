@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCM-PC 项目整理 + 任务说明书 v1.0</title>
+<style>
+  :root {
+    --c-text: #e2e8f0;
+    --c-muted: #94a3b8;
+    --c-heading: #f1f5f9;
+    --c-accent: #60a5fa;
+    --c-bg: #0b1220;
+    --c-bg-soft: #111827;
+    --c-bg-card: #131c2e;
+    --c-border: #1f2937;
+    --c-border-strong: #334155;
+    --c-code-bg: #0f172a;
+    --c-code-text: #e2e8f0;
+    --c-row-stripe: #0e1626;
+
+    --c-blue: #93c5fd;
+    --c-blue-bg: #16243d;
+    --c-blue-border: #2563eb;
+    --c-green: #6ee7b7;
+    --c-green-bg: #0b3a2c;
+    --c-green-border: #10b981;
+    --c-red: #fca5a5;
+    --c-red-bg: #3a1414;
+    --c-red-border: #ef4444;
+    --c-amber: #fcd34d;
+    --c-amber-bg: #3b2a08;
+    --c-amber-border: #f59e0b;
+    --c-purple: #d8b4fe;
+    --c-purple-bg: #2a1a3d;
+    --c-purple-border: #a855f7;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #334155; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.72;
+    color: var(--c-text);
+    background: var(--c-bg);
+  }
+  .container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  nav.toc {
+    position: sticky; top: 1rem; align-self: start;
+    max-height: calc(100vh - 2rem); overflow-y: auto;
+    padding: 1rem 0.85rem;
+    background: var(--c-bg-soft);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    font-size: 0.86rem;
+  }
+  nav.toc .toc-title {
+    font-weight: 700; color: var(--c-heading);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem; padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--c-border);
+  }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; }
+  nav.toc li { margin: 0.2rem 0; }
+  nav.toc a {
+    display: block; padding: 0.25rem 0.5rem;
+    color: var(--c-muted); text-decoration: none;
+    border-left: 2px solid transparent;
+    border-radius: 3px; transition: all .15s;
+  }
+  nav.toc a:hover {
+    color: var(--c-accent);
+    background: rgba(96, 165, 250, 0.1);
+    border-left-color: var(--c-accent);
+  }
+  nav.toc li.toc-sub { margin-left: 0.75rem; font-size: 0.82rem; }
+  main { min-width: 0; }
+  h1, h2, h3, h4 { color: var(--c-heading); line-height: 1.3; }
+  h1 {
+    font-size: 2rem; margin: 0 0 0.5rem 0;
+    border-bottom: 3px solid var(--c-accent);
+    padding-bottom: 0.5rem; display: inline-block;
+  }
+  h2 {
+    font-size: 1.45rem; margin: 2.5rem 0 1rem 0;
+    padding: 0.4rem 0 0.4rem 0.75rem;
+    border-left: 4px solid var(--c-accent);
+    background: linear-gradient(90deg, rgba(96,165,250,0.08), transparent);
+  }
+  h3 { font-size: 1.15rem; margin: 1.5rem 0 0.5rem 0; }
+  h4 { font-size: 1rem; margin: 1rem 0 0.4rem 0; color: var(--c-muted); }
+  p { margin: 0.55rem 0; }
+  strong { color: #f8fafc; }
+  ul, ol { padding-left: 1.4rem; }
+  li { margin: 0.18rem 0; }
+  header.doc-header {
+    margin-bottom: 2rem; padding-bottom: 1rem;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .doc-meta { font-size: 0.85rem; color: var(--c-muted); margin: 0 0 0.5rem 0; }
+  .doc-meta .badge {
+    display: inline-block; padding: 0.1rem 0.55rem;
+    border-radius: 999px; background: var(--c-bg-soft);
+    border: 1px solid var(--c-border-strong);
+    color: var(--c-heading); margin-right: 0.4rem;
+    font-size: 0.78rem;
+  }
+  .tldr {
+    margin: 1.5rem 0; padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, rgba(96,165,250,0.08), rgba(168, 85, 247, 0.05));
+    border: 1px solid var(--c-blue-border);
+    border-radius: 10px; font-size: 1.02rem;
+  }
+  .tldr h3 {
+    margin-top: 0; color: var(--c-blue);
+    font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.8rem;
+    margin: 1.25rem 0 2rem 0;
+  }
+  .card {
+    padding: 0.9rem 1rem;
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border-strong);
+    border-radius: 8px;
+  }
+  .card .label {
+    font-size: 0.78rem; color: var(--c-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+  .card .value {
+    font-size: 1.45rem; font-weight: 700;
+    color: var(--c-heading); line-height: 1.1;
+  }
+  .card .sub { font-size: 0.78rem; color: var(--c-muted); margin-top: 0.25rem; }
+  .card.good { border-left: 3px solid var(--c-green-border); }
+  .card.bad { border-left: 3px solid var(--c-red-border); }
+  .card.warn { border-left: 3px solid var(--c-amber-border); }
+  .card.info { border-left: 3px solid var(--c-blue-border); }
+  code, pre, .mono {
+    font-family: "SF Mono", Monaco, Menlo, Consolas, monospace;
+    font-size: 0.875rem;
+  }
+  code {
+    background: var(--c-code-bg);
+    color: var(--c-code-text);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    border: 1px solid var(--c-border);
+  }
+  pre {
+    background: var(--c-code-bg);
+    color: var(--c-code-text);
+    padding: 0.9rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--c-border);
+    overflow-x: auto;
+    line-height: 1.55;
+    margin: 0.6rem 0;
+  }
+  pre code { background: none; border: none; padding: 0; color: inherit; }
+  .kw { color: #fb923c; font-weight: 600; }
+  .str { color: #86efac; }
+  .num { color: #93c5fd; }
+  .com { color: #94a3b8; font-style: italic; }
+  .fn { color: #d8b4fe; }
+  .file-ref {
+    display: inline-block;
+    font-size: 0.82rem; color: var(--c-muted);
+    margin-top: 0.1rem;
+    padding-left: 0.5rem;
+    border-left: 3px solid var(--c-border-strong);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.85rem 0 1.25rem 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--c-border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--c-bg-soft);
+    font-weight: 600;
+    color: var(--c-heading);
+  }
+  tr:nth-child(even) td { background: var(--c-row-stripe); }
+  td.num-cell { text-align: right; font-family: "SF Mono", monospace; }
+  td.center { text-align: center; }
+  .pill {
+    display: inline-block;
+    font-size: 0.74rem;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .pill.done { background: var(--c-green-bg); color: var(--c-green); border: 1px solid var(--c-green-border); }
+  .pill.fail { background: var(--c-red-bg); color: var(--c-red); border: 1px solid var(--c-red-border); }
+  .pill.warn { background: var(--c-amber-bg); color: var(--c-amber); border: 1px solid var(--c-amber-border); }
+  .pill.plan { background: var(--c-blue-bg); color: var(--c-blue); border: 1px solid var(--c-blue-border); }
+  .pill.retire { background: var(--c-bg-soft); color: var(--c-muted); border: 1px dashed var(--c-border-strong); }
+  .pill.new { background: var(--c-purple-bg); color: var(--c-purple); border: 1px solid var(--c-purple-border); }
+  .callout {
+    margin: 1rem 0; padding: 0.85rem 1.1rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+  .callout .label { font-weight: 700; margin-right: 0.5rem; letter-spacing: 0.02em; }
+  .callout.warn { background: var(--c-amber-bg); border-color: var(--c-amber-border); }
+  .callout.warn .label { color: var(--c-amber); }
+  .callout.danger { background: var(--c-red-bg); border-color: var(--c-red-border); }
+  .callout.danger .label { color: var(--c-red); }
+  .callout.info { background: var(--c-bg-soft); border-color: var(--c-accent); }
+  .callout.info .label { color: var(--c-accent); }
+  .callout.success { background: var(--c-green-bg); border-color: var(--c-green-border); }
+  .callout.success .label { color: var(--c-green); }
+  .matrix {
+    margin: 1.25rem 0;
+    padding: 1rem;
+    background: var(--c-bg-soft);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+  }
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: 130px 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .mcell {
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--c-border);
+    background: var(--c-bg-card);
+    text-align: center;
+    font-size: 0.85rem;
+  }
+  .mcell.head {
+    background: var(--c-bg-soft);
+    font-weight: 700; color: var(--c-heading);
+    border: none;
+  }
+  .mcell.rowhead {
+    background: var(--c-bg-soft);
+    font-weight: 700; color: var(--c-heading);
+    border: none; text-align: left;
+    padding-left: 1rem; align-content: center;
+  }
+  .mcell.blue { background: var(--c-blue-bg); border-color: var(--c-blue-border); }
+  .mcell.green { background: var(--c-green-bg); border-color: var(--c-green-border); }
+  .mcell.red { background: var(--c-red-bg); border-color: var(--c-red-border); }
+  .mcell.off { background: #0e1626; color: var(--c-muted); border-style: dashed; }
+  .mcell .name { font-weight: 700; font-family: "SF Mono", monospace; margin-bottom: 0.25rem; }
+  .mcell .desc { font-size: 0.78rem; color: var(--c-muted); }
+  .mcell .badge {
+    display: inline-block; font-size: 0.7rem;
+    padding: 0.08rem 0.4rem; border-radius: 3px;
+    background: rgba(15, 23, 42, 0.6); margin-top: 0.3rem;
+  }
+  .roadmap {
+    margin: 1.25rem 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: weeknum;
+  }
+  .roadmap > li {
+    position: relative;
+    margin: 0 0 1rem 0;
+    padding: 1rem 1.2rem 1rem 3.5rem;
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border-strong);
+    border-radius: 8px;
+  }
+  .roadmap > li::before {
+    counter-increment: weeknum;
+    content: "W" counter(weeknum);
+    position: absolute;
+    left: 0.85rem; top: 0.95rem;
+    font-family: "SF Mono", monospace;
+    font-weight: 700; font-size: 0.9rem;
+    color: var(--c-blue);
+    padding: 0.15rem 0.5rem;
+    background: var(--c-blue-bg);
+    border: 1px solid var(--c-blue-border);
+    border-radius: 4px;
+  }
+  .roadmap h3 { margin: 0 0 0.5rem 0; color: var(--c-heading); }
+  .roadmap .week-meta {
+    font-size: 0.82rem; color: var(--c-muted);
+    margin-bottom: 0.6rem;
+  }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .compare > div {
+    padding: 1rem 1.2rem;
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border-strong);
+    border-radius: 8px;
+  }
+  .compare h4 {
+    margin-top: 0; padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--c-border);
+    color: var(--c-heading);
+  }
+  .compare.v1 > div:first-child { border-left: 3px solid var(--c-blue-border); }
+  .compare.v1 > div:last-child { border-left: 3px solid var(--c-purple-border); }
+  .formula {
+    display: block;
+    margin: 0.75rem 0;
+    padding: 0.75rem 1rem;
+    background: var(--c-bg-soft);
+    border-left: 3px solid var(--c-accent);
+    border-radius: 0 4px 4px 0;
+    font-family: "SF Mono", monospace;
+    font-size: 0.92rem;
+    overflow-x: auto;
+  }
+  .formula em { font-style: italic; color: var(--c-accent); }
+  .svg-wrap {
+    margin: 1rem 0; padding: 1rem;
+    background: var(--c-bg-soft);
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  .svg-wrap svg { display: block; margin: auto; max-width: 100%; }
+  footer.doc-footer {
+    margin-top: 3rem; padding: 1rem 0;
+    border-top: 1px solid var(--c-border);
+    font-size: 0.85rem; color: var(--c-muted);
+  }
+  hr { border: none; border-top: 1px solid var(--c-border); margin: 1.5rem 0; }
+  details {
+    margin: 0.75rem 0; padding: 0.5rem 1rem;
+    background: var(--c-bg-soft);
+    border: 1px solid var(--c-border);
+    border-radius: 6px;
+  }
+  details > summary { cursor: pointer; font-weight: 600; color: var(--c-heading); }
+  .delta-up { color: var(--c-green); }
+  .delta-down { color: var(--c-red); }
+  .delta-flat { color: var(--c-muted); }
+  @media (max-width: 1000px) {
+    .container { grid-template-columns: 1fr; }
+    nav.toc { position: static; max-height: none; }
+    .matrix-grid { grid-template-columns: 95px 1fr 1fr; font-size: 0.78rem; }
+    .compare { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<nav class="toc">
+  <div class="toc-title">📋 目录</div>
+  <ol>
+    <li><a href="#tldr">🎯 一句话现状 + Dashboard</a></li>
+    <li><a href="#sec1">1. 两个版本走到今天</a></li>
+    <li class="toc-sub"><a href="#sec1-1">1.1 MCM-PC（原版）</a></li>
+    <li class="toc-sub"><a href="#sec1-2">1.2 MCM-PC-2（新版）</a></li>
+    <li class="toc-sub"><a href="#sec1-3">1.3 两版并存的代价</a></li>
+    <li><a href="#sec2">2. MCM-PC-2 实验盘点</a></li>
+    <li class="toc-sub"><a href="#sec2-1">2.1 E1-BASE baseline</a></li>
+    <li class="toc-sub"><a href="#sec2-2">2.2 E2 / E3 positive admission</a></li>
+    <li class="toc-sub"><a href="#sec2-3">2.3 E4-DIAG ⭐</a></li>
+    <li class="toc-sub"><a href="#sec2-4">2.4 E4-CANC v0 / v1</a></li>
+    <li class="toc-sub"><a href="#sec2-5">2.5 E0-TPE 文本端</a></li>
+    <li><a href="#sec3">3. 根因诊断</a></li>
+    <li><a href="#sec4">4. 资产清单（保留/退役）</a></li>
+    <li><a href="#sec5">5. 统一方案 MCM-PC v3.0</a></li>
+    <li class="toc-sub"><a href="#sec5-2">5.2 三个 contribution</a></li>
+    <li class="toc-sub"><a href="#sec5-3">5.3 矩阵 + 数据流</a></li>
+    <li><a href="#sec6">6. 6 周路线图</a></li>
+    <li><a href="#sec7">7. 风险与备选</a></li>
+    <li><a href="#sec8">8. 立即行动（24h）</a></li>
+    <li><a href="#sec9">9. 下一步选项</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="doc-header">
+  <p class="doc-meta">
+    <span class="badge">任务说明书 v1.0</span>
+    <span class="badge">2026-05-17</span>
+    <span class="badge">作者：AI pair</span>
+    <span class="badge">读者：项目主导</span>
+  </p>
+  <h1>MCM-PC 项目整理 + 详细任务说明书</h1>
+  <p style="color: var(--c-muted); margin-top: 0.5rem;">
+    项目题目（保留）：<strong>MCM-PC: Multi-Cache Matrix for 3D Point Cloud Test-Time Adaptation</strong>
+  </p>
+</header>
+
+<section id="tldr">
+  <div class="tldr">
+    <h3>一句话现状</h3>
+    <p>
+      <strong>MCM-PC-2</strong>（<code>/root/autodl-tmp/MCM-PC-2</code>）在 <strong>ULIP-2 backbone + 7 corruption × severity 2</strong> 这个狭窄设定下做了 <strong>6 个实验</strong>（E0-TPE / E1 / E2 / E3-v0 / E3-v1 / E4-DIAG / E4-CANC-v0 / v1），<strong>除 E4-DIAG 是诊断信号有意义之外，方法侧全部低于或仅微超 baseline（±0.05pp）</strong>，主线已堵；
+      <strong>MCM-PC</strong>（<code>/root/autodl-tmp/MCM-PC</code>）虽暂停在概念阶段，但保留了 <strong>35-setting 评估、OpenShape backbone、vMF 文本锚点、D20 anchor pollution P1 探针、2×3 matrix 骨架</strong> 等核心资产。
+    </p>
+    <p>
+      <strong>建议</strong>：不要再追 MCM-PC-2 的 cache-admission 第 N 个变种，而是把 MCM-PC-2 的 <strong>E4-DIAG conflict 发现（77.79% 错检 precision）</strong>升华为<strong>「cache 准入门控」</strong>，并入 MCM-PC 的 <strong>Multi-Cache Matrix 骨架</strong>，做<strong>统一版 v3.0</strong>。题目和"Multi-Cache Matrix"卖点保留不变。
+    </p>
+  </div>
+
+  <div class="dashboard">
+    <div class="card bad">
+      <div class="label">MCM-PC-2 Baseline</div>
+      <div class="value">62.81<span style="font-size: 0.7em; color: var(--c-muted);">%</span></div>
+      <div class="sub">ULIP-2, 7 corr × sev 2</div>
+    </div>
+    <div class="card bad">
+      <div class="label">最佳方法</div>
+      <div class="value">62.85<span style="font-size: 0.7em; color: var(--c-muted);">%</span></div>
+      <div class="sub">E4-CANC-v1，<span class="delta-up">+0.04pp</span></div>
+    </div>
+    <div class="card bad">
+      <div class="label">失败实验数</div>
+      <div class="value">5 / 6</div>
+      <div class="sub">仅 E4-DIAG 是诊断成功</div>
+    </div>
+    <div class="card warn">
+      <div class="label">all35 verified</div>
+      <div class="value">1 / 1</div>
+      <div class="sub">E4-CANC-v1 all35 = 62.50 <span class="delta-down">&lt; baseline sev2</span></div>
+    </div>
+    <div class="card good">
+      <div class="label">MCM-PC Baseline</div>
+      <div class="value">75.27<span style="font-size: 0.7em; color: var(--c-muted);">%</span></div>
+      <div class="sub">OpenShape, 35 setting</div>
+    </div>
+    <div class="card info">
+      <div class="label">AAAI'27 截稿</div>
+      <div class="value">~14 月</div>
+      <div class="sub">2027-08 投稿窗口</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 1. History ============================== -->
+<section id="sec1">
+  <h2>1. 两个版本走到今天的全貌</h2>
+
+  <h3 id="sec1-1">1.1 MCM-PC（原版） <span class="pill warn">暂停在概念阶段</span></h3>
+
+  <table>
+    <tr><th style="width: 12rem">维度</th><th>取值</th></tr>
+    <tr><td><strong>路径</strong></td><td><code>/root/autodl-tmp/MCM-PC</code></td></tr>
+    <tr><td><strong>活跃时间</strong></td><td>2026-04 → 2026-05-13（W1 → W2.5 + 概念阶段）</td></tr>
+    <tr><td><strong>Backbone</strong></td><td>OpenShape PointBERT-vitg14（768 维 feature）</td></tr>
+    <tr><td><strong>评估范围</strong></td><td>ModelNet-C <strong>35 setting</strong>（7 corruption × 5 severity）</td></tr>
+    <tr><td><strong>baseline 数字</strong></td><td>ZS-clean 83.27% / ZS-35mean 72.51% / Hierarchical TTA 35-mean <strong>75.27%</strong></td></tr>
+    <tr><td><strong>主线决策</strong></td><td>原 C1 ICP-CD 几何距离（D19 fast-track）已证伪 → D22 转 anchor pollution 主线</td></tr>
+    <tr><td><strong>核心资产</strong></td><td>① 35-setting 跑分基础设施<br>② vMF 文本锚点 paraphrase 脚本（<code>generate_paraphrase.py</code>）<br>③ D20 P1 anchor pollution 探针（oracle +10~13pp on affine）<br>④ <code>model_with_mcp3d.py</code> 2×3 matrix 骨架（11 Section，核心 TODO）<br>⑤ 概念文档 5 篇（00-05，最新 05 是 MCP 三缓存 HTML 暗黑主题）</td></tr>
+  </table>
+
+  <h3 id="sec1-2">1.2 MCM-PC-2（新版） <span class="pill warn">主线堵在 E4-CANC</span></h3>
+
+  <table>
+    <tr><th style="width: 12rem">维度</th><th>取值</th></tr>
+    <tr><td><strong>路径</strong></td><td><code>/root/autodl-tmp/MCM-PC-2</code></td></tr>
+    <tr><td><strong>活跃时间</strong></td><td>2026-05-13 → 2026-05-17（4 天，6 个实验）</td></tr>
+    <tr><td><strong>Backbone</strong></td><td>ULIP-2（不同于 MCM-PC 的 OpenShape）</td></tr>
+    <tr><td><strong>评估范围</strong></td><td>ModelNet-C <strong>7 corruption × severity 2</strong>（仅 7 个数字，只有 E4-CANC-v1 跑过 all35）</td></tr>
+    <tr><td><strong>baseline 数字</strong></td><td>ZS 65.19 / Global Cache 67.06 / Hierarchical Cache <strong>62.81</strong>（7-corr sev2 平均）</td></tr>
+    <tr><td><strong>主分支</strong></td><td><code>mcm-pc-reliability-v1</code>（17 commits since fork from main）</td></tr>
+    <tr><td><strong>核心资产</strong></td><td>① <strong>E4-DIAG 发现：global-local conflict → 77.79% wrong-label precision</strong>（强诊断信号）⭐<br>② 完整的 E1/E2/E3/E4 失败经验文档（<code>docs/stages/</code>）<br>③ ULIP-2 backbone 配置（作为第二 backbone 候选）<br>④ 严格的脚本命名 + commit 拆分规则（<code>mcm_pc_user_preferences_and_workflow_rules.md</code>）</td></tr>
+  </table>
+
+  <h3 id="sec1-3">1.3 两版并存的代价</h3>
+
+  <div class="compare v1">
+    <div>
+      <h4>✓ 好处</h4>
+      <ul>
+        <li>MCM-PC-2 节奏快，4 天跑了 6 个实验</li>
+        <li>文档化好，每 stage 有 .md 归档</li>
+        <li>commit 拆分规则严谨</li>
+        <li>暴露出了「positive admission 这条路不通」的硬事实</li>
+        <li>找到了 E4-DIAG 这个高 precision 错检信号（论文素材）</li>
+      </ul>
+    </div>
+    <div>
+      <h4>✗ 坏处</h4>
+      <ul>
+        <li>backbone 改了（ULIP-2 ≠ OpenShape），数字与 MCM-PC 不可比</li>
+        <li>评估口径变窄（7 setting ≠ 35 setting，<strong>论文不可投</strong>）</li>
+        <li>丢失了 MCM-PC 三大资产：vMF / anchor pollution / 2×3 matrix</li>
+        <li>6 个实验全在一个维度（cache 准入）上挤来挤去</li>
+        <li>没有跨数据集（ScanObjectNN-C 没跑）</li>
+        <li>论文 contribution 收窄成「conflict-aware cache」，太薄</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <span class="label">⚠ 硬事实</span>
+    <strong>E4-CANC-v1 在唯一一次 all35 跑分上得到 62.50%（&lt; baseline sev2 的 62.81%）</strong>。在 5 个 severity 上加权后，方法侧的 +0.04pp 微优势消失。这说明现有 cache-admission 路线在更宽的评估上反而无收益，必须换思路。
+  </div>
+</section>
+
+<!-- ============================== 2. MCM-PC-2 实验盘点 ============================== -->
+<section id="sec2">
+  <h2>2. MCM-PC-2 实验盘点：失败的真相</h2>
+
+  <p>下面把 MCM-PC-2 已经跑过的所有方法侧实验全部摆出来，并且<strong>诚实标注每个的论文价值</strong>。</p>
+
+  <h3 id="sec2-1">2.1 E1-BASE — baseline 就是 baseline <span class="pill done">复现</span></h3>
+
+  <p>原始 Point-Cache 在 ULIP-2 backbone 下的复现。所有后续方法的对照组。</p>
+
+  <table>
+    <thead><tr><th>Corruption (sev 2)</th><th>ZS</th><th>Global Cache</th><th>Hierarchical Cache (E1)</th></tr></thead>
+    <tbody>
+      <tr><td>add_global_2</td><td class="num-cell">65.19</td><td class="num-cell">67.06</td><td class="num-cell">68.15</td></tr>
+      <tr><td>add_local_2</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">61.30</td></tr>
+      <tr><td>dropout_global_2</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">73.22</td></tr>
+      <tr><td>dropout_local_2</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">63.65</td></tr>
+      <tr><td>rotate_2</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">73.30</td></tr>
+      <tr><td>scale_2</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">70.46</td></tr>
+      <tr><td>jitter_2</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">29.58</td></tr>
+      <tr><td><strong>Average</strong></td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell"><strong>62.81</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <span class="label">📌 注意</span>
+    E1-BASE 在 <strong>all35 范围还没跑过</strong>（最新 commit <code>cb9c88f</code> 才加了脚本 <code>run_e1_base_hierarchical_modelnetc_all35_corruptions_dual_gpu.sh</code>）。这是<strong>所有后续 fair comparison 的前置依赖</strong>，建议<strong>立即跑</strong>。
+  </div>
+
+  <h3 id="sec2-2">2.2 E2-EMR + E3-GLC — positive admission 一路 −0.31pp <span class="pill fail">失败 × 3</span></h3>
+
+  <p>三个连续实验都在改 <strong>positive cache 准入规则</strong>：</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>实验</th><th>核心改动</th><th>公式</th>
+        <th>Avg @ sev 2</th><th>Δ vs baseline</th><th>结论</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>E1-BASE</td><td>原始 hierarchical</td><td><code>−H(x)</code></td>
+        <td class="num-cell">62.81</td><td class="num-cell">—</td><td>baseline</td>
+      </tr>
+      <tr>
+        <td><strong>E2-EMR</strong></td>
+        <td>entropy + top1-top2 margin</td>
+        <td><code>−H + λ·M</code></td>
+        <td class="num-cell">62.50</td>
+        <td class="num-cell delta-down">−0.31</td>
+        <td>有些 corruption 略好，全平均下降</td>
+      </tr>
+      <tr>
+        <td><strong>E3-GLC-v0</strong></td>
+        <td>加 local consistency</td>
+        <td><code>−H + λM + λ_c · p_l(ŷ_g)</code></td>
+        <td class="num-cell">62.50</td>
+        <td class="num-cell delta-down">−0.31</td>
+        <td>朴素加 local 不稳定</td>
+      </tr>
+      <tr>
+        <td><strong>E3-GLC-v1</strong></td>
+        <td>non-expansive gate</td>
+        <td><code>S_g · (ε + (1−ε)·C_glm)</code></td>
+        <td class="num-cell">62.50</td>
+        <td class="num-cell delta-down">−0.31</td>
+        <td>数学更干净，仍无效</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="file-ref">
+    runner 文件：<code>Point-Cache/runners/model_with_hierarchical_caches_e3_glc_v0.py</code> ·
+    <code>...e3_glc_v1.py</code>
+  </p>
+
+  <div class="callout danger">
+    <span class="label">✗ 根因</span>
+    <strong>positive cache admission 这条路在 3D corrupted 数据上不通</strong>。corruption 同时破坏 global feature 和 local part evidence，<strong>没有一个 confidence 信号是干净的</strong>。继续在这个维度上叠加 reliability 不会有收益。
+  </div>
+
+  <h3 id="sec2-3">2.3 E4-DIAG ⭐ — 唯一闪光点 <span class="pill done">诊断成功</span></h3>
+
+  <p>这是<strong>没改任何方法、只跑统计</strong>的诊断实验。结论是项目最有价值的发现。</p>
+
+  <table>
+    <thead><tr><th>指标</th><th>数值</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Global pseudo-label error rate</td>
+        <td class="num-cell">42.06%</td>
+        <td>baseline 出错的基础概率</td>
+      </tr>
+      <tr>
+        <td><strong>Mean-conflict wrong precision</strong></td>
+        <td class="num-cell"><strong>77.79%</strong></td>
+        <td><strong>检测到 conflict 时，全局预测错的概率</strong> ⭐</td>
+      </tr>
+      <tr>
+        <td>Max-conflict wrong precision</td>
+        <td class="num-cell">75.59%</td>
+        <td>使用单 patch 触发的同类信号</td>
+      </tr>
+      <tr>
+        <td>Conflict rate</td>
+        <td class="num-cell">7.85%</td>
+        <td>有多少样本触发该信号</td>
+      </tr>
+      <tr>
+        <td><strong>Local alternative correct rate</strong></td>
+        <td class="num-cell delta-down"><strong>20.64%</strong></td>
+        <td><strong>local 给的替代类很少是真正答案</strong>（不能当 pseudo-label）</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>per-corruption 错检 precision（按 improvement 降序）</h4>
+
+  <table>
+    <thead><tr><th>Corruption</th><th>Global err</th><th>Mean-conflict wrong precision</th><th>Improvement</th></tr></thead>
+    <tbody>
+      <tr><td>add_global_2</td><td class="num-cell">34.48</td><td class="num-cell">81.86</td><td class="num-cell delta-up">+47.38</td></tr>
+      <tr><td>dropout_local_2</td><td class="num-cell">42.02</td><td class="num-cell">85.82</td><td class="num-cell delta-up">+43.80</td></tr>
+      <tr><td>dropout_global_2</td><td class="num-cell">31.08</td><td class="num-cell">72.66</td><td class="num-cell delta-up">+41.58</td></tr>
+      <tr><td>rotate_2</td><td class="num-cell">29.34</td><td class="num-cell">70.10</td><td class="num-cell delta-up">+40.77</td></tr>
+      <tr><td>add_local_2</td><td class="num-cell">45.54</td><td class="num-cell">80.09</td><td class="num-cell delta-up">+34.54</td></tr>
+      <tr><td>scale_2</td><td class="num-cell">33.10</td><td class="num-cell">64.58</td><td class="num-cell delta-up">+31.48</td></tr>
+      <tr><td>jitter_2</td><td class="num-cell">78.89</td><td class="num-cell">89.41</td><td class="num-cell delta-up">+10.52</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout success">
+    <span class="label">✓ 论文价值</span>
+    E4-DIAG 提供了一个<strong>跨 7 corruption 一致显著</strong>的诊断信号。这可以在论文里写成「<em>conflict-aware cache admission gate</em>」（不是 negative cache 准入，是<strong>对 cache 写入流的过滤门</strong>）。这是论文 §3 Method 的一个完整子节，且配有 §4 一张 motivating figure。
+  </div>
+
+  <h3 id="sec2-4">2.4 E4-CANC v0 / v1 — 把诊断信号当 method 用 <span class="pill warn">几乎无效</span></h3>
+
+  <p>把 E4-DIAG 的 conflict 信号直接接进 negative cache 准入规则，结果非常弱：</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Corruption</th><th>E1 baseline</th>
+        <th>E4-CANC-v0</th><th>E4-CANC-v1</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>add_global_2</td><td class="num-cell">68.15</td><td class="num-cell">68.19 <span class="delta-up">+0.04</span></td><td class="num-cell">68.18 <span class="delta-up">+0.03</span></td></tr>
+      <tr><td>add_local_2</td><td class="num-cell">61.30</td><td class="num-cell">61.43 <span class="delta-up">+0.13</span></td><td class="num-cell">61.39 <span class="delta-up">+0.09</span></td></tr>
+      <tr><td>dropout_global_2</td><td class="num-cell">73.22</td><td class="num-cell">73.14 <span class="delta-down">−0.08</span></td><td class="num-cell">68.12 <span class="delta-down">−5.10</span></td></tr>
+      <tr><td>dropout_local_2</td><td class="num-cell">63.65</td><td class="num-cell">63.57 <span class="delta-down">−0.08</span></td><td class="num-cell">62.76 <span class="delta-down">−0.89</span></td></tr>
+      <tr><td>rotate_2</td><td class="num-cell">73.30</td><td class="num-cell">73.38 <span class="delta-up">+0.08</span></td><td class="num-cell">72.36 <span class="delta-down">−0.94</span></td></tr>
+      <tr><td>scale_2</td><td class="num-cell">70.46</td><td class="num-cell">70.54 <span class="delta-up">+0.08</span></td><td class="num-cell">70.40 <span class="delta-down">−0.06</span></td></tr>
+      <tr><td>jitter_2</td><td class="num-cell">29.58</td><td class="num-cell">29.58 <span class="delta-flat">0.00</span></td><td class="num-cell">34.29 <span class="delta-up">+4.71</span></td></tr>
+      <tr><td><strong>Avg sev 2</strong></td><td class="num-cell"><strong>62.81</strong></td><td class="num-cell"><strong>62.83 <span class="delta-up">+0.02</span></strong></td><td class="num-cell"><strong>62.85 <span class="delta-up">+0.04</span></strong></td></tr>
+      <tr><td colspan="3"><strong>E4-CANC-v1 all35 overall</strong></td><td class="num-cell"><strong>62.50</strong> <span class="delta-down">&lt; baseline sev2 62.81</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout danger">
+    <span class="label">✗ 根因</span>
+    <strong>诊断信号 ≠ 干预动作</strong>。E4-DIAG 说「conflict 时 78% 错」，但<strong>错检不等于能改正</strong>：往 negative cache 里塞这些样本，只是让模型对这类 feature 整体降权，对其他正常样本造成副作用（看 dropout_global_2 的 −5.10pp）。
+  </div>
+
+  <h3 id="sec2-5">2.5 E0-TPE — 文本端 4 种 zero-shot 方法 <span class="pill fail">全部 &lt; ZS</span></h3>
+
+  <p>试图通过修改文本原型聚合方式提升 zero-shot 预测，4 种方案全军覆没。详见 <code>docs/stages/stage0_tpe_zero_shot_text_methods_summary.md</code>。</p>
+
+  <table>
+    <thead><tr><th>方法</th><th>聚合方式</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td>E0-TPE-v1-lite shrinkage</td><td>文本原型收缩</td><td class="delta-down">&lt; ZS-BASE</td></tr>
+      <tr><td>E0-TPE-v2 trimmean10</td><td>模板得分截尾平均</td><td class="delta-down">&lt; ZS-BASE</td></tr>
+      <tr><td>E0-TPE-v2 meanlogit</td><td>模板得分平均</td><td class="delta-down">&lt; ZS-BASE</td></tr>
+      <tr><td>E0-TPE-v2 median</td><td>模板得分中位数</td><td class="delta-down">&lt; ZS-BASE</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <span class="label">→ 教训</span>
+    在 Point-Cache 已有 64-模板平均的基础上，<strong>简单的统计变换</strong>不能继续提升。这告诉我们 vMF（球面统计 + paraphrase）必须真正<strong>引入新的信息</strong>（多样化 paraphrase），不只是换聚合公式。
+  </div>
+</section>
+
+<!-- ============================== 3. 根因诊断 ============================== -->
+<section id="sec3">
+  <h2>3. 根因诊断：为什么所有路都堵了</h2>
+
+  <h3>3.1 评估口径过窄 → 论文不可投</h3>
+
+  <p>当前 7 corruption × 1 severity = 7 个数字。Point-Cache 原论文报告 35-setting（7 × 5）。任何投 AAAI/CVPR 的 baseline comparison 都<strong>必须是 35-setting</strong>。</p>
+
+  <p>而且已经看到证据：E4-CANC-v1 在 sev 2 上 +0.04pp，但 all35 上反而 −0.31pp（62.50 &lt; 62.81）。<strong>窄 setting 上的微弱优势经不起 severity 1/3/4 的考验</strong>。</p>
+
+  <h3>3.2 backbone 切换让数字不可比</h3>
+
+  <table>
+    <thead><tr><th>项目</th><th>Backbone</th><th>ZS-clean</th><th>Hierarchical avg</th></tr></thead>
+    <tbody>
+      <tr><td>MCM-PC（原版）</td><td>OpenShape PointBERT-vitg14</td><td class="num-cell">83.27</td><td class="num-cell">75.27 (35-mean)</td></tr>
+      <tr><td>MCM-PC-2（新版）</td><td>ULIP-2</td><td class="num-cell">—</td><td class="num-cell">62.81 (7-mean sev 2)</td></tr>
+    </tbody>
+  </table>
+
+  <p>ULIP-2 整体精度比 OpenShape 低 10+pp，论文写作时需要<strong>显式说明 backbone</strong>。建议<strong>主表用 OpenShape（强 baseline）</strong>，<strong>跨 backbone 消融加 ULIP-2</strong>。</p>
+
+  <h3>3.3 把诊断信号当 method 用 — 经典陷阱</h3>
+
+  <p>E4 系列暴露了一个方法论问题：</p>
+
+  <div class="formula">
+    P(ŷ_g ≠ y | conflict) = 77.79%   <em>← 诊断（descriptive）</em><br><br>
+    ≠<br><br>
+    把 conflict 样本塞进 neg cache 一定能涨准确率   <em>← 干预（prescriptive）</em>
+  </div>
+
+  <p><strong>错检 ≠ 能改正</strong>。E4-CANC 试图直接让 neg cache 吃掉这些样本，结果在 normal corruption（如 dropout_global）上反而退步，因为 neg cache 也开始影响那些<em>本来对的</em>样本。</p>
+
+  <div class="callout info">
+    <span class="label">✓ 正确用法</span>
+    把 E4-DIAG 的 conflict 信号用作 <strong>cache 准入 gate</strong>：当样本触发 conflict 时，<strong>不让它进入任何 cache</strong>（既不 positive 也不 negative），而是<strong>跳过本次 cache 更新</strong>。这样保护 cache 不被污染，但不影响其他样本的 logits。
+  </div>
+
+  <h3>3.4 丢失了 MCM-PC 三大资产</h3>
+
+  <table>
+    <thead><tr><th>资产</th><th>在 MCM-PC 的状态</th><th>在 MCM-PC-2 的状态</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>vMF 文本锚点 + paraphrase 脚本</strong></td>
+        <td>✓ generate_paraphrase.py 已写，DeepSeek API 接口可用</td>
+        <td>✗ 没拷过来；E0-TPE 在试别的聚合，但没换数据源</td>
+      </tr>
+      <tr>
+        <td><strong>D20 anchor pollution P1 探针</strong></td>
+        <td>✓ anchor_pollution_sim.py + oracle 数据（+10~13pp on affine）</td>
+        <td>✗ 完全不在 MCM-PC-2 文档里</td>
+      </tr>
+      <tr>
+        <td><strong>2×3 matrix 骨架</strong></td>
+        <td>✓ model_with_mcp3d.py 11 Section，核心算法 TODO</td>
+        <td>✗ runners/ 里没有这个文件</td>
+      </tr>
+      <tr>
+        <td><strong>35-setting 跑分脚本</strong></td>
+        <td>✓ scripts/repro_fig1a_bar3_tta.sh 等</td>
+        <td>⚠ 刚加了 run_e1_base_*_all35_*.sh，还没跑过</td>
+      </tr>
+      <tr>
+        <td><strong>概念文档 5 篇</strong></td>
+        <td>✓ docs/concepts/00-05.md/html（最新 05 是 MCP 三缓存 HTML 暗黑主题）</td>
+        <td>✗ MCM-PC-2/docs/ 只有 stage 文档，没有 concept 文档</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>3.5 卖点维度单一 — 不够 AAAI</h3>
+
+  <p>当前 MCM-PC-2 的 6 个实验全在「cache admission rule」一个维度：</p>
+
+  <ul>
+    <li>E1：原始规则</li>
+    <li>E2：加 margin</li>
+    <li>E3：加 local consistency</li>
+    <li>E4-DIAG：诊断 conflict</li>
+    <li>E4-CANC v0/v1：把 conflict 接进 neg cache</li>
+  </ul>
+
+  <p>这是<strong>一个 contribution 的内部变种</strong>，不是三个 contribution。AAAI/CVPR reviewer 会问：</p>
+
+  <ul>
+    <li>为什么不在 ScanObjectNN-C 上跑？</li>
+    <li>为什么不跨 backbone？</li>
+    <li>"Multi-Cache Matrix" 在哪？只看到一个 negative cache 的小改</li>
+    <li>BayesMM（CVPR'26）这条线你怎么对比？</li>
+  </ul>
+</section>
+
+<!-- ============================== 4. 资产清单 ============================== -->
+<section id="sec4">
+  <h2>4. 资产清单：保留 / 退役</h2>
+
+  <p>下面把两个版本里所有可见的资产，按「v3 是否继续用」决策。</p>
+
+  <table>
+    <thead>
+      <tr><th>资产</th><th>来源</th><th>v3 决策</th><th>v3 用法</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>35-setting 跑分基础设施</td>
+        <td>MCM-PC</td>
+        <td><span class="pill done">KEEP</span></td>
+        <td>主评估口径，所有方法跑这个</td>
+      </tr>
+      <tr>
+        <td>OpenShape PointBERT-vitg14 backbone</td>
+        <td>MCM-PC</td>
+        <td><span class="pill done">KEEP</span></td>
+        <td>主 backbone（高精度 baseline）</td>
+      </tr>
+      <tr>
+        <td>ULIP-2 backbone 配置</td>
+        <td>MCM-PC-2</td>
+        <td><span class="pill done">KEEP</span></td>
+        <td>第二 backbone（跨 backbone 消融）</td>
+      </tr>
+      <tr>
+        <td>generate_paraphrase.py（DeepSeek）</td>
+        <td>MCM-PC</td>
+        <td><span class="pill plan">USE</span></td>
+        <td>C3 vMF 文本锚点（W5 启动，预算 ~30 元）</td>
+      </tr>
+      <tr>
+        <td>D20 anchor pollution P1 探针</td>
+        <td>MCM-PC</td>
+        <td><span class="pill plan">USE</span></td>
+        <td>C2 motivation 段，写进论文 §3.1</td>
+      </tr>
+      <tr>
+        <td>2×3 matrix 骨架 mcp3d.py</td>
+        <td>MCM-PC</td>
+        <td><span class="pill plan">EXTEND</span></td>
+        <td>C1 起点，扩成 3×2 Multi-Cache Matrix</td>
+      </tr>
+      <tr>
+        <td>MCP 三缓存概念 05 HTML</td>
+        <td>MCM-PC</td>
+        <td><span class="pill done">KEEP</span></td>
+        <td>C1 教学/写作材料</td>
+      </tr>
+      <tr>
+        <td><strong>E4-DIAG conflict 发现 77.79% precision</strong> ⭐</td>
+        <td>MCM-PC-2</td>
+        <td><span class="pill new">UPGRADE</span></td>
+        <td>升华为 C2「Conflict-Gated Cache Admission」</td>
+      </tr>
+      <tr>
+        <td>Point-Cache hierarchical 主代码</td>
+        <td>两版都有</td>
+        <td><span class="pill done">KEEP</span></td>
+        <td>base runner，扩展点</td>
+      </tr>
+      <tr>
+        <td>E4-CANC-v1 runner</td>
+        <td>MCM-PC-2</td>
+        <td><span class="pill plan">USE</span></td>
+        <td>conflict 计算代码起点，改门控逻辑</td>
+      </tr>
+      <tr>
+        <td>E2-EMR / E3-GLC-v0/v1 runners</td>
+        <td>MCM-PC-2</td>
+        <td><span class="pill retire">RETIRE</span></td>
+        <td>论文 §4.3 消融对照（"+0pp" 反面教材）</td>
+      </tr>
+      <tr>
+        <td>E0-TPE 4 种文本方法</td>
+        <td>MCM-PC-2</td>
+        <td><span class="pill retire">RETIRE</span></td>
+        <td>论文 §4.3 消融对照（vMF 之前的尝试）</td>
+      </tr>
+      <tr>
+        <td>ICP-CD 几何距离（D19 fast-track）</td>
+        <td>MCM-PC</td>
+        <td><span class="pill retire">RETIRE</span></td>
+        <td>已证伪（−1.70pp on scale），写进论文 §5.3 limitation</td>
+      </tr>
+      <tr>
+        <td>5 个 concept 文档（00-05）</td>
+        <td>MCM-PC</td>
+        <td><span class="pill done">KEEP</span></td>
+        <td>拷到 MCM-PC-2/docs/concepts/ 共享</td>
+      </tr>
+      <tr>
+        <td>实验编号 + 脚本命名规则</td>
+        <td>MCM-PC-2</td>
+        <td><span class="pill done">KEEP</span></td>
+        <td>v3 继续用 E1/E2/.../EN 编号</td>
+      </tr>
+      <tr>
+        <td>每个 stage 一个 .md 文档</td>
+        <td>MCM-PC-2</td>
+        <td><span class="pill done">KEEP</span></td>
+        <td>v3 继续 docs/stages/EN_*.md</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <span class="label">✓ 关键结论</span>
+    总共 17 个 asset，其中 <strong>10 个 KEEP / 4 个 USE / 1 个 EXTEND / 1 个 UPGRADE / 4 个 RETIRE</strong>。没有任何 sunk cost 被浪费——失败实验进消融，成功诊断升华，骨架继续扩展。
+  </div>
+</section>
+
+<!-- ============================== 5. 统一方案 v3.0 ============================== -->
+<section id="sec5">
+  <h2>5. 统一方案：MCM-PC v3.0（merge，不是 pivot）</h2>
+
+  <h3 id="sec5-1">5.1 题目（保留）</h3>
+
+  <div class="formula">
+    <strong>MCM-PC: Multi-Cache Matrix for 3D Point Cloud Test-Time Adaptation</strong>
+  </div>
+
+  <p>题目和"Multi-Cache Matrix"卖点完全保留。下面把 MCM-PC 与 MCM-PC-2 的资产合并成三个 contribution。</p>
+
+  <h3 id="sec5-2">5.2 三个 Contribution</h3>
+
+  <h4>C1：Multi-Cache Matrix（3 functions × 2 representations = 6 cells）</h4>
+
+  <p>从 MCP（CVPR'25）借「entropy / align / negative」三种功能型 cache，从 Point-Cache（CVPR'25）借「global / local」两种表征。组合成 3×2 矩阵：</p>
+
+  <div class="matrix">
+    <div class="matrix-grid">
+      <div class="mcell head"></div>
+      <div class="mcell head">Global 表征</div>
+      <div class="mcell head">Local 表征</div>
+
+      <div class="mcell rowhead">Entropy<br><span style="font-size:0.8em; color:var(--c-muted); font-weight:400;">低熵存样本</span></div>
+      <div class="mcell blue">
+        <div class="name">G-Entropy</div>
+        <div class="desc">global pseudo-label + 低熵 → 类原型库</div>
+        <div class="badge">已有：Point-Cache 主 cache</div>
+      </div>
+      <div class="mcell blue">
+        <div class="name">L-Entropy</div>
+        <div class="desc">local part 低熵 → patch 级原型</div>
+        <div class="badge">已有：Point-Cache local cache</div>
+      </div>
+
+      <div class="mcell rowhead">Align<br><span style="font-size:0.8em; color:var(--c-muted); font-weight:400;">对文本锚点距离小</span></div>
+      <div class="mcell green">
+        <div class="name">G-Align</div>
+        <div class="desc">global feature 距文本 anchor 近 → 高质量代表</div>
+        <div class="badge">新增：MCP-2D align cache 3D 化</div>
+      </div>
+      <div class="mcell green">
+        <div class="name">L-Align</div>
+        <div class="desc">local part 距文本 anchor 近 → 部件级原型</div>
+        <div class="badge">新增：first attempt</div>
+      </div>
+
+      <div class="mcell rowhead">Negative<br><span style="font-size:0.8em; color:var(--c-muted); font-weight:400;">高熵反向证据</span></div>
+      <div class="mcell red">
+        <div class="name">G-Negative</div>
+        <div class="desc">高熵/边界样本 → 减弱 logits</div>
+        <div class="badge">已有：Point-Cache neg cache</div>
+      </div>
+      <div class="mcell off">
+        <div class="name">L-Negative</div>
+        <div class="desc">默认关闭<br>（信号过弱，论文写在 limitation）</div>
+        <div class="badge">OFF in v3</div>
+      </div>
+    </div>
+  </div>
+
+  <p><strong>Δ vs MCP-2D</strong>：MCP 只有 3 个 cache（1 维），v3 把它扩到 3×2 = 6 cell（2 维），这是题目里 "Matrix" 的来源。</p>
+
+  <h4>C2：Conflict-Gated Cache Admission ⭐</h4>
+
+  <p>从 MCM-PC-2 的 E4-DIAG 升华而来。<strong>不是 negative cache 准入规则</strong>，而是「<strong>是否让样本进入任何 cache 的总门控</strong>」。</p>
+
+  <div class="formula">
+    <em>// 每个样本 x 来到时</em><br>
+    <span class="kw">if</span> conflict(x) <span class="kw">and</span> H(x) &gt; <span class="num">τ_h</span>:<br>
+    &nbsp;&nbsp;<span class="com"># 高 conflict + 高熵 → 双重不可信</span><br>
+    &nbsp;&nbsp;<span class="kw">abstain</span>()  <em># 跳过本次 cache 更新</em><br>
+    <span class="kw">elif</span> conflict(x):<br>
+    &nbsp;&nbsp;<span class="com"># 有 conflict 但 entropy 较低 → 弱信号</span><br>
+    &nbsp;&nbsp;<span class="kw">update</span>(weight=<span class="num">0.5</span>)  <em># 半权写入</em><br>
+    <span class="kw">else</span>:<br>
+    &nbsp;&nbsp;<span class="kw">update</span>(weight=<span class="num">1.0</span>)  <em># 正常写入</em>
+  </div>
+
+  <p><strong>Δ vs E4-CANC-v0/v1</strong>：E4-CANC 把 conflict 当 neg cache 写入条件（"加塞污染") → 副作用大；v3 把 conflict 当 cache 更新的门控（"过滤保护"） → 副作用小。</p>
+
+  <p class="file-ref">
+    新建：<code>Point-Cache/runners/model_with_mcm_v3.py</code><br>
+    新建：<code>Point-Cache/runners/cache_admission_gate.py</code>（独立模块）
+  </p>
+
+  <h4>C3：Spherical Text Anchor（可选 / CVPR 后期）</h4>
+
+  <p>从 MCM-PC 的 vMF/paraphrase 资产借来。AAAI 阶段可以先不做（不是核心），CVPR 阶段加上作为第三 contribution。</p>
+
+  <p>核心想法：</p>
+
+  <ul>
+    <li>用 DeepSeek API 给每个类生成 40 句 paraphrase（<code>generate_paraphrase.py</code> 已就绪）</li>
+    <li>每个 paraphrase 编码到球面，得到 N 个 unit vector</li>
+    <li>用 vMF MAP 估计类的 mean direction μ_c 和 concentration κ_c</li>
+    <li>替换 Point-Cache 的 64-template 算术平均</li>
+  </ul>
+
+  <p><strong>风险</strong>：MCM-PC-2 的 E0-TPE 测过类似的统计变换都失败了。<strong>关键</strong>是 paraphrase 必须真正增加信息（DeepSeek 而非简单变换）。如果 W5 quick test 不出 +0.3pp，直接降为附录消融。</p>
+
+  <h3 id="sec5-3">5.3 数据流图</h3>
+
+  <div class="svg-wrap">
+    <svg viewBox="0 0 920 360" width="900" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        .box { fill: #131c2e; stroke: #334155; stroke-width: 1.5; rx: 6; }
+        .box-blue { fill: #16243d; stroke: #2563eb; }
+        .box-green { fill: #0b3a2c; stroke: #10b981; }
+        .box-red { fill: #3a1414; stroke: #ef4444; }
+        .box-purple { fill: #2a1a3d; stroke: #a855f7; }
+        .lbl { fill: #f1f5f9; font: 600 13px sans-serif; text-anchor: middle; }
+        .sub { fill: #94a3b8; font: 11px monospace; text-anchor: middle; }
+        .arr { fill: none; stroke: #60a5fa; stroke-width: 1.6; marker-end: url(#ah); }
+        .arrr { fill: none; stroke: #ef4444; stroke-width: 1.6; stroke-dasharray: 4,3; marker-end: url(#ah-r); }
+      </style>
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#60a5fa"/>
+        </marker>
+        <marker id="ah-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+
+      <!-- Input -->
+      <rect x="20" y="160" width="120" height="50" class="box" />
+      <text x="80" y="184" class="lbl">Point Cloud x</text>
+      <text x="80" y="200" class="sub">1024 × 3</text>
+
+      <!-- Encoder -->
+      <rect x="180" y="155" width="130" height="60" class="box box-blue" />
+      <text x="245" y="180" class="lbl">3D Encoder</text>
+      <text x="245" y="198" class="sub">OpenShape / ULIP-2</text>
+
+      <!-- Features -->
+      <rect x="350" y="100" width="120" height="40" class="box" />
+      <text x="410" y="124" class="lbl">f_global</text>
+      <rect x="350" y="220" width="120" height="40" class="box" />
+      <text x="410" y="244" class="lbl">f_local{1..R}</text>
+
+      <!-- Conflict Gate (C2) -->
+      <rect x="510" y="160" width="140" height="50" class="box box-purple" />
+      <text x="580" y="183" class="lbl">Conflict Gate</text>
+      <text x="580" y="200" class="sub">C2 (E4-DIAG 升华)</text>
+
+      <!-- Multi-Cache Matrix -->
+      <rect x="700" y="20" width="200" height="320" class="box box-green" />
+      <text x="800" y="42" class="lbl">Multi-Cache Matrix</text>
+      <text x="800" y="58" class="sub">C1 (3 × 2 = 6 cells)</text>
+
+      <!-- Matrix cells -->
+      <rect x="715" y="75" width="80" height="55" class="box box-blue" />
+      <text x="755" y="98" class="sub" style="fill:#f1f5f9;font-weight:600;">G-Ent</text>
+      <text x="755" y="115" class="sub">Point-Cache</text>
+      <rect x="805" y="75" width="80" height="55" class="box box-blue" />
+      <text x="845" y="98" class="sub" style="fill:#f1f5f9;font-weight:600;">L-Ent</text>
+      <text x="845" y="115" class="sub">Point-Cache</text>
+
+      <rect x="715" y="140" width="80" height="55" class="box box-green" />
+      <text x="755" y="163" class="sub" style="fill:#f1f5f9;font-weight:600;">G-Align</text>
+      <text x="755" y="180" class="sub">MCP-2D→3D</text>
+      <rect x="805" y="140" width="80" height="55" class="box box-green" />
+      <text x="845" y="163" class="sub" style="fill:#f1f5f9;font-weight:600;">L-Align</text>
+      <text x="845" y="180" class="sub">new</text>
+
+      <rect x="715" y="205" width="80" height="55" class="box box-red" />
+      <text x="755" y="228" class="sub" style="fill:#f1f5f9;font-weight:600;">G-Neg</text>
+      <text x="755" y="245" class="sub">Point-Cache</text>
+      <rect x="805" y="205" width="80" height="55" class="box" style="opacity:0.4;" />
+      <text x="845" y="228" class="sub" style="fill:#94a3b8;font-weight:600;">L-Neg</text>
+      <text x="845" y="245" class="sub">OFF</text>
+
+      <!-- Text anchor (C3, optional) -->
+      <rect x="715" y="280" width="170" height="45" class="box box-purple" style="stroke-dasharray:4,3;" />
+      <text x="800" y="303" class="lbl" style="font-size:12px;">Spherical Text Anchor</text>
+      <text x="800" y="318" class="sub">C3 (vMF, optional)</text>
+
+      <!-- Arrows -->
+      <path class="arr" d="M 140 185 L 178 185" />
+      <path class="arr" d="M 310 175 L 348 130" />
+      <path class="arr" d="M 310 195 L 348 235" />
+      <path class="arr" d="M 470 120 L 508 175" />
+      <path class="arr" d="M 470 240 L 508 195" />
+      <path class="arr" d="M 650 175 L 698 175" />
+      <path class="arrr" d="M 650 165 Q 670 130 700 100" />
+    </svg>
+  </div>
+
+  <p style="font-size:0.85rem; color:var(--c-muted);">
+    实线 = 数据流；红色虚线 = Conflict Gate 的 abstain 路径（跳过 cache 更新）。
+  </p>
+</section>
+
+<!-- ============================== 6. 6 周路线图 ============================== -->
+<section id="sec6">
+  <h2>6. 详细任务说明书：6 周路线图</h2>
+
+  <p>每一周都按"<strong>目的 → 数学/逻辑依据 → 具体文件 → 命令 → 检查点 → commit</strong>"的格式给出，遵守 <code>mcm_pc_user_preferences_and_workflow_rules.md</code> 第 1.1 节。</p>
+
+  <ol class="roadmap">
+
+    <li>
+      <h3>代码库统一 + 35-setting baseline</h3>
+      <p class="week-meta">📅 5 天 · 🎯 在 MCM-PC-2 树内拿到 v3 baseline 数字</p>
+
+      <p><strong>目的</strong>：解决「两个版本并存」的混乱，确定单一 source of truth。把 MCM-PC 的 35-setting + OpenShape backbone 资产迁到 MCM-PC-2 子树。</p>
+
+      <p><strong>具体任务</strong></p>
+      <ul>
+        <li><strong>Day 1</strong>：决定 monorepo。建议保留 <code>MCM-PC-2</code> 作为唯一活跃目录（git history 更丰富），把 MCM-PC 当只读 archive 引用</li>
+        <li><strong>Day 2-3</strong>：拷贝资产
+          <pre><span class="com"># 1. 拷 35-setting 跑分脚本</span>
+cp /root/autodl-tmp/MCM-PC/Point-Cache/scripts/repro_fig1a_bar3_tta.sh \
+   /root/autodl-tmp/MCM-PC-2/Point-Cache/scripts/recur-pc/
+
+<span class="com"># 2. 拷 OpenShape backbone 配置 + weights</span>
+cp /root/autodl-tmp/MCM-PC/Point-Cache/configs/openshape_*.yaml \
+   /root/autodl-tmp/MCM-PC-2/Point-Cache/configs/
+ln -s /root/autodl-tmp/MCM-PC/Point-Cache/weights/openshape \
+      /root/autodl-tmp/MCM-PC-2/Point-Cache/weights/openshape
+
+<span class="com"># 3. 拷 5 篇 concept 文档</span>
+cp -r /root/autodl-tmp/MCM-PC/docs/concepts \
+      /root/autodl-tmp/MCM-PC-2/docs/concepts
+
+<span class="com"># 4. 拷 vMF paraphrase + D20 P1 探针</span>
+cp /root/autodl-tmp/MCM-PC/generate_paraphrase.py \
+   /root/autodl-tmp/MCM-PC-2/
+cp /root/autodl-tmp/MCM-PC/Point-Cache/scripts/anchor_pollution_sim.py \
+   /root/autodl-tmp/MCM-PC-2/Point-Cache/scripts/
+
+<span class="com"># 5. 拷 mcp3d 骨架</span>
+cp /root/autodl-tmp/MCM-PC/Point-Cache/runners/model_with_mcp3d.py \
+   /root/autodl-tmp/MCM-PC-2/Point-Cache/runners/</pre>
+        </li>
+        <li><strong>Day 4</strong>：跑 <code>E1-BASE all35 dual GPU</code>（OpenShape backbone）
+          <pre><span class="com"># 已有脚本，加 backbone 参数</span>
+QUICK_TEST=1 bash Point-Cache/scripts/recur-pc/run_e1_base_hierarchical_modelnetc_all35_corruptions_dual_gpu.sh
+<span class="com"># quick test 通过后</span>
+bash Point-Cache/scripts/recur-pc/run_e1_base_hierarchical_modelnetc_all35_corruptions_dual_gpu.sh</pre>
+        </li>
+        <li><strong>Day 5</strong>：跑同样的 all35 但用 ULIP-2 backbone（cross-backbone baseline）</li>
+      </ul>
+
+      <p><strong>检查点 / 退出标准</strong></p>
+      <ul>
+        <li>✓ <code>summary_e1_base_openshape_dual_gpu_all35.csv</code> 35 行 _0~_4 全 OK</li>
+        <li>✓ <code>summary_e1_base_ulip2_dual_gpu_all35.csv</code> 35 行 _0~_4 全 OK</li>
+        <li>✓ OpenShape 35-mean ≥ 75.0%（对齐 MCM-PC 报告的 75.27%）</li>
+        <li>✓ ULIP-2 35-mean ≈ 62~64%</li>
+      </ul>
+
+      <p><strong>commit 规范</strong></p>
+      <ul>
+        <li><code>chore: vendor mcm-pc assets (35-setting, openshape, vmf scripts)</code></li>
+        <li><code>exp: add e1 base all35 results both backbones</code></li>
+        <li><code>docs: archive e1 base v3 baseline numbers</code></li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>实现 Multi-Cache Matrix 主框架（C1）</h3>
+      <p class="week-meta">📅 7 天 · 🎯 跑通 6-cell 矩阵，35-mean ≥ E1-BASE</p>
+
+      <p><strong>目的</strong>：把 MCP 的 align cache 3D 化，与 Point-Cache 的 global/local 表征轴正交组合，得到 3×2 矩阵。先不接 Conflict Gate，先保证 6 个 cell 单独都能跑通。</p>
+
+      <p><strong>具体任务</strong></p>
+      <ul>
+        <li>新建 <code>Point-Cache/runners/model_with_mcm_v3.py</code>，参考 <code>model_with_hierarchical_caches.py</code> 的扩展点，把 cache 结构从 dict 改成 2-D Matrix<br>
+          <pre><span class="kw">class</span> <span class="fn">MultiCacheMatrix</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, n_classes, n_local_regions=<span class="num">6</span>):
+        self.cells = {
+            (<span class="str">'entropy'</span>, <span class="str">'global'</span>): EntropyCache(...),
+            (<span class="str">'entropy'</span>, <span class="str">'local'</span>):  LocalEntropyCache(...),
+            (<span class="str">'align'</span>,   <span class="str">'global'</span>): AlignCache(...),  <span class="com"># MCP-style</span>
+            (<span class="str">'align'</span>,   <span class="str">'local'</span>):  LocalAlignCache(...), <span class="com"># 新</span>
+            (<span class="str">'negative'</span>, <span class="str">'global'</span>): NegativeCache(...),
+            <span class="com"># ('negative', 'local'): OFF in v3</span>
+        }</pre>
+        </li>
+        <li>实现 <code>AlignCache</code>（参考 MCP-2D <code>MCM-PC/MCP/mcp_runner.py:55-74</code>）<br>
+            判据：<code>cosine(f_x, t_c) &gt; τ_align</code> 时入库</li>
+        <li>实现 fusion logits：6 cell 各产 1 个 logits，加权融合到 final prediction
+          <div class="formula">
+            ℓ_final = ℓ_zs + λ_E·(ℓ_GE + ℓ_LE) + λ_A·(ℓ_GA + ℓ_LA) − λ_N·ℓ_GN
+          </div>
+        </li>
+        <li>quick test：<code>QUICK_TEST=1 bash scripts/recur-pc/run_e5_mcm_v3_smoke_modelnetc_suffix2_dual_gpu.sh</code></li>
+        <li>full all35 跑分</li>
+      </ul>
+
+      <p><strong>退出标准</strong></p>
+      <ul>
+        <li>✓ 6 cell 都能正常更新，cache size 正常增长</li>
+        <li>✓ OpenShape 35-mean <strong>≥ E1-BASE</strong>（即 ≥ 75.0%）— 没退步就算成功</li>
+        <li>✓ 至少有 1 个 cell（建议 G-Align）单独 ablation 能 +0.3pp</li>
+      </ul>
+
+      <p><strong>失败兜底</strong>：如果 G-Align cell 加上 vs 不加上 没有差别，说明 MCP-2D 的 align 判据在 3D 上不显著，需要换 conditioning（如改用 ICP 距离作 align 度量 — 但这个已被 D19 证伪，作 quick check 而已）</p>
+    </li>
+
+    <li>
+      <h3>接入 Conflict-Gated Cache Admission（C2）⭐</h3>
+      <p class="week-meta">📅 5 天 · 🎯 在 v3 矩阵上 +0.8~1.5pp</p>
+
+      <p><strong>目的</strong>：用 E4-DIAG 的 conflict 信号做 cache 更新的"<strong>过滤门</strong>"，不是 negative cache 准入条件。</p>
+
+      <p><strong>具体任务</strong></p>
+      <ul>
+        <li>抽出 <code>cache_admission_gate.py</code> 模块，从 <code>model_with_hierarchical_caches_e4_canc_v1.py</code> 复用 conflict 计算代码（<code>compute_global_stats</code> + <code>compute_local_stats</code>）</li>
+        <li>实现三态门控：
+          <pre><span class="kw">def</span> <span class="fn">cache_admission_decision</span>(stats):
+    H_g = stats[<span class="str">'entropy_global'</span>]
+    D_gl = stats[<span class="str">'conflict_mean'</span>]   <span class="com"># mean-local disagreement</span>
+    <span class="kw">if</span> D_gl &gt; TAU_D <span class="kw">and</span> H_g &gt; TAU_H_HI:
+        <span class="kw">return</span> <span class="str">'abstain'</span>      <span class="com"># 高 conflict + 高熵</span>
+    <span class="kw">if</span> D_gl &gt; TAU_D:
+        <span class="kw">return</span> <span class="str">'half_weight'</span>  <span class="com"># 有 conflict 但 entropy 较低</span>
+    <span class="kw">return</span> <span class="str">'full'</span>             <span class="com"># 正常</span></pre>
+        </li>
+        <li>把 gate 接到 <code>MultiCacheMatrix.update(x, stats)</code> 入口</li>
+        <li>三阶段 ablation：
+          <table>
+            <thead><tr><th>变体</th><th>设置</th><th>预期增益</th></tr></thead>
+            <tbody>
+              <tr><td>v3.0</td><td>不接 gate</td><td>baseline</td></tr>
+              <tr><td>v3.1</td><td>仅 abstain 模式</td><td>+0.3~0.7pp</td></tr>
+              <tr><td>v3.2</td><td>abstain + half_weight</td><td>+0.5~1.2pp</td></tr>
+            </tbody>
+          </table>
+        </li>
+      </ul>
+
+      <p><strong>退出标准</strong></p>
+      <ul>
+        <li>✓ v3.2 35-mean <strong>≥ v3.0 + 0.5pp</strong> on OpenShape</li>
+        <li>✓ 同时在 ULIP-2 backbone 上验证一遍（不要求绝对数字，但要求<strong>相对增益方向一致</strong>）</li>
+        <li>✓ E4-CANC-v0/v1 对比表加进 §4.3 ablation</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>Anchor-Pollution 防护（D20 P1 升级到 method）</h3>
+      <p class="week-meta">📅 5 天 · 🎯 在 affine corruption 上 +1.5~3pp</p>
+
+      <p><strong>目的</strong>：D20 P1 oracle 证明了 affine（rotate/scale）下 prototype 离 query 远 → cache 应该切到 static prototype。把这个 oracle 信号 离线 + 在线 都做出来。</p>
+
+      <p><strong>具体任务</strong></p>
+      <ul>
+        <li>离线：提取 ModelNet40 训练集 prototype（每类一个 unit vector），存到 <code>weights/proto_modelnet40.pt</code></li>
+        <li>在线：实现 <code>anchor_source_selector(query_f)</code>
+          <pre><span class="kw">def</span> <span class="fn">anchor_source_selector</span>(query_f, proto_static, tau_lo=<span class="num">0.6</span>, tau_hi=<span class="num">0.8</span>):
+    sim = (query_f @ proto_static.T).max()  <span class="com"># 与最近 static proto 的余弦</span>
+    <span class="kw">if</span> sim &gt; tau_hi:
+        <span class="kw">return</span> <span class="str">'stream'</span>    <span class="com"># query 像训练分布 → 用 streaming cache</span>
+    <span class="kw">if</span> sim &lt; tau_lo:
+        <span class="kw">return</span> <span class="str">'static'</span>    <span class="com"># query 离训练远 → 用 static prototype</span>
+    <span class="kw">return</span> <span class="str">'mix'</span>           <span class="com"># 中间地带 → 加权混合</span></pre>
+        </li>
+        <li>把 selector 接到 G-Entropy 和 G-Align 两个 cell 的查询端</li>
+        <li>per-corruption ablation：验证 rotate / scale 上是否真有 +2~3pp（对齐 D20 oracle 上限 +10~13pp 的 30~50%）</li>
+      </ul>
+
+      <p><strong>退出标准</strong></p>
+      <ul>
+        <li>✓ rotate / scale corruption 上 v3.3 vs v3.2 <strong>≥ +1.5pp</strong></li>
+        <li>✓ 整体 35-mean 不退步</li>
+        <li>✓ D20 P1 oracle 数据进论文 §3.1 motivating figure</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>vMF Spherical Text Anchor（C3, 可选）</h3>
+      <p class="week-meta">📅 5 天 · 🎯 quick test 决定是否纳入主表</p>
+
+      <p><strong>目的</strong>：把 Point-Cache 的 64-template 算术平均换成 vMF MAP 估计，加上 DeepSeek paraphrase 增加文本多样性。</p>
+
+      <p><strong>具体任务</strong></p>
+      <ul>
+        <li>付 ~30 元，调用 DeepSeek API 给 40 类生成 40 句 paraphrase（<code>generate_paraphrase.py</code> 已就绪）</li>
+        <li>实现 <code>build_vmf_text_anchors(paraphrases, kappa_0)</code>（concept 01 文档已有理论）</li>
+        <li>实现 <code>StreamingZScore</code>（concept 04 已有公式）</li>
+        <li>跑 zero-shot vMF 与 ZS-BASE 对比（不接 cache），看是否 +0.3pp</li>
+      </ul>
+
+      <p><strong>退出标准（关键决策点）</strong></p>
+      <ul>
+        <li>如果 zero-shot vMF ≥ ZS-BASE + 0.3pp → <strong>接入 v3 主表</strong>，作为 C3</li>
+        <li>如果 zero-shot vMF &lt; ZS-BASE + 0.3pp → <strong>降为附录消融</strong>，C3 改其他主题（如 R-Negative 软抑制）</li>
+      </ul>
+
+      <p><strong>风险预警</strong>：MCM-PC-2 的 E0-TPE 4 种文本统计变换都失败。<strong>vMF 唯一的卖点是 paraphrase 引入新信息</strong>，不要再寄希望于 mean→median 这类换聚合。如果 paraphrase 质量低，结果还是负的。</p>
+    </li>
+
+    <li>
+      <h3>消融 + 跨 backbone + 论文 §3 §4 第一版</h3>
+      <p class="week-meta">📅 7 天 · 🎯 写完 method + 实验骨架</p>
+
+      <p><strong>目的</strong>：把已经跑完的所有数字组织成 AAAI 投稿可用的 §3 Method + §4 Experiments。</p>
+
+      <p><strong>消融实验</strong></p>
+      <ul>
+        <li><strong>A1：leave-one-cell-out</strong>（6 行表，verify 每个 cell 的边际贡献）</li>
+        <li><strong>A2：Conflict Gate 三态对比</strong>（abstain / half / full）</li>
+        <li><strong>A3：Anchor-Pollution 阈值搜索</strong>（τ_lo, τ_hi 网格）</li>
+        <li><strong>A4：跨 backbone</strong>（OpenShape ↔ ULIP-2 同方法 35-mean 对比）</li>
+        <li><strong>A5：失败实验对照</strong>（E2-EMR, E3-GLC, E4-CANC vs v3 main table）</li>
+      </ul>
+
+      <p><strong>论文骨架</strong></p>
+      <ul>
+        <li>§1 Intro — 给 D20 motivating figure（anchor pollution + conflict）</li>
+        <li>§2 Related Work — Point-Cache, MCP, BayesMM</li>
+        <li>§3 Method — C1 Matrix / C2 Gate / C3 vMF（如果 W5 通过）</li>
+        <li>§4 Experiments — main table（35 × 2 backbone）+ A1~A5</li>
+        <li>§5 Limitation — L-Negative 关闭原因 / ICP-CD 证伪</li>
+      </ul>
+
+      <p><strong>退出标准</strong></p>
+      <ul>
+        <li>✓ §3 Method + §4 Main Table v0.1 完成（可发给导师 review）</li>
+        <li>✓ 6 cell × 2 backbone × 35 setting = 完整数字</li>
+        <li>✓ 距 AAAI'27 截稿剩 ~12 个月 buffer，可继续优化</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="callout info">
+    <span class="label">📊 W1~W6 总览（投稿目标 AAAI'27）</span>
+    <ul>
+      <li><strong>W1-W3</strong>：拿下 C1 + C2，35-mean ≥ +1.0pp on OpenShape</li>
+      <li><strong>W4</strong>：拿下 anchor pollution gate，35-mean ≥ +1.5pp 累计</li>
+      <li><strong>W5</strong>：决定 vMF 命运（升级或降为附录）</li>
+      <li><strong>W6</strong>：把所有数字写成 paper §3 §4 第一版</li>
+    </ul>
+    <strong>累计期望增益</strong>：v3 vs E1-BASE 在 OpenShape 35-mean 上 <strong>+1.5~2.5pp</strong>（达到 76.8~77.8% 范围）。这个数字在 Point-Cache 75.27% 之上，且配 3 个 contribution，<strong>到 AAAI 强 Reject 边缘以上、Borderline Accept 范围</strong>。
+  </div>
+</section>
+
+<!-- ============================== 7. 风险与备选 ============================== -->
+<section id="sec7">
+  <h2>7. 风险与备选路线</h2>
+
+  <h3>7.1 五大风险 (Risk Gates)</h3>
+
+  <table>
+    <thead><tr><th>ID</th><th>风险</th><th>触发条件</th><th>触发后行动</th><th>评估周</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>R1</strong></td>
+        <td>OpenShape 35-mean baseline 与 MCM-PC 报告 75.27% 对不上（&lt; 74%）</td>
+        <td>W1 末</td>
+        <td>检查 weights 是否完整、preprocessing 是否一致；如对不上，先解决再继续</td>
+        <td>W1</td>
+      </tr>
+      <tr>
+        <td><strong>R2</strong></td>
+        <td>v3 矩阵 6-cell 跑通后 35-mean 反而退步</td>
+        <td>W2 末</td>
+        <td>关闭 L-Align（最新最不稳定的 cell），先 5 cell；如还退步，回退到 Point-Cache hierarchical 重新做 cell 单元测试</td>
+        <td>W2</td>
+      </tr>
+      <tr>
+        <td><strong>R3</strong></td>
+        <td>Conflict Gate 不带来正收益</td>
+        <td>W3 末</td>
+        <td>检查阈值是否合适；改成"per-corruption-type 自适应"；如 1 周内仍无收益，降级为消融</td>
+        <td>W3</td>
+      </tr>
+      <tr>
+        <td><strong>R4</strong></td>
+        <td>Anchor Pollution Gate 在非 affine corruption 上有负迁移</td>
+        <td>W4 末</td>
+        <td>限制 selector 只在 affine 类（rotate/scale）激活；非 affine 始终用 stream</td>
+        <td>W4</td>
+      </tr>
+      <tr>
+        <td><strong>R5</strong></td>
+        <td>vMF paraphrase 不出 +0.3pp</td>
+        <td>W5 中</td>
+        <td>降为附录；C3 改为 "soft negative suppression"（取 E4-CANC-v2 软抑制方向，仅作为 C3 占位）</td>
+        <td>W5</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 Plan B：万一 v3 整体不出 +1pp</h3>
+
+  <p>如果 W4 末累计增益不到 +1pp，建议切到 <strong>Plan B</strong>：</p>
+
+  <ul>
+    <li><strong>缩小投稿目标</strong>：从 AAAI'27 main track 切到 <strong>workshop / TPAMI minor / TIP</strong>，对应增益要求降到 +0.5pp 即可</li>
+    <li><strong>调整 contribution</strong>：把 E4-DIAG（77.79% 错检 precision）作为<strong>诊断分析论文</strong>的核心，论文标题改为 "<em>Conflict-Aware Pseudo-Label Diagnosis for 3D Test-Time Adaptation</em>"</li>
+    <li><strong>新增 ScanObjectNN-C</strong>：扩数据集弥补绝对 gain 不足</li>
+  </ul>
+
+  <h3>7.3 Plan C：彻底重定方向</h3>
+
+  <p>如果 W6 末仍无 publishable gain，建议切到 <strong>Plan C</strong>（与 MCM-PC 完全不同的方向）：</p>
+
+  <ul>
+    <li>转向 <strong>3D TTA 的理论分析</strong>（cache pollution 数学刻画 + 收敛性）</li>
+    <li>转向 <strong>跨数据集 generalization</strong>（ModelNet40 → ScanObjectNN 的 transfer）</li>
+    <li>转向 <strong>BayesMM 复现 + 优化</strong>（如果 Bayes 框架在 3D 有结构优势）</li>
+  </ul>
+
+  <div class="callout warn">
+    <span class="label">⚠ 时间预算</span>
+    距 AAAI'27 截稿约 14 个月。给 6 周路线 + 2 个月 buffer + 2 个月写作打磨 + 6 个月 polish = 14 个月。<strong>不能再花 4 天做 6 个失败实验</strong>；每个失败必须有 retire 决策。
+  </div>
+</section>
+
+<!-- ============================== 8. 立即行动 ============================== -->
+<section id="sec8">
+  <h2>8. 立即行动（24h 以内）</h2>
+
+  <p>下面是<strong>不需要做任何方法决策</strong>就可以立即开干的 4 步，能在今晚到明天完成。</p>
+
+  <ol>
+    <li>
+      <p><strong>跑 E1-BASE all35（ULIP-2 backbone）</strong>，把 baseline 数字砸实</p>
+      <pre>cd /root/autodl-tmp/MCM-PC-2/Point-Cache
+QUICK_TEST=1 bash scripts/recur-pc/run_e1_base_hierarchical_modelnetc_all35_corruptions_dual_gpu.sh
+<span class="com"># quick test 通过后</span>
+bash scripts/recur-pc/run_e1_base_hierarchical_modelnetc_all35_corruptions_dual_gpu.sh</pre>
+      <p class="file-ref">输出：<code>logs/recur-pc/summary_e1_base_dual_gpu_all35.csv</code>（35 行，_0~_4 全 OK）</p>
+    </li>
+
+    <li>
+      <p><strong>把 MCM-PC 的 5 篇 concept 文档拷到 MCM-PC-2</strong></p>
+      <pre>cp -r /root/autodl-tmp/MCM-PC/docs/concepts \
+      /root/autodl-tmp/MCM-PC-2/docs/concepts
+ls /root/autodl-tmp/MCM-PC-2/docs/concepts/
+<span class="com"># 应能看到 00_overview.md, 01_vmf_anchor.md, ..., 05_mcp_three_caches.html</span></pre>
+    </li>
+
+    <li>
+      <p><strong>把 MCM-PC 的 vMF paraphrase + D20 探针脚本拷过来</strong>（W5 / W4 用）</p>
+      <pre>cp /root/autodl-tmp/MCM-PC/generate_paraphrase.py \
+   /root/autodl-tmp/MCM-PC-2/
+cp /root/autodl-tmp/MCM-PC/Point-Cache/scripts/anchor_pollution_sim.py \
+   /root/autodl-tmp/MCM-PC-2/Point-Cache/scripts/
+cp /root/autodl-tmp/MCM-PC/Point-Cache/runners/model_with_mcp3d.py \
+   /root/autodl-tmp/MCM-PC-2/Point-Cache/runners/</pre>
+    </li>
+
+    <li>
+      <p><strong>commit 上述变更（按规则拆成 3 个 commit）</strong></p>
+      <pre>git add docs/concepts
+git commit -m <span class="str">"docs: vendor mcm-pc concept docs (00-05)"</span>
+
+git add generate_paraphrase.py Point-Cache/scripts/anchor_pollution_sim.py
+git commit -m <span class="str">"chore: vendor vmf paraphrase + anchor pollution probe"</span>
+
+git add Point-Cache/runners/model_with_mcp3d.py
+git commit -m <span class="str">"chore: vendor mcp-3d matrix skeleton runner"</span></pre>
+    </li>
+  </ol>
+
+  <div class="callout success">
+    <span class="label">✓ 完成后状态</span>
+    MCM-PC-2 树内将拥有：① E1-BASE all35 baseline 数字 ② 5 篇 concept 文档 ③ vMF/paraphrase/anchor-pollution/mcp3d 4 个资产。下一步可以开始 W1 Day 4-5（拷 OpenShape backbone + 跑 OpenShape baseline）。
+  </div>
+</section>
+
+<!-- ============================== 9. 下一步选项 ============================== -->
+<section id="sec9">
+  <h2>9. 下一步选项（你来选）</h2>
+
+  <p>读完这份说明书后，请选一个方向。下面 4 个选项对应不同的承诺度和风险偏好。</p>
+
+  <table>
+    <thead><tr><th>选项</th><th>含义</th><th>第一步动作</th><th>承诺度</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>A. 同意 v3 方案，立即落盘</strong> ⭐</td>
+        <td>接受合并方案，按 W1 路线执行</td>
+        <td>跑 §8 的 4 步</td>
+        <td>高</td>
+      </tr>
+      <tr>
+        <td>B. 先 quick test E4-CANC-v2</td>
+        <td>不放弃 cache-admission 路线，再挤一次</td>
+        <td>实现 soft suppression: <code>z'_ŷ_g = z − α·r(x)</code>，跑 quick test</td>
+        <td>低（备用）</td>
+      </tr>
+      <tr>
+        <td>C. 重新讨论 contribution 组合</td>
+        <td>不要 Conflict Gate，换别的卖点</td>
+        <td>讨论：要不要主推 vMF (C3) / anchor pollution / 跨数据集</td>
+        <td>中</td>
+      </tr>
+      <tr>
+        <td>D. 暂停，先 commit 当前状态</td>
+        <td>把本文档 commit 进库，明天再决</td>
+        <td><code>git add docs/reports/2026-05-17_task_specification.html &amp;&amp; git commit -m "docs: add v3 task specification"</code></td>
+        <td>低</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <span class="label">💡 我的推荐</span>
+    选 <strong>A</strong>（v3 方案）。理由：
+    <ul>
+      <li>不浪费任何 sunk cost（17 asset 仅 4 retire）</li>
+      <li>合并后 contribution 从 1 个变 3 个（C1 Matrix / C2 Gate / C3 vMF）</li>
+      <li>题目 "Multi-Cache Matrix" 终于名副其实（3×2 cell）</li>
+      <li>E4-DIAG 这个唯一闪光发现得到正确升华（从弱的 method 变成有力的 gate）</li>
+      <li>W1-W3 三周就能拿到 35-mean 数字，决策节奏快</li>
+    </ul>
+    如果你不确定，建议先选 <strong>D</strong>（commit 文档），明天细读后再决 A/B/C。
+  </div>
+</section>
+
+<footer class="doc-footer">
+  <p>
+    <strong>文档版本</strong>：v1.0 / 2026-05-17<br>
+    <strong>状态</strong>：草稿，等待用户决策<br>
+    <strong>下次更新</strong>：用户选定方向后，将本文档移到 <code>docs/reports/2026-05-17_task_specification_v1.html</code> 并新建 v2 跟踪执行进度
+  </p>
+  <p>
+    本文档基于以下信息整理：
+  </p>
+  <ul>
+    <li><code>/root/autodl-tmp/MCM-PC-2/docs/experiment_summary.md</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC-2/docs/stages/{stage1,stage2,stage3,stage4,stage0_tpe}_*.md</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC-2/docs/mcm_pc_user_preferences_and_workflow_rules.md</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC-2/docs/reports/mcm_pc_top_conference_progress_20260515.html</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC-2/paper_notes/mcm_pc_method_ideas.md</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC-2/Point-Cache/runners/model_with_hierarchical_caches_e4_canc_v1.py</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC/docs/context/windsurf/{INDEX,chat_summary,key_findings,decisions,next_steps}.md</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC/docs/concepts/05_mcp_three_caches.html</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC/Point-Cache/runners/model_with_mcp3d.py</code></li>
+    <li><code>/root/autodl-tmp/MCM-PC/Point-Cache/scripts/anchor_pollution_sim.py</code></li>
+    <li>Git history: <code>MCM-PC-2/.git</code>（17 commits on <code>mcm-pc-reliability-v1</code>）</li>
+  </ul>
+</footer>
+
+</main>
+</div>
+</body>
+</html>

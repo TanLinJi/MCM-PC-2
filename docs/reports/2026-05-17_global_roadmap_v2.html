@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MCM-PC · Detailed Global Roadmap v2</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --bg:#060913;
+  --panel:#111827;
+  --panel2:#172033;
+  --panel3:#0f172a;
+  --text:#e7eef9;
+  --muted:#a9b4c7;
+  --soft:#cbd5e1;
+  --cyan:#67e8f9;
+  --blue:#93c5fd;
+  --violet:#c4b5fd;
+  --green:#86efac;
+  --yellow:#fde68a;
+  --orange:#fdba74;
+  --red:#fca5a5;
+  --rose:#fda4af;
+  --border:#2b3958;
+  --code:#0b1220;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(103,232,249,.12), transparent 30%),
+    radial-gradient(circle at 100% 0%, rgba(196,181,253,.12), transparent 34%),
+    radial-gradient(circle at 50% 100%, rgba(134,239,172,.07), transparent 34%),
+    linear-gradient(135deg,#050816 0%,#081020 45%,#111827 100%);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",Arial,sans-serif;
+  line-height:1.74;
+}
+.container{max-width:1320px;margin:0 auto;padding:38px 24px 90px}
+.hero{
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(103,232,249,.13),rgba(196,181,253,.10));
+  border-radius:30px;
+  padding:38px;
+  box-shadow:0 24px 80px rgba(0,0,0,.40);
+}
+h1{font-size:38px;margin:0 0 14px;line-height:1.22}
+.subtitle{color:var(--muted);font-size:16px;margin:7px 0 0}
+.badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.badge{border:1px solid var(--border);background:rgba(255,255,255,.045);color:#dbeafe;border-radius:999px;padding:6px 12px;font-size:13px}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:22px;margin-top:22px}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}}
+.toc{
+  position:sticky;top:16px;align-self:start;
+  border:1px solid var(--border);background:rgba(17,24,39,.91);border-radius:22px;padding:18px;
+  max-height:calc(100vh - 32px);overflow:auto;
+}
+.toc h3{margin:0 0 10px;font-size:16px}
+.toc a{display:block;color:#c7d2fe;text-decoration:none;font-size:13px;margin:7px 0}
+.toc a:hover{color:var(--cyan)}
+.card{
+  margin-bottom:22px;
+  border:1px solid var(--border);
+  background:rgba(17,24,39,.90);
+  border-radius:24px;
+  padding:30px;
+  box-shadow:0 14px 42px rgba(0,0,0,.26);
+}
+h2{margin:0 0 18px;font-size:26px;border-left:4px solid var(--cyan);padding-left:12px}
+h3{font-size:20px;margin:26px 0 10px;color:#dbeafe}
+h4{font-size:17px;margin:20px 0 8px;color:#e0f2fe}
+p{margin:10px 0}.muted{color:var(--muted)}.soft{color:var(--soft)}
+table{width:100%;border-collapse:collapse;margin:15px 0;border-radius:14px;overflow:hidden}
+th,td{border:1px solid var(--border);padding:10px 12px;text-align:left;vertical-align:top}
+th{background:rgba(103,232,249,.10);color:#e0f2fe}
+td{background:rgba(255,255,255,.026)}
+.formula{background:rgba(11,18,32,.80);border:1px solid var(--border);border-radius:16px;padding:12px 16px;margin:16px 0;overflow-x:auto}
+.callout{border:1px solid var(--border);border-left:5px solid var(--cyan);background:rgba(103,232,249,.075);border-radius:16px;padding:15px 17px;margin:17px 0}
+.good{border-left-color:var(--green);background:rgba(134,239,172,.085)}
+.warn{border-left-color:var(--yellow);background:rgba(253,230,138,.085)}
+.danger{border-left-color:var(--red);background:rgba(252,165,165,.085)}
+.note{border-left-color:var(--violet);background:rgba(196,181,253,.085)}
+.orange{border-left-color:var(--orange);background:rgba(253,186,116,.085)}
+code{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:2px 6px;color:#dbeafe}
+pre{background:var(--code);border:1px solid var(--border);border-radius:14px;padding:14px;overflow:auto;color:#dbeafe}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.kpi{border:1px solid var(--border);background:rgba(255,255,255,.035);border-radius:18px;padding:18px}
+.kpi .num{font-size:30px;font-weight:700;color:#e0f2fe}
+.kpi .label{font-size:13px;color:var(--muted)}
+.timeline{position:relative;margin:18px 0 0;padding-left:26px}
+.timeline:before{content:"";position:absolute;left:7px;top:0;bottom:0;width:2px;background:linear-gradient(var(--cyan),var(--violet))}
+.titem{position:relative;margin:0 0 22px;padding:0 0 0 10px}
+.titem:before{content:"";position:absolute;left:-24px;top:7px;width:12px;height:12px;border-radius:999px;background:var(--cyan);box-shadow:0 0 0 4px rgba(103,232,249,.12)}
+.titem.done:before{background:var(--green)}
+.titem.running:before{background:var(--yellow)}
+.titem.todo:before{background:var(--violet)}
+.titem.risk:before{background:var(--red)}
+.tag{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px;margin:2px;color:#dbeafe;background:rgba(255,255,255,.04)}
+.small{font-size:13px;color:var(--muted)}
+.hr{height:1px;background:var(--border);margin:22px 0}
+.footer{margin-top:26px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<section class="hero">
+  <h1>MCM-PC 顶会论文项目全局进展分析与完整路线图 v2</h1>
+  <p class="subtitle">目标：把从最初想法、错误尝试、成功诊断、当前实验、未来 Multi-Cache Matrix 完整主线全部写清楚。</p>
+  <p class="subtitle">当前运行中：E4-CANC-v1 · ModelNet-C all35 corruption 双卡实验。</p>
+  <div class="badges">
+    <span class="badge">Project: MCM-PC</span>
+    <span class="badge">Base: Point-Cache</span>
+    <span class="badge">References: MCP / BayesMM</span>
+    <span class="badge">Core shift: Positive admission → Negative suppression</span>
+    <span class="badge">Long-term: Multi-Cache Matrix</span>
+    <span class="badge">Updated: 2026-05-14 13:39:52</span>
+  </div>
+</section>
+
+<div class="layout">
+<aside class="toc">
+  <h3>目录</h3>
+  <a href="#global">0. 全局方法思路</a>
+  <a href="#codes">1. 实验代号总表</a>
+  <a href="#terms">2. 术语解释</a>
+  <a href="#timeline">3. 详细阶段时间线</a>
+  <a href="#results">4. 实验结果总览</a>
+  <a href="#stage1">5. Stage 1 Baseline</a>
+  <a href="#stage2">6. Stage 2 E2-EMR</a>
+  <a href="#stage3">7. Stage 3 E3-GLC</a>
+  <a href="#stage4diag">8. Stage 4 E4-DIAG</a>
+  <a href="#stage4canc">9. Stage 4 E4-CANC</a>
+  <a href="#formulas">10. 公式演化</a>
+  <a href="#matrix">11. 后续 Multi-Cache Matrix</a>
+  <a href="#paper">12. 顶会论文结构</a>
+  <a href="#roadmap">13. 完整后续路线</a>
+  <a href="#risks">14. 风险与决策树</a>
+  <a href="#git">15. 工程与 Git 规范</a>
+</aside>
+
+<main>
+
+<section class="card" id="global">
+<h2>0. 全局方法思路：我们最终想做的不是一个小 trick，而是一个多缓存矩阵框架</h2>
+
+<div class="callout good">
+  <b>全局目标：</b>
+  构建一个面向 3D 点云 vision-language model 的 test-time adaptation 框架，使模型在未知 corruption 下不需要训练数据、不更新 backbone，仅通过测试流中的缓存机制提升鲁棒性。
+</div>
+
+<h3>0.1 整体问题</h3>
+<p>
+Point-Cache 的核心思想是：在测试阶段，把模型对测试样本的特征和伪标签信息缓存起来，后续样本可以利用这个 cache 来修正预测。
+但问题是，测试时没有真实标签。如果错误预测的样本被加入 cache，就会发生 cache pollution。
+</p>
+
+<div class="formula">
+\[
+\text{wrong pseudo-label}
+\Rightarrow
+\text{wrong cache entry}
+\Rightarrow
+\text{future predictions biased}
+\Rightarrow
+\text{error accumulation}
+\]
+</div>
+
+<p>
+因此，本项目的核心科学问题是：
+</p>
+
+<div class="formula">
+\[
+\boxed{
+\text{How can we decide which test-time samples should be cached, suppressed, or ignored?}
+}
+\]
+</div>
+
+<h3>0.2 初始灵感来源</h3>
+<table>
+<tr><th>来源</th><th>我们借鉴什么</th><th>当前使用程度</th></tr>
+<tr>
+<td>MCP 多缓存文献</td>
+<td>多缓存、多原型、动态缓存、不同功能 cache 协同</td>
+<td>作为最终 Multi-Cache Matrix 的上层思想来源</td>
+</tr>
+<tr>
+<td>Point-Cache</td>
+<td>3D 点云 test-time cache baseline，global / local / positive / negative cache 实现基础</td>
+<td>当前全部实验都基于它改造</td>
+</tr>
+<tr>
+<td>BayesMM</td>
+<td>文本特征不是简单平均，可以考虑分布建模；例如 vMF 球面分布</td>
+<td>暂时不是主线，作为后续文本原型可靠性模块储备</td>
+</tr>
+</table>
+
+<h3>0.3 最终 MCM-PC 框架设想</h3>
+<p>
+我们最终希望的 MCM-PC 不是只包含一个 cache，而是一个“矩阵式”的缓存系统。矩阵的两个维度可以理解为：
+</p>
+
+<table>
+<tr><th>维度</th><th>候选内容</th><th>作用</th></tr>
+<tr>
+<td>特征层级</td>
+<td>global object feature / local part feature / text prototype feature</td>
+<td>从整体、局部、语义文本三种角度理解样本</td>
+</tr>
+<tr>
+<td>缓存功能</td>
+<td>positive / negative / boundary / reliability / conflict cache</td>
+<td>分别用于增强正确类别、抑制错误类别、处理混淆边界、判断可信度</td>
+</tr>
+</table>
+
+<p>因此，长期框架可以抽象为：</p>
+
+<div class="formula">
+\[
+\mathcal{M}
+=
+\begin{bmatrix}
+\mathcal{C}_{global}^{+} & \mathcal{C}_{global}^{-} & \mathcal{C}_{global}^{boundary} \\
+\mathcal{C}_{local}^{+} & \mathcal{C}_{local}^{-} & \mathcal{C}_{local}^{boundary} \\
+\mathcal{C}_{text}^{proto} & \mathcal{C}_{text}^{uncertainty} & \mathcal{C}_{semantic}^{confusion}
+\end{bmatrix}
+\]
+</div>
+
+<div class="callout note">
+  <b>注意：</b>当前还没有真正完成整个 Multi-Cache Matrix。我们现在完成的是其中最关键的一条路线：
+  从 positive cache admission 失败分析，转向 conflict-aware negative / boundary cache。
+</div>
+
+<h3>0.4 当前已经明确的主线</h3>
+<p>经过 E2、E3、E4 的实验，我们现在知道：</p>
+<ul>
+  <li>继续优化 positive cache admission 不够稳定；</li>
+  <li>global-local consistency 不适合直接作为正向加分项；</li>
+  <li>global-local conflict 能非常有效地诊断 global pseudo-label 错误；</li>
+  <li>因此，当前最有希望的路线是：<b>conflict-aware negative / boundary suppression</b>。</li>
+</ul>
+
+<div class="formula">
+\[
+\text{Global-local conflict}
+\Rightarrow
+\text{global pseudo-label likely wrong}
+\Rightarrow
+\text{suppress } \hat y_g
+\]
+</div>
+</section>
+
+<section class="card" id="codes">
+<h2>1. 实验代号总表：E2、E3、E4 到底代表什么</h2>
+
+<p>
+这里的 E 是 Experiment 的缩写，表示“第几组实验”。后面的英文缩写是这个实验的核心思想。
+</p>
+
+<table>
+<tr><th>代号</th><th>英文全称</th><th>中文解释</th><th>它做了什么</th><th>状态</th></tr>
+<tr>
+<td><b>Stage 1 / Baseline</b></td>
+<td>Baseline Reproduction</td>
+<td>基线复现</td>
+<td>复现原始 Point-Cache hierarchical cache</td>
+<td>完成</td>
+</tr>
+<tr>
+<td><b>E2-EMR</b></td>
+<td>Entropy-Margin Reliability</td>
+<td>熵-间隔可靠性</td>
+<td>positive cache 不只看 entropy，也看 top-1/top-2 margin</td>
+<td>完成，未超过 baseline</td>
+</tr>
+<tr>
+<td><b>E3-GLC-v0</b></td>
+<td>Global-Local Consistency, version 0</td>
+<td>全局-局部一致性 v0</td>
+<td>把 local support 作为加法项加入 positive cache reliability</td>
+<td>完成，不稳定</td>
+</tr>
+<tr>
+<td><b>E3-GLC-v1</b></td>
+<td>Non-expansive Global-Local Consistency Gate</td>
+<td>非扩张全局-局部门控</td>
+<td>把 GLC 从加法项改成不会放大分数的门控项</td>
+<td>完成，仍未超过 baseline</td>
+</tr>
+<tr>
+<td><b>E4-CANC-DIAG-v1/v2</b></td>
+<td>Confusion-Aware Negative Cache Diagnosis</td>
+<td>混淆感知负缓存诊断</td>
+<td>不改模型，只统计 global-local conflict 是否能发现错误 global pseudo-label</td>
+<td>完成，诊断结果强阳性</td>
+</tr>
+<tr>
+<td><b>E4-CANC-v0</b></td>
+<td>Conservative Conflict-Aware Negative Cache</td>
+<td>保守冲突感知负缓存</td>
+<td>只加入 \(I_H\lor(I_M\land I_D)\) 的 negative 样本</td>
+<td>完成，安全但保守，+0.02</td>
+</tr>
+<tr>
+<td><b>E4-CANC-v1</b></td>
+<td>Conflict-Gated Negative Cache</td>
+<td>冲突门控负缓存</td>
+<td>放宽 v0，使用 \(I_H\lor(I_D\land p_g^{(1)}>\tau_p)\)</td>
+<td>all35 正在运行</td>
+</tr>
+<tr>
+<td><b>E5-MCM</b></td>
+<td>Multi-Cache Matrix</td>
+<td>多缓存矩阵</td>
+<td>把 positive / negative / boundary / text / conflict cache 系统化成完整框架</td>
+<td>未来阶段</td>
+</tr>
+<tr>
+<td><b>E6-Text</b></td>
+<td>Text Prototype Uncertainty / vMF Text Modeling</td>
+<td>文本原型不确定性建模</td>
+<td>参考 BayesMM / vMF 思想，改进文本 prototype，而不是简单 prompt average</td>
+<td>未来可选阶段</td>
+</tr>
+</table>
+
+<div class="callout">
+  <b>最重要的当前状态：</b>
+  E2 和 E3 是探索 positive cache admission 的失败/排除实验；E4 是当前最有希望成为论文主创新的方向。
+</div>
+</section>
+
+<section class="card" id="terms">
+<h2>2. 英文术语解释：很多英文到底是什么意思</h2>
+
+<table>
+<tr><th>英文</th><th>中文</th><th>在本项目里的意思</th></tr>
+<tr><td>Test-Time Adaptation, TTA</td><td>测试时自适应</td><td>模型在测试阶段根据测试数据流调整预测，但通常不使用真实标签。</td></tr>
+<tr><td>Vision-Language Model, VLM</td><td>视觉-语言模型</td><td>把图像/点云和文本类别描述映射到同一特征空间的模型。</td></tr>
+<tr><td>Point Cloud</td><td>点云</td><td>由 3D 坐标点组成的物体表示，例如 ModelNet-C 中的 3D 形状。</td></tr>
+<tr><td>Cache</td><td>缓存</td><td>测试时保存的特征和伪标签信息，用于后续预测修正。</td></tr>
+<tr><td>Positive Cache</td><td>正缓存</td><td>认为样本属于某类别时，用于增强该类别预测的缓存。</td></tr>
+<tr><td>Negative Cache</td><td>负缓存</td><td>认为某个类别可能是错误预测时，用于抑制该类别的缓存。</td></tr>
+<tr><td>Boundary Cache</td><td>边界缓存</td><td>处理类别混淆边界的缓存，例如 chair 与 stool 之间。</td></tr>
+<tr><td>Pseudo-label</td><td>伪标签</td><td>模型自己预测出来的标签，不是真实标签。</td></tr>
+<tr><td>Global Feature</td><td>全局特征</td><td>整个点云物体的整体特征。</td></tr>
+<tr><td>Local Feature / Part Feature</td><td>局部特征 / 部件特征</td><td>点云局部区域或局部 patch 的特征。</td></tr>
+<tr><td>Global-Local Conflict</td><td>全局-局部冲突</td><td>全局预测支持某类，但局部特征更支持其他类别。</td></tr>
+<tr><td>Entropy</td><td>熵</td><td>衡量预测分布的不确定性。熵低表示模型很自信。</td></tr>
+<tr><td>Margin</td><td>间隔</td><td>top-1 概率和 top-2 概率的差。差越大，模型越不犹豫。</td></tr>
+<tr><td>Corruption</td><td>损坏 / 扰动</td><td>测试数据受到的噪声或变换，例如 jitter、dropout、rotate。</td></tr>
+<tr><td>Severity</td><td>严重程度</td><td>corruption 强度等级。ModelNet-C 通常有 1 到 5 级。</td></tr>
+<tr><td>all35</td><td>全部 35 个损坏设置</td><td>7 种 corruption × 5 个 severity。</td></tr>
+<tr><td>Runner</td><td>实验 Python 文件</td><td>真正实现算法逻辑的 Python 文件。</td></tr>
+<tr><td>Script</td><td>运行脚本</td><td>调用 runner、指定参数、保存日志的 bash 脚本。</td></tr>
+<tr><td>Summary</td><td>结果汇总文件</td><td>CSV 格式的实验结果表。</td></tr>
+</table>
+</section>
+
+<section class="card" id="timeline">
+<h2>3. 详细阶段时间线：从最初到现在每一步做了什么</h2>
+
+<div class="timeline">
+
+<div class="titem done">
+<h3>Stage 0：项目构思、文献定位与工程环境搭建</h3>
+<p>
+最初目标是把 MCP 的多缓存思想迁移到 3D 点云中，以 Point-Cache 作为基线，并结合 BayesMM 中关于文本处理的思想。此阶段主要完成了方向判断：文本 vMF 建模可以作为一个可选创新点，但不能让它成为主创新，因为整体论文更需要围绕 3D TTA 和 cache 机制展开。
+</p>
+<p>
+同时完成服务器和 Git 工程搭建。数据和权重位于 <code>/root/autodl-tmp/MCM-PC-2/Point-Cache/data</code> 和 <code>weights</code>，不提交 Git。远端仓库为 <code>MCM-PC-2</code>。脚本统一放在 <code>Point-Cache/scripts/recur-pc</code>。
+</p>
+<p><b>阶段产物：</b>项目 proposal、HTML 计划文档、Git 仓库、baseline 运行环境。</p>
+</div>
+
+<div class="titem done">
+<h3>Stage 1：Point-Cache baseline 复现</h3>
+<p>
+该阶段的目标是证明原始 Point-Cache 代码在当前服务器和数据上能跑通，并得到可比较的基线。我们先跑 zero-shot，再跑 global cache，最后跑 hierarchical cache。
+</p>
+<p>
+关键发现：Point-Cache 的原始 runner 一次只跑一个 corruption，因此后续全 corruption 实验必须写循环脚本。我们也发现日志必须统一保存，否则实验不可复现。
+</p>
+<p><b>阶段产物：</b>baseline hierarchical 7 corruption severity-2 结果，后续所有实验都以它为主要对比对象。</p>
+</div>
+
+<div class="titem done">
+<h3>Stage 2：E2-EMR，尝试改 positive cache admission</h3>
+<p>
+该阶段尝试解决一个直观问题：原始 Point-Cache 主要依赖 entropy 判断样本是否可靠，但低 entropy 不一定代表预测正确。于是加入 top-1/top-2 margin，希望样本既低熵又有大间隔。
+</p>
+<p>
+实验结果显示，E2-EMR 在 add_global_2 上提升明显，但在 local corruption、rotate、scale 上下降，最终平均低于 baseline。这说明纯 global confidence 指标不够。
+</p>
+<p><b>阶段结论：</b>entropy-margin 有一定信号价值，但不能作为最终主方法。</p>
+</div>
+
+<div class="titem done">
+<h3>Stage 3：E3-GLC，把 global-local consistency 加入 positive cache</h3>
+<p>
+E2 失败后，我们认为 3D 点云应该考虑局部结构，因此提出 global-local consistency。v0 直接把 local support 加到 reliability score 中；v1 则修正为 non-expansive gate，避免 local consistency 过度放大样本可靠性。
+</p>
+<p>
+但是两个版本都没有超过 baseline。这个失败非常关键，因为它说明 local evidence 不适合直接用于 positive promotion。特别是在 local corruption 下，局部结构本身可能已经被破坏。
+</p>
+<p><b>阶段结论：</b>GLC 不适合用于 positive cache promotion，但它可能适合用于发现 global-local conflict。</p>
+</div>
+
+<div class="titem done">
+<h3>Stage 4A：E4-CANC-DIAG，先诊断而不是直接改方法</h3>
+<p>
+由于 E3 的经验，我们不再把 local alternative 当作正确类别，而是提出新问题：当 local evidence 反对 global prediction 时，global prediction 是否更可能是错的？
+</p>
+<p>
+为了避免逻辑跳跃，我们先做诊断实验，不改变模型预测，不改变 cache，只统计条件概率。E4-CANC-DIAG-v2 加入了分位数统计、多阈值 sweep、mean-local conflict 和 max-part conflict。
+</p>
+<p>
+结果非常关键：7 个 severity-2 corruption 中，global-local conflict 都显著提高 global pseudo-label 错误概率。mean-conflict wrong precision 平均约 77.79%，远高于 global error rate 42.06%。
+</p>
+<p><b>阶段结论：</b>conflict 是有效的错误伪标签诊断信号，但 local alternative 正确率低，不能当 positive pseudo-label。</p>
+</div>
+
+<div class="titem done">
+<h3>Stage 4B：E4-CANC-v0，保守冲突感知负缓存</h3>
+<p>
+诊断通过后，我们实现第一版真正方法：保留原始 entropy-based negative cache，同时额外加入既是 boundary 又有 conflict 的样本。
+</p>
+<p>
+规则为 \(I_H\lor(I_M\land I_D)\)。结果平均 62.83，首次略超 baseline 62.81，但提升很小。进一步分析发现，真正新增 negative 样本只有约 0.78%，所以 v0 安全但过于保守。
+</p>
+<p><b>阶段结论：</b>negative suppression 路线比 positive promotion 更稳，但需要增强 conflict signal 的实际作用。</p>
+</div>
+
+<div class="titem running">
+<h3>Stage 4C：E4-CANC-v1，当前正在运行 all35</h3>
+<p>
+为增强作用，v1 去掉小 margin boundary 限制，使用 \(I_H\lor(I_D\land p_g^{(1)}>\tau_p)\)。这会让更多 conflict samples 进入 negative cache。
+</p>
+<p>
+quick test 在 add_global_2 上略低于 baseline，说明规则可能更激进，有 false negative 风险。但不能只看 add_global_2，因此现在正在跑 35 个 corruption，检查不同 severity 和 corruption type 下的整体趋势。
+</p>
+<p><b>当前状态：</b>运行中，等待 summary。</p>
+</div>
+
+<div class="titem todo">
+<h3>Stage 5：E4 方法稳定化</h3>
+<p>
+根据 v1 all35 结果决定下一步。如果 v1 有提升，就做参数扫描和更多数据集。如果 v1 下降，就说明过于激进，需要改成 soft suppression 或提高阈值。
+</p>
+</div>
+
+<div class="titem todo">
+<h3>Stage 6：Multi-Cache Matrix 真正成型</h3>
+<p>
+在 CANC 稳定后，把正缓存、负缓存、边界缓存、文本原型不确定性、global/local 层级组织成完整矩阵框架，而不是只有单个 E4 模块。
+</p>
+</div>
+
+<div class="titem todo">
+<h3>Stage 7：论文完整实验与写作</h3>
+<p>
+完成 all35、多数据集、多 severity、ablation、参数敏感性、可视化、复杂度分析，并开始正式英文论文写作。
+</p>
+</div>
+
+</div>
+</section>
+
+<section class="card" id="results">
+<h2>4. 实验结果总览：成功与失败都要保留</h2>
+
+<h3>4.1 主结果表：severity-2 的 7 corruption</h3>
+<table>
+<tr><th>Method</th><th>核心思想</th><th>Avg.</th><th>结论</th></tr>
+<tr><td>Baseline Hierarchical</td><td>原始 Point-Cache hierarchical cache</td><td>62.81</td><td>当前主 baseline</td></tr>
+<tr><td>E2-EMR</td><td>entropy + margin 改 positive admission</td><td>62.50</td><td>失败/不稳定</td></tr>
+<tr><td>E3-GLC-v0</td><td>local support 加法项</td><td>62.50</td><td>失败/不稳定</td></tr>
+<tr><td>E3-GLC-v1</td><td>non-expansive local gate</td><td>62.50</td><td>数学合理但无提升</td></tr>
+<tr><td>E4-CANC-v0</td><td>保守 negative suppression</td><td>62.83</td><td>小幅正向，安全但弱</td></tr>
+</table>
+
+<h3>4.2 Baseline 与 E4-CANC-v0 详细对比</h3>
+<table>
+<tr><th>Corruption</th><th>Baseline</th><th>E4-CANC-v0</th><th>Delta</th><th>解释</th></tr>
+<tr><td>add_global_2</td><td>68.15</td><td>68.19</td><td>+0.04</td><td>略升，说明 v0 没破坏 global corruption</td></tr>
+<tr><td>add_local_2</td><td>61.30</td><td>61.43</td><td>+0.13</td><td>局部扰动略升，符合 conflict suppression 预期</td></tr>
+<tr><td>dropout_global_2</td><td>73.22</td><td>73.14</td><td>-0.08</td><td>略降，可能有少量 false negative</td></tr>
+<tr><td>dropout_local_2</td><td>63.65</td><td>63.57</td><td>-0.08</td><td>略降</td></tr>
+<tr><td>rotate_2</td><td>73.30</td><td>73.38</td><td>+0.08</td><td>略升</td></tr>
+<tr><td>scale_2</td><td>70.46</td><td>70.54</td><td>+0.08</td><td>略升</td></tr>
+<tr><td>jitter_2</td><td>29.58</td><td>29.58</td><td>0.00</td><td>无变化，jitter 仍是最大难点</td></tr>
+</table>
+
+<h3>4.3 E4-CANC-DIAG-v2 的关键诊断结果</h3>
+<table>
+<tr><th>指标</th><th>数值</th><th>意义</th></tr>
+<tr><td>Global error rate</td><td>约 42.06%</td><td>global pseudo-label 本身错误率</td></tr>
+<tr><td>Mean-conflict wrong precision</td><td>约 77.79%</td><td>发生 mean conflict 时，global pseudo-label 很可能错</td></tr>
+<tr><td>Max-conflict wrong precision</td><td>约 75.59%</td><td>max-part conflict 也有效</td></tr>
+<tr><td>Local alternative correct</td><td>约 20.64%</td><td>local alternative 很少是真实类别</td></tr>
+</table>
+
+<div class="callout good">
+  <b>关键成功：</b>
+  E4-DIAG 证明 conflict signal 有诊断价值，这是当前论文最强的证据之一。
+</div>
+
+<div class="callout danger">
+  <b>关键限制：</b>
+  local alternative correct 很低，所以不能把 \(k_l^\star\) 当作 pseudo-label。
+</div>
+</section>
+
+<section class="card" id="stage1">
+<h2>5. Stage 1 Baseline 详细说明</h2>
+<p>
+Baseline 阶段不是简单“跑了一下代码”。它解决了几个基础问题：
+</p>
+<ul>
+  <li>确认 Point-Cache 的环境、权重、数据路径均可用；</li>
+  <li>修复或绕开 wandb 未初始化导致的日志问题；</li>
+  <li>确认原始 runner 一次只能跑一个 corruption；</li>
+  <li>编写脚本保存日志和 summary；</li>
+  <li>确认 hierarchical cache 比 global cache 更强，因此后续都以 hierarchical 为主要 baseline。</li>
+</ul>
+
+<p>这个阶段的意义是：所有后续 E2/E3/E4 的准确率都必须和它比较。</p>
+</section>
+
+<section class="card" id="stage2">
+<h2>6. Stage 2 · E2-EMR 详细说明</h2>
+
+<h3>6.1 为什么提出 E2-EMR</h3>
+<p>
+原始 Point-Cache 对 positive cache 的准入主要依赖 entropy。直觉是：模型越自信，样本越可靠。但在 corrupted point cloud 下，模型可能自信地错。因此我们加入 margin：
+</p>
+<div class="formula">
+\[
+M_g(x)=p_g^{(1)}(x)-p_g^{(2)}(x)
+\]
+</div>
+
+<h3>6.2 公式</h3>
+<div class="formula">
+\[
+R_{E2}(x)=-H_g(x)+\lambda_m M_g(x)
+\]
+</div>
+
+<h3>6.3 实验结果与解释</h3>
+<p>
+E2 在 add_global_2 上有效，说明 margin 对全局噪声确实有帮助。但在 local corruption 和几何变换上下降，说明只看 global probability distribution 不能描述点云局部结构是否可靠。
+</p>
+
+<div class="callout warn">
+  E2 是一个重要的失败实验：它证明“更复杂的 global confidence”仍然不够。
+</div>
+</section>
+
+<section class="card" id="stage3">
+<h2>7. Stage 3 · E3-GLC 详细说明</h2>
+
+<h3>7.1 为什么提出 E3</h3>
+<p>
+E2 失败后，我们认为 3D 点云和 2D 图像不同，点云有局部部件结构。一个可靠样本不应该只满足 global confidence，还应该满足 local parts 与 global prediction 一致。
+</p>
+
+<h3>7.2 E3-v0 的问题</h3>
+<div class="formula">
+\[
+R_{v0}(x)=
+-H_g(x)+\lambda_m M_g(x)+\lambda_c C_{gl}(x)
+\]
+</div>
+<p>
+v0 把 local support 直接作为加分项。问题是：即使 global 本身不可靠，local support 仍可能把它加成高分。
+</p>
+
+<h3>7.3 E3-v1 的数学修正</h3>
+<div class="formula">
+\[
+S_g(x)=1-H_g(x)+\lambda_m M_g(x)
+\]
+\[
+G_{gl}(x)=\epsilon+(1-\epsilon)C_{glm}(x)
+\]
+\[
+R_{v1}(x)=S_g(x)G_{gl}(x)
+\]
+</div>
+
+<p>
+这样保证：
+</p>
+<div class="formula">
+\[
+0\le R_{v1}(x)\le S_g(x)
+\]
+</div>
+
+<p>
+local consistency 不再放大样本，只负责衰减不一致样本。但实验依然没有提升，说明 local consistency 用于 positive admission 不是好方向。
+</p>
+
+<div class="callout good">
+  E3 的真正价值不是提升准确率，而是帮助我们把研究方向从 positive promotion 转到 conflict detection。
+</div>
+</section>
+
+<section class="card" id="stage4diag">
+<h2>8. Stage 4A · E4-CANC-DIAG 详细说明</h2>
+
+<h3>8.1 为什么先诊断</h3>
+<p>
+我们不能直接假设 local 反对 global 就说明 global 错。因为 local branch 也可能被 corruption 破坏。所以必须先用有标签的 ModelNet-C 统计：
+</p>
+
+<div class="formula">
+\[
+P(\hat y_g\ne y\mid D_{gl}>\tau_d)
+\]
+</div>
+
+<p>
+是否显著大于：
+</p>
+
+<div class="formula">
+\[
+P(\hat y_g\ne y)
+\]
+</div>
+
+<h3>8.2 诊断指标</h3>
+<table>
+<tr><th>指标</th><th>作用</th></tr>
+<tr><td><code>global_error_rate</code></td><td>global pseudo-label 的基础错误率</td></tr>
+<tr><td><code>wrong_given_conflict_mean</code></td><td>mean conflict 条件下 global 错误概率</td></tr>
+<tr><td><code>wrong_given_conflict_max</code></td><td>max-part conflict 条件下 global 错误概率</td></tr>
+<tr><td><code>local_alt_correct</code></td><td>local alternative 是否是真实类别</td></tr>
+<tr><td><code>candidate_safe_rate</code></td><td>保守候选覆盖率</td></tr>
+</table>
+
+<h3>8.3 诊断结论</h3>
+<p>
+诊断结果非常明确：conflict 能检测 global 错误，但 local alternative 不可靠。
+</p>
+
+<div class="formula">
+\[
+D_{gl}\Rightarrow \hat y_g\ \text{likely wrong}
+\]
+\[
+D_{gl}\not\Rightarrow k_l^\star=y
+\]
+</div>
+
+<p>
+因此后续方法必须做：
+</p>
+
+<div class="formula">
+\[
+\text{suppress } \hat y_g
+\]
+<p>而不是：</p>
+\[
+\text{promote } k_l^\star
+\]
+</div>
+</section>
+
+<section class="card" id="stage4canc">
+<h2>9. Stage 4B/4C · E4-CANC 方法实验</h2>
+
+<h3>9.1 E4-CANC-v0</h3>
+<div class="formula">
+\[
+I_{neg}^{v0}(x)=I_H(x)\lor(I_M(x)\land I_D(x))
+\]
+</div>
+
+<p>
+它很安全，因为只新增既 boundary 又 conflict 的样本。但真正新增样本为：
+</p>
+
+<div class="formula">
+\[
+I_{new}^{v0}=\neg I_H\land I_M\land I_D
+\]
+</div>
+
+<p>
+平均新增只有约 0.78%，所以提升只有 +0.02。
+</p>
+
+<h3>9.2 E4-CANC-v1</h3>
+<div class="formula">
+\[
+I_{neg}^{v1}(x)=I_H(x)\lor(I_D(x)\land p_g^{(1)}(x)>\tau_p)
+\]
+</div>
+
+<p>
+它去掉了 \(I_M\) 的小 margin 限制，增强 conflict suppression。优点是能使用更多有效 conflict samples，风险是 false negative 变多。
+</p>
+
+<div class="callout warn">
+  当前 v1 all35 正在运行。它的成败决定我们下一步是继续强化 CANC，还是回退到更温和的 soft suppression。
+</div>
+</section>
+
+<section class="card" id="formulas">
+<h2>10. 公式演化总览</h2>
+
+<table>
+<tr><th>阶段</th><th>公式</th><th>含义</th><th>结论</th></tr>
+<tr>
+<td>E2</td>
+<td>\(R=-H+\lambda M\)</td>
+<td>低熵 + 大 margin</td>
+<td>不够稳定</td>
+</tr>
+<tr>
+<td>E3-v0</td>
+<td>\(R=-H+\lambda_mM+\lambda_cC\)</td>
+<td>local consistency 直接加分</td>
+<td>容易误加分</td>
+</tr>
+<tr>
+<td>E3-v1</td>
+<td>\(R=S_gG_{gl}\)</td>
+<td>local consistency 只做非扩张门控</td>
+<td>数学更稳但无提升</td>
+</tr>
+<tr>
+<td>E4-DIAG</td>
+<td>\(D_{gl}=[\max_{k\ne\hat y_g}p_l(k)-p_l(\hat y_g)]_+\)</td>
+<td>local 是否反对 global</td>
+<td>诊断有效</td>
+</tr>
+<tr>
+<td>E4-v0</td>
+<td>\(I_H\lor(I_M\land I_D)\)</td>
+<td>保守负缓存</td>
+<td>安全但弱</td>
+</tr>
+<tr>
+<td>E4-v1</td>
+<td>\(I_H\lor(I_D\land p_1>\tau_p)\)</td>
+<td>冲突门控负缓存</td>
+<td>运行中</td>
+</tr>
+</table>
+</section>
+
+<section class="card" id="matrix">
+<h2>11. 后续 Multi-Cache Matrix：完整全局路线，而不是只到 Stage 6</h2>
+
+<p>
+你提到的非常关键：目前文档不能只写到 E4/E6，因为最终目标是 Multi-Cache Matrix。下面是完整后续设想。
+</p>
+
+<h3>11.1 Matrix 的两个维度</h3>
+<table>
+<tr><th>维度</th><th>候选项</th><th>说明</th></tr>
+<tr><td>Feature Level</td><td>Global / Local / Text</td><td>整体物体、局部部件、文本语义原型</td></tr>
+<tr><td>Cache Role</td><td>Positive / Negative / Boundary / Reliability / Conflict</td><td>增强、抑制、边界建模、可靠性评估、冲突诊断</td></tr>
+</table>
+
+<h3>11.2 未来 MCM-PC 的可能完整矩阵</h3>
+<div class="formula">
+\[
+\mathcal{M}_{MCM-PC}=
+\begin{bmatrix}
+\mathcal{C}_{g}^{+} & \mathcal{C}_{g}^{-} & \mathcal{C}_{g}^{bd} & \mathcal{C}_{g}^{rel}\\
+\mathcal{C}_{l}^{+} & \mathcal{C}_{l}^{-} & \mathcal{C}_{l}^{bd} & \mathcal{C}_{l}^{conf}\\
+\mathcal{C}_{t}^{proto} & \mathcal{C}_{t}^{unc} & \mathcal{C}_{t}^{bayes} & \mathcal{C}_{sem}^{conf}
+\end{bmatrix}
+\]
+</div>
+
+<h3>11.3 每个模块的计划</h3>
+<table>
+<tr><th>模块</th><th>当前状态</th><th>未来任务</th></tr>
+<tr><td>Global positive cache</td><td>原始 Point-Cache 已有</td><td>暂不作为主要创新</td></tr>
+<tr><td>Local positive cache</td><td>原始 hierarchical cache 已有</td><td>已证明直接 positive promotion 不稳</td></tr>
+<tr><td>Negative cache</td><td>E4 正在改造</td><td>当前最核心创新</td></tr>
+<tr><td>Boundary cache</td><td>尚未真正实现</td><td>若 CANC 有效，可扩展 pairwise boundary cache</td></tr>
+<tr><td>Reliability cache</td><td>E2/E3 已探索</td><td>可作为 ablation，不一定进入最终主方法</td></tr>
+<tr><td>Text prototype uncertainty</td><td>尚未实现</td><td>未来用 vMF / BayesMM 思想改 prompt average</td></tr>
+<tr><td>Conflict matrix</td><td>E4-DIAG 已证明价值</td><td>未来统计 class-pair confusion，例如 chair-stool</td></tr>
+</table>
+
+<h3>11.4 从 E4 到真正 MCM 的桥梁</h3>
+<p>
+如果 E4-CANC-v1 或后续版本稳定提升，那么下一步可以把 conflict 不只作为一个 yes/no 条件，而是扩展成 pairwise matrix：
+</p>
+
+<div class="formula">
+\[
+\mathcal{B}_{i,j}
+=
+\{x:\hat y_g=i,\ k_l^\star=j,\ D_{gl}(x)>\tau_d\}
+\]
+</div>
+
+<p>
+这就是 Multi-Cache Matrix 中的 boundary/confusion 维度。它比普通 negative cache 更有论文创新性，因为它不仅知道“这个样本可能错”，还知道“错在可能和哪个类别混淆”。
+</p>
+</section>
+
+<section class="card" id="paper">
+<h2>12. 顶会论文结构建议</h2>
+
+<h3>12.1 Abstract 可以写什么</h3>
+<p class="muted">
+We study test-time adaptation for 3D point cloud vision-language models under corruptions. We find that confidence-based positive cache admission is insufficient, while global-local conflict provides a strong diagnostic signal for wrong pseudo-labels. Based on this observation, we propose a conflict-aware negative cache that suppresses unreliable global predictions without treating local alternatives as positive pseudo-labels.
+</p>
+
+<h3>12.2 Introduction 主线</h3>
+<ul>
+  <li>3D VLM 在 corrupted point cloud 上会出现 test-time domain shift。</li>
+  <li>Cache-based TTA 不更新模型，适合高效适配。</li>
+  <li>但错误 pseudo-label 会污染 cache。</li>
+  <li>现有 confidence-based cache admission 不足以避免污染。</li>
+  <li>我们的发现：global-local conflict 是更强的错误伪标签诊断信号。</li>
+  <li>提出 MCM-PC / CANC，使用 conflict-aware negative suppression。</li>
+</ul>
+
+<h3>12.3 Method 结构</h3>
+<table>
+<tr><th>小节</th><th>内容</th></tr>
+<tr><td>Preliminaries</td><td>Point-Cache、global/local logits、positive/negative cache</td></tr>
+<tr><td>Failure of positive admission</td><td>E2/E3 的动机与失败分析</td></tr>
+<tr><td>Global-local conflict diagnosis</td><td>\(D_{gl}\) 定义与诊断统计</td></tr>
+<tr><td>Conflict-aware negative cache</td><td>E4-CANC 规则与 suppression</td></tr>
+<tr><td>Multi-cache matrix extension</td><td>如果后续做出来，写完整 MCM framework</td></tr>
+</table>
+
+<h3>12.4 Experiments 结构</h3>
+<table>
+<tr><th>实验</th><th>作用</th></tr>
+<tr><td>Main results</td><td>ModelNet-C all35 / 可能更多数据集</td></tr>
+<tr><td>Ablation: E2/E3/E4</td><td>证明为什么选择 conflict negative suppression</td></tr>
+<tr><td>Diagnostic analysis</td><td>展示 \(P(\hat y_g\ne y\mid I_D)\) 很高</td></tr>
+<tr><td>Parameter sensitivity</td><td>\(\tau_d,\tau_p\) 扫描</td></tr>
+<tr><td>Complexity</td><td>推理开销、GPU/CPU 时间</td></tr>
+<tr><td>Visualization</td><td>冲突类别对、jitter 下错误示例</td></tr>
+</table>
+</section>
+
+<section class="card" id="roadmap">
+<h2>13. 完整后续路线图</h2>
+
+<h3>13.1 短期：等当前 all35 结果</h3>
+<table>
+<tr><th>结果情况</th><th>下一步</th></tr>
+<tr><td>v1 all35 明显超过 baseline 和 v0</td><td>提交 v1，做参数扫描，扩展数据集</td></tr>
+<tr><td>v1 all35 平均略升但不稳定</td><td>分析 per severity，设计 v1.1 阈值或 soft suppression</td></tr>
+<tr><td>v1 all35 下降</td><td>说明规则过激，回到 v0 或做 weighted suppression</td></tr>
+</table>
+
+<h3>13.2 中期：E4 方法稳定化</h3>
+<ul>
+  <li>E4-CANC-v1.1：提高 \(\tau_d\)，减少 false negative。</li>
+  <li>E4-CANC-v2：soft negative suppression，不是硬加入 cache。</li>
+  <li>E4-Boundary：pairwise boundary cache。</li>
+  <li>E4-Adaptive：根据 conflict score 分位数动态阈值。</li>
+</ul>
+
+<h3>13.3 长期：Multi-Cache Matrix 完成</h3>
+<ul>
+  <li>把 E4 的 conflict/negative/boundary 模块与 positive cache 合并成完整矩阵。</li>
+  <li>引入文本 prototype uncertainty，解决 prompt average 问题。</li>
+  <li>做 class-pair confusion matrix，可视化哪些类别最容易混淆。</li>
+  <li>扩展到更多数据集和 backbone。</li>
+</ul>
+
+<h3>13.4 写作路线</h3>
+<table>
+<tr><th>时间</th><th>任务</th><th>产物</th></tr>
+<tr><td>当前</td><td>完成 E4-CANC-v1 all35</td><td>summary csv + 分析文档</td></tr>
+<tr><td>下一阶段</td><td>决定 v1 / v1.1 / v2</td><td>稳定主方法</td></tr>
+<tr><td>随后</td><td>补 ablation 和参数扫描</td><td>论文表格</td></tr>
+<tr><td>再后</td><td>扩展数据集 / severity / backbone</td><td>主结果表</td></tr>
+<tr><td>最后</td><td>写论文初稿</td><td>Abstract / Introduction / Method / Experiments</td></tr>
+</table>
+</section>
+
+<section class="card" id="risks">
+<h2>14. 风险与决策树</h2>
+
+<h3>14.1 当前风险</h3>
+<table>
+<tr><th>风险</th><th>表现</th><th>应对</th></tr>
+<tr><td>false negative pollution</td><td>v1 加入太多 conflict 样本导致 accuracy 下降</td><td>提高 \(\tau_d\)，或使用 soft suppression</td></tr>
+<tr><td>jitter 始终很低</td><td>所有方法对 jitter 提升不明显</td><td>单独分析 jitter，考虑点云 denoise 或 feature smoothing</td></tr>
+<tr><td>提升幅度太小</td><td>只有 +0.02 这种级别</td><td>需要更强模块，如 pairwise boundary cache</td></tr>
+<tr><td>只在 ModelNet-C 有效</td><td>泛化不足</td><td>扩展 ScanObjectNN-C / ShapeNet-C 等</td></tr>
+</table>
+
+<h3>14.2 决策树</h3>
+<pre><code>当前 E4-CANC-v1 all35 完成后：
+
+如果 avg 明显提升：
+    -> 提交 v1
+    -> 做参数扫描
+    -> 扩展数据集
+    -> 写 Method 初稿
+
+如果 avg 小幅提升但不稳定：
+    -> 分 severity/type 分析
+    -> 做 v1.1：提高 tau_d 或 tau_p
+    -> 尝试 soft suppression
+
+如果 avg 下降：
+    -> 说明 hard negative insertion 太激进
+    -> 回到 v0 作为安全版本
+    -> 做 E4-CANC-v2：weighted negative suppression
+    -> 或转 pairwise boundary cache</code></pre>
+</section>
+
+<section class="card" id="git">
+<h2>15. 工程与 Git 规范</h2>
+
+<h3>15.1 已经形成的规范</h3>
+<ul>
+  <li>不要把不同类型改动混在一个 commit。</li>
+  <li>文档、runner、脚本、结果说明分开提交。</li>
+  <li>脚本命名必须统一，不再混用 reliability_v2 / e3_glc 等不同风格。</li>
+  <li>所有实验先 quick test，再跑完整版本。</li>
+  <li>日志不提交 Git。</li>
+</ul>
+
+<h3>15.2 后续 commit 示例</h3>
+<table>
+<tr><th>类型</th><th>Commit message</th></tr>
+<tr><td>runner</td><td><code>exp: add e4 canc v1 conflict-gated negative cache</code></td></tr>
+<tr><td>all35 script</td><td><code>exp: add e4 canc v1 all35 runner script</code></td></tr>
+<tr><td>结果归档</td><td><code>docs: record e4 canc v1 all35 results</code></td></tr>
+<tr><td>论文笔记</td><td><code>docs: update mcm-pc method roadmap</code></td></tr>
+</table>
+</section>
+
+</main>
+</div>
+
+<div class="footer">Generated for MCM-PC project · detailed global roadmap v2 · 2026-05-14 13:39:52</div>
+</div>
+</body>
+</html>
