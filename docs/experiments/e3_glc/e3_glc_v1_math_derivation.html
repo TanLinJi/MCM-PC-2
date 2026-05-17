@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCM-PC · E3-GLC-v1 Revised Mathematical Plan</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --bg:#0b1020; --panel:#121a2e; --text:#e8eefc; --muted:#a7b1c7;
+  --accent:#7dd3fc; --green:#86efac; --yellow:#fde68a; --red:#fca5a5;
+  --border:#2a3658; --code:#0f172a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:linear-gradient(135deg,#070b16 0%,#0b1020 55%,#111827 100%);
+  color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",Arial,sans-serif;
+  line-height:1.72;
+}
+.container{max-width:1180px;margin:0 auto;padding:38px 24px 80px}
+.hero{
+  border:1px solid var(--border); background:linear-gradient(135deg,rgba(125,211,252,.12),rgba(167,139,250,.10));
+  border-radius:24px; padding:34px; box-shadow:0 18px 60px rgba(0,0,0,.28);
+}
+h1{font-size:34px;margin:0 0 12px;line-height:1.25}
+.subtitle{color:var(--muted);font-size:16px;margin:0}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.badge{border:1px solid var(--border);background:rgba(255,255,255,.04);padding:6px 10px;border-radius:999px;color:#dbeafe;font-size:13px}
+.card{margin-top:22px;border:1px solid var(--border);background:rgba(18,26,46,.86);border-radius:20px;padding:26px;box-shadow:0 12px 36px rgba(0,0,0,.22)}
+h2{font-size:24px;margin:0 0 16px;border-left:4px solid var(--accent);padding-left:12px}
+h3{font-size:19px;margin:24px 0 10px;color:#dbeafe}
+p{margin:10px 0;color:var(--text)}
+.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse;margin:14px 0;overflow:hidden;border-radius:12px}
+th,td{border:1px solid var(--border);padding:10px 12px;text-align:left;vertical-align:top}
+th{background:rgba(125,211,252,.10);color:#e0f2fe}
+td{background:rgba(255,255,255,.025)}
+code,pre{background:var(--code);color:#dbeafe;border:1px solid var(--border);border-radius:10px}
+code{padding:2px 6px}
+pre{padding:14px;overflow:auto;line-height:1.45}
+.callout{border:1px solid var(--border);border-left:5px solid var(--accent);background:rgba(125,211,252,.07);border-radius:14px;padding:14px 16px;margin:16px 0}
+.warn{border-left-color:var(--yellow);background:rgba(253,230,138,.08)}
+.danger{border-left-color:var(--red);background:rgba(252,165,165,.08)}
+.good{border-left-color:var(--green);background:rgba(134,239,172,.08)}
+.formula{background:rgba(15,23,42,.72);border:1px solid var(--border);border-radius:16px;padding:10px 16px;margin:16px 0}
+.footer{margin-top:24px;color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="container">
+  <section class="hero">
+    <h1>MCM-PC · E3-GLC-v1 修正版数学推导与实验计划</h1>
+    <p class="subtitle">实验名：<b>E3-GLC-v1: Non-expansive Global-Local Consistency Gate</b></p>
+    <p class="subtitle">目标：修正上一版推导中的门控强度、冲突惩罚、概率定义和非平滑性问题，避免继续盲目实验。</p>
+    <div class="badges">
+      <span class="badge">Dataset: ModelNet-C</span>
+      <span class="badge">Backbone: ULIP-2</span>
+      <span class="badge">Baseline: Point-Cache Hierarchical</span>
+      <span class="badge">Stage: E3-GLC-v1</span>
+      <span class="badge">GPU: dual-gpu ready</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>1. 这次修复了哪些问题</h2>
+    <table>
+      <tr><th>问题</th><th>原计划的风险</th><th>修复方案</th></tr>
+      <tr><td>\(1-H\) 平移后参与乘法门控</td><td>局部一致性可能过强地改变排序。</td><td>改为 <b>non-expansive gate</b>，局部项只衰减不放大：\(G_{gl}\in[\epsilon,1]\)。</td></tr>
+      <tr><td>冲突样本不被惩罚</td><td>\(\hat y_g\ne \hat y_l\) 时只是没有奖励，仍可能进入 cache。</td><td>冲突时 \(C_{glm}=0\)，门控变为 \(G_{gl}=\epsilon\)，直接降低分数。</td></tr>
+      <tr><td>indicator × local margin 不够干净</td><td>离散 top-1 判断在边界附近不稳定，数学表达也不紧凑。</td><td>改为 clipped global-class local margin：\([p_l(\hat y_g)-\max_{k\ne\hat y_g}p_l(k)]_+\)。</td></tr>
+      <tr><td>概率 / logit 未明确</td><td>若 margin 基于 logit，\([0,1]\) 上下界推导不成立。</td><td>明确所有 entropy 和 margin 都基于 softmax probability。</td></tr>
+      <tr><td>连续导数解释过度</td><td>max / ReLU / top-1 会造成分段函数。</td><td>只解释为 cache ranking score 的单调性，不声称对 logits 平滑可导。</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>2. 统一概率定义</h2>
+    <p>令 global logits 为 \(z_g(x)\in\mathbb{R}^C\)，local part logits 为 \(z_{l,r}(x)\in\mathbb{R}^C\)，其中 \(r=1,\dots,P\)。</p>
+    <div class="formula">
+      \[
+      p_g(k\mid x)=\operatorname{softmax}(z_g(x))_k
+      \]
+      \[
+      p_{l,r}(k\mid x)=\operatorname{softmax}(z_{l,r}(x))_k
+      \]
+      \[
+      p_l(k\mid x)=\frac{1}{P}\sum_{r=1}^P p_{l,r}(k\mid x)
+      \]
+    </div>
+    <div class="callout">
+      <b>local probability 使用平均概率：</b>
+      \(p_l=\frac1P\sum_r p_{l,r}\)，而不是 \(\operatorname{softmax}(\frac1P\sum_r z_{l,r})\)。
+      这样 \(p_l\) 仍然是概率分布，且 local margin 的尺度更稳定。
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. Global 基础可靠性</h2>
+    <div class="formula">
+      \[
+      H_g(x)=
+      -\frac{1}{\log C}
+      \sum_{k=1}^C p_g(k\mid x)\log p_g(k\mid x),
+      \qquad 0\le H_g(x)\le 1
+      \]
+      \[
+      M_g(x)=p_g^{(1)}(x)-p_g^{(2)}(x),
+      \qquad 0\le M_g(x)\le 1
+      \]
+      \[
+      S_g(x)=1-H_g(x)+\lambda_m M_g(x),
+      \qquad \lambda_m\ge 0
+      \]
+      \[
+      0\le S_g(x)\le 1+\lambda_m
+      \]
+    </div>
+    <div class="callout warn">
+      <b>限制：</b>\(S_g\) 仍然主要衡量 global prediction 的尖锐程度，不能彻底解决过度自信错误伪标签。
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>4. 修正后的 Global-Local Consistency</h2>
+    <div class="formula">
+      \[
+      \hat y_g=\arg\max_k p_g(k\mid x)
+      \]
+      \[
+      C_{glm}(x)=
+      \left[
+      p_l(\hat y_g\mid x)
+      -
+      \max_{k\ne \hat y_g}p_l(k\mid x)
+      \right]_+
+      \]
+      \[
+      [a]_+=\max(a,0),
+      \qquad 0\le C_{glm}(x)\le 1
+      \]
+    </div>
+    <p>如果 local branch 也支持 global 预测类别，则 \(C_{glm}>0\)；如果 local branch 更支持其他类别，则 \(C_{glm}=0\)。</p>
+  </section>
+
+  <section class="card">
+    <h2>5. 最终推荐公式：Non-expansive Gate</h2>
+    <p>不再使用 boost 型公式 \(S_g(1+\lambda_c C)\)，因为它可能让 local consistency 过度放大样本可靠性。</p>
+    <div class="formula">
+      \[
+      G_{gl}(x)=\epsilon+(1-\epsilon)C_{glm}(x),
+      \qquad 0\le\epsilon\le 1
+      \]
+      \[
+      R_{glc}(x)=S_g(x)\cdot G_{gl}(x)
+      \]
+    </div>
+    <p>建议初始值：</p>
+    <div class="formula">
+      \[
+      \epsilon=0.7
+      \]
+    </div>
+    <div class="formula">
+      \[
+      \epsilon\le G_{gl}(x)\le 1
+      \]
+      \[
+      0\le R_{glc}(x)\le S_g(x)\le 1+\lambda_m
+      \]
+    </div>
+    <div class="callout good">
+      <b>核心含义：</b>local consistency 不再让样本超过其 global 基础可靠性，而是在 local 冲突时衰减可靠性，在 local 一致时尽量保留可靠性。
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>6. 排序反转条件</h2>
+    <p>对两个样本 \(i,j\)，若 \(S_i<S_j\)，样本 \(i\) 想反超 \(j\)，必须满足：</p>
+    <div class="formula">
+      \[
+      S_iG_i>S_jG_j
+      \]
+      \[
+      \frac{S_i}{S_j}>\frac{G_j}{G_i}
+      \]
+    </div>
+    <p>在最极端情况下，\(G_i=1\)，\(G_j=\epsilon\)，反超条件为：</p>
+    <div class="formula">
+      \[
+      \frac{S_i}{S_j}>\epsilon
+      \]
+    </div>
+    <p>若 \(\epsilon=0.7\)，则一个 local 一致样本至少需要达到另一样本 70% 的 global 基础可靠性，才可能反超。这个约束比 boost 版本更保守。</p>
+  </section>
+
+  <section class="card">
+    <h2>7. 单调性与非平滑性</h2>
+    <div class="formula">
+      \[
+      \frac{\partial R_{glc}}{\partial C_{glm}}
+      =
+      (1-\epsilon)S_g(x)\ge 0
+      \]
+    </div>
+    <p>成立条件：</p>
+    <div class="formula">
+      \[
+      0\le\epsilon\le1,
+      \qquad S_g(x)\ge0
+      \]
+    </div>
+    <div class="callout warn">
+      这里不能被解释为对 logits 的平滑可导训练目标。\(C_{glm}\) 含有 \(\max\) 和 \([\cdot]_+\)，因此它只是一个用于 cache 排序的分段评分函数。
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>8. 仍然无法解决的问题</h2>
+    <div class="callout danger">
+      如果 global 和 local 同时高置信地预测错同一个类别，那么 \(S_g\) 和 \(C_{glm}\) 都可能很高。
+      E3-GLC-v1 不能彻底解决这种 coherent wrong pseudo-label。后续仍需要 compactness、prototype alignment 或 confusion-aware negative cache。
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>9. 下一步实验计划</h2>
+    <table>
+      <tr><th>项目</th><th>内容</th></tr>
+      <tr><td>实验名</td><td>E3-GLC-v1: Non-expansive Global-Local Consistency Gate</td></tr>
+      <tr><td>Runner</td><td><code>Point-Cache/runners/model_with_hierarchical_caches_e3_glc_v1.py</code></td></tr>
+      <tr><td>Script</td><td><code>Point-Cache/scripts/recur-pc/run_e3_glc_v1_hierarchical_modelnetc_all_corruptions_dual_gpu.sh</code></td></tr>
+      <tr><td>Dataset</td><td>ModelNet-C</td></tr>
+      <tr><td>Corruptions</td><td>add_global_2, add_local_2, dropout_global_2, dropout_local_2, rotate_2, scale_2, jitter_2</td></tr>
+      <tr><td>参数</td><td>\(\lambda_m=1.0,\ \epsilon=0.7\)</td></tr>
+      <tr><td>比较对象</td><td>Baseline Hierarchical, E2-EMR, E3-GLC-v0, E3-GLC-v1</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>10. 论文写作素材</h2>
+    <h3>[Section: Method]</h3>
+    <p class="muted">We formulate global-local consistency as a non-expansive reliability gate rather than an additive bonus. The gate attenuates samples whose local part evidence conflicts with the global prediction, while preventing local evidence from inflating a sample beyond its global reliability.</p>
+    <h3>[Section: Ablation]</h3>
+    <p class="muted">The naive additive global-local consistency term is unstable because it can compensate for unreliable global predictions. The proposed non-expansive gate addresses this issue by penalizing global-local conflicts and bounding the final reliability score by the global reliability.</p>
+  </section>
+
+  <div class="footer">Generated for MCM-PC project · revised mathematical plan · 2026-05-14 10:26:30</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MCM-PC · E4-CANC-v0 Negative Cache Rule Explanation</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --bg:#080c16; --panel:#111827; --text:#e6edf8; --muted:#a7b1c7;
+  --cyan:#67e8f9; --blue:#93c5fd; --green:#86efac; --yellow:#fde68a; --red:#fca5a5;
+  --border:#2b3958; --code:#0b1220;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  color:var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(103,232,249,.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(147,197,253,.10), transparent 32%),
+    linear-gradient(135deg,#070a13 0%,#0b1020 45%,#111827 100%);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",Arial,sans-serif;
+  line-height:1.72;
+}
+.container{max-width:1220px;margin:0 auto;padding:38px 24px 80px}
+.hero{
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(103,232,249,.13),rgba(147,197,253,.10));
+  border-radius:26px;
+  padding:34px;
+  box-shadow:0 20px 70px rgba(0,0,0,.34);
+}
+h1{font-size:34px;margin:0 0 12px;line-height:1.25}
+.subtitle{color:var(--muted);font-size:16px;margin:6px 0 0}
+.badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.badge{border:1px solid var(--border);background:rgba(255,255,255,.045);color:#dbeafe;border-radius:999px;padding:6px 11px;font-size:13px}
+.card{
+  margin-top:22px;
+  border:1px solid var(--border);
+  background:rgba(17,24,39,.88);
+  border-radius:20px;
+  padding:26px;
+  box-shadow:0 14px 42px rgba(0,0,0,.24);
+}
+h2{margin:0 0 16px;font-size:24px;border-left:4px solid var(--cyan);padding-left:12px}
+h3{font-size:19px;margin:24px 0 10px;color:#dbeafe}
+p{margin:10px 0}.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse;margin:14px 0;border-radius:12px;overflow:hidden}
+th,td{border:1px solid var(--border);padding:10px 12px;text-align:left;vertical-align:top}
+th{background:rgba(103,232,249,.10);color:#e0f2fe}
+td{background:rgba(255,255,255,.025)}
+.formula{background:rgba(11,18,32,.78);border:1px solid var(--border);border-radius:16px;padding:12px 16px;margin:16px 0;overflow-x:auto}
+.callout{border:1px solid var(--border);border-left:5px solid var(--cyan);background:rgba(103,232,249,.07);border-radius:14px;padding:14px 16px;margin:16px 0}
+.warn{border-left-color:var(--yellow);background:rgba(253,230,138,.08)}
+.danger{border-left-color:var(--red);background:rgba(252,165,165,.08)}
+.good{border-left-color:var(--green);background:rgba(134,239,172,.08)}
+code{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:2px 6px;color:#dbeafe}
+.diagram{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  background:rgba(11,18,32,.84);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  overflow:auto;
+  color:#dbeafe;
+}
+.footer{margin-top:24px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<section class="hero">
+  <h1>MCM-PC · E4-CANC-v0 规则解释与阶段分析</h1>
+  <p class="subtitle">主题：为什么当前 conservative negative cache 是安全但保守的，以及下一步为什么要进入 E4-CANC-v1。</p>
+  <div class="badges">
+    <span class="badge">Stage: E4</span>
+    <span class="badge">Experiment: E4-CANC-v0</span>
+    <span class="badge">Rule: Conservative Negative Cache</span>
+    <span class="badge">Dataset: ModelNet-C</span>
+    <span class="badge">Result: +0.02 Avg.</span>
+  </div>
+</section>
+
+<section class="card">
+<h2>1. 当前实验在做什么</h2>
+<p>
+E4-CANC-v0 的目标不是继续改 positive cache，而是利用 E4-CANC-DIAG-v2 发现的规律：
+global-local conflict 可以显著提高 global pseudo-label 出错概率。因此，E4-CANC-v0 尝试把这类冲突样本用于 negative cache，也就是抑制可能错误的 global predicted class。
+</p>
+
+<div class="callout good">
+  <b>核心原则：</b>
+  local alternative class \(k_l^\star\) 不作为 pseudo-label。E4 只使用冲突信号来判断 \(\hat y_g\) 是否应该被 suppress。
+</div>
+
+<p>当前规则为：</p>
+<div class="formula">
+\[
+I_{neg}^{E4}(x)=I_H(x)\lor(I_M(x)\land I_D(x)).
+\]
+</div>
+</section>
+
+<section class="card">
+<h2>2. 三个判断条件分别是什么意思</h2>
+
+<h3>2.1 \(I_H\)：原始 Point-Cache 的 entropy negative 条件</h3>
+<div class="formula">
+\[
+I_H(x)=\mathbf{1}[\tau_l < H_g(x)<\tau_u].
+\]
+</div>
+<p>
+\(I_H\) 表示原始 Point-Cache 已经会选进 negative cache 的样本。它对应的是中等 entropy 区间：模型不是非常确定，也不是完全混乱，可能处在不稳定区域。
+</p>
+
+<h3>2.2 \(I_M\)：global boundary candidate</h3>
+<div class="formula">
+\[
+I_M(x)=
+\mathbf{1}[M_g(x)<\tau_m]\cdot
+\mathbf{1}[p_g^{(1)}(x)>\tau_p].
+\]
+</div>
+<p>
+其中：
+</p>
+<div class="formula">
+\[
+M_g(x)=p_g^{(1)}(x)-p_g^{(2)}(x).
+\]
+</div>
+<p>
+\(I_M\) 表示 global top-1 和 top-2 比较接近，同时 top-1 概率又不是太低。因此它不是完全混乱样本，而是可能位于类别边界附近的样本。
+</p>
+
+<h3>2.3 \(I_D\)：global-local conflict</h3>
+<div class="formula">
+\[
+I_D(x)=\mathbf{1}[D_{gl}^{mean}(x)>\tau_d].
+\]
+</div>
+<p>
+其中 mean-local conflict 为：
+</p>
+<div class="formula">
+\[
+D_{gl}^{mean}(x)=
+\left[
+\max_{k\ne \hat y_g}p_l^{mean}(k\mid x)
+-
+p_l^{mean}(\hat y_g\mid x)
+\right]_+.
+\]
+</div>
+<p>
+\(I_D\) 表示 local part evidence 明显不支持 global predicted class \(\hat y_g\)。
+</p>
+</section>
+
+<section class="card">
+<h2>3. E4-CANC-v0 规则的集合含义</h2>
+<p>当前 E4-CANC-v0 使用：</p>
+<div class="formula">
+\[
+I_{neg}^{E4}
+=
+I_H
+\lor
+(I_M\land I_D).
+\]
+</div>
+
+<p>这句话可以拆成两部分：</p>
+<table>
+<tr><th>部分</th><th>含义</th></tr>
+<tr>
+<td>\(I_H\)</td>
+<td>保留原始 Point-Cache 的 negative cache 样本。</td>
+</tr>
+<tr>
+<td>\(I_M\land I_D\)</td>
+<td>额外加入“既是 global 边界样本、又存在 global-local 冲突”的样本。</td>
+</tr>
+</table>
+
+<div class="diagram">
+Universe: all test samples
+
+I_H: original entropy-based negative samples
+I_M: global boundary samples
+I_D: global-local conflict samples
+
+E4-CANC-v0 selects:
+    I_H  ∪  (I_M ∩ I_D)
+
+New samples compared with baseline:
+    (not I_H) ∩ I_M ∩ I_D
+</div>
+
+<p>也就是说，E4-CANC-v0 并不是把所有 conflict 样本都加入 negative cache，而只加入其中非常保守的一部分。</p>
+</section>
+
+<section class="card">
+<h2>4. 为什么真正新增部分是 \((\neg I_H)\land I_M\land I_D\)</h2>
+
+<p>baseline negative cache 已经包含：</p>
+<div class="formula">
+\[
+I_{neg}^{base}=I_H.
+\]
+</div>
+
+<p>E4-CANC-v0 包含：</p>
+<div class="formula">
+\[
+I_{neg}^{E4}=I_H\lor(I_M\land I_D).
+\]
+</div>
+
+<p>因此，E4 相比 baseline 真正新增的样本是：</p>
+<div class="formula">
+\[
+I_{new}
+=
+I_{neg}^{E4}\land \neg I_{neg}^{base}.
+\]
+</div>
+
+<p>代入定义：</p>
+<div class="formula">
+\[
+I_{new}
+=
+\bigl(I_H\lor(I_M\land I_D)\bigr)\land \neg I_H.
+\]
+</div>
+
+<p>利用分配律：</p>
+<div class="formula">
+\[
+I_{new}
+=
+(I_H\land\neg I_H)
+\lor
+(I_M\land I_D\land\neg I_H).
+\]
+</div>
+
+<p>因为：</p>
+<div class="formula">
+\[
+I_H\land\neg I_H=0,
+\]
+</div>
+
+<p>所以：</p>
+<div class="formula">
+\[
+I_{new}
+=
+\neg I_H\land I_M\land I_D.
+\]
+</div>
+
+<div class="callout good">
+  <b>结论：</b>
+  E4-CANC-v0 真正新增的样本，必须是 baseline 本来不会选入 negative cache，但同时满足 boundary 和 conflict 的样本。
+</div>
+</section>
+
+<section class="card">
+<h2>5. 当前实验结果说明什么</h2>
+
+<h3>5.1 Accuracy 结果</h3>
+<table>
+<tr><th>Corruption</th><th>Baseline</th><th>E4-CANC-v0</th><th>Delta</th></tr>
+<tr><td>add_global_2</td><td>68.15</td><td>68.19</td><td>+0.04</td></tr>
+<tr><td>add_local_2</td><td>61.30</td><td>61.43</td><td>+0.13</td></tr>
+<tr><td>dropout_global_2</td><td>73.22</td><td>73.14</td><td>-0.08</td></tr>
+<tr><td>dropout_local_2</td><td>63.65</td><td>63.57</td><td>-0.08</td></tr>
+<tr><td>rotate_2</td><td>73.30</td><td>73.38</td><td>+0.08</td></tr>
+<tr><td>scale_2</td><td>70.46</td><td>70.54</td><td>+0.08</td></tr>
+<tr><td>jitter_2</td><td>29.58</td><td>29.58</td><td>0.00</td></tr>
+<tr><th>Average</th><th>62.81</th><th>62.83</th><th>+0.02</th></tr>
+</table>
+
+<p>
+E4-CANC-v0 是目前第一个在 full corruption average 上略微超过 baseline 的版本，但提升非常小。
+</p>
+
+<h3>5.2 Negative candidate 统计</h3>
+<table>
+<tr><th>Metric</th><th>Average</th><th>解释</th></tr>
+<tr><td>base_negative_rate</td><td>23.76%</td><td>原始 Point-Cache negative 样本比例</td></tr>
+<tr><td>e4_total_negative_rate</td><td>24.54%</td><td>E4-CANC-v0 总 negative 样本比例</td></tr>
+<tr><td>e4_extra_negative_rate</td><td>0.78%</td><td>E4 真正新增的样本比例</td></tr>
+<tr><td>conflict_rate</td><td>9.15%</td><td>global-local conflict 样本比例</td></tr>
+<tr><td>conflict_boundary_rate</td><td>2.12%</td><td>同时满足 boundary 和 conflict 的比例</td></tr>
+</table>
+
+<div class="callout warn">
+  E4-DIAG 已经证明 conflict signal 很强，但 E4-CANC-v0 实际只使用了其中很小一部分，所以效果很弱。
+</div>
+</section>
+
+<section class="card">
+<h2>6. 为什么说 v0 安全但保守</h2>
+
+<h3>6.1 安全性</h3>
+<p>
+E4-CANC-v0 不使用所有 conflict 样本，而只使用 \(I_M\land I_D\)。这降低了 false negative cache pollution 的风险。
+</p>
+
+<div class="formula">
+\[
+I_M\land I_D
+\Rightarrow
+\text{global boundary} + \text{local disagreement}
+\]
+</div>
+
+<p>
+这比单独使用 \(I_D\) 更谨慎。
+</p>
+
+<h3>6.2 保守性</h3>
+<p>
+但是这个规则太严格，导致真正新增样本比例只有约 \(0.78\%\)。
+</p>
+
+<div class="formula">
+\[
+I_{new}=\neg I_H\land I_M\land I_D.
+\]
+</div>
+
+<p>
+因此，即使 conflict signal 本身对错误 global pseudo-label 有很强诊断能力，它对最终 cache 的影响仍然很有限。
+</p>
+</section>
+
+<section class="card">
+<h2>7. 下一步为什么要做 E4-CANC-v1</h2>
+
+<p>
+E4-CANC-v0 的结果说明 negative suppression 路线比 E2/E3 的 positive admission 路线更稳定，但当前规则过于保守。下一步需要放宽规则，让更多经过诊断验证的 conflict 样本参与 negative suppression。
+</p>
+
+<p>建议 E4-CANC-v1 规则为：</p>
+<div class="formula">
+\[
+I_{neg}^{E4-v1}(x)
+=
+I_H(x)
+\lor
+\left(
+I_D(x)
+\land
+p_g^{(1)}(x)>\tau_p
+\right).
+\]
+</div>
+
+<p>也就是去掉 \(I_M\) 的小 margin 限制，只保留：</p>
+<ul>
+<li>global-local conflict；</li>
+<li>global top-1 不是完全低置信；</li>
+<li>仍然 suppress global predicted class \(\hat y_g\)，不使用 local alternative class 作为 pseudo-label。</li>
+</ul>
+
+<div class="callout good">
+  <b>预期：</b>
+  E4-CANC-v1 会比 v0 使用更多 conflict samples，从而增强 negative suppression 的实际作用。
+</div>
+</section>
+
+<section class="card">
+<h2>8. 论文中应如何表述</h2>
+
+<h3>[Method Motivation]</h3>
+<p class="muted">
+The conservative CANC rule preserves the original entropy-based negative cache and only adds samples that are both globally ambiguous and locally conflicting. This design avoids aggressive false-negative insertion but may under-utilize the diagnostic power of global-local conflict.
+</p>
+
+<h3>[Ablation Analysis]</h3>
+<p class="muted">
+E4-CANC-v0 slightly improves the full-corruption average, indicating that conflict-aware negative suppression is safer than positive cache promotion. However, the newly added negative samples are less than 1% on average, showing that the rule is under-active.
+</p>
+
+<h3>[Next Variant]</h3>
+<p class="muted">
+To strengthen the effect of conflict-aware suppression, E4-CANC-v1 relaxes the boundary constraint and admits samples with reliable global-local conflict and non-trivial global confidence.
+</p>
+</section>
+
+<div class="footer">Generated for MCM-PC project · E4-CANC-v0 explanation · 2026-05-14 13:07:54</div>
+
+</div>
+</body>
+</html>

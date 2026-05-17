@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stage 0 / E0-TPE：基于源码更正后的文本原型增强说明文档</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(','\\)'], ['$', '$']],
+    displayMath: [['\\[','\\]'], ['$$','$$']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --bg:#f5f7fb; --paper:#fff; --ink:#172033; --sub:#5e6b7e; --line:#e2e8f0; --line2:#eef2f7;
+  --green:#147A55; --green2:#EAF7F1; --blue:#2563eb; --blue2:#EFF6FF; --amber:#B45309; --amber2:#FFF7ED;
+  --code:#111827; --shadow:0 20px 55px rgba(23,32,51,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:radial-gradient(circle at 6% 5%, rgba(37,99,235,.10), transparent 30%),
+             radial-gradient(circle at 92% 2%, rgba(20,122,85,.10), transparent 28%),
+             linear-gradient(180deg,#fbfdff 0%,var(--bg) 45%,#eef3f8 100%);
+  color:var(--ink);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","Microsoft YaHei",Arial,sans-serif;
+  line-height:1.72;
+}
+.topbar{max-width:1240px;margin:0 auto;padding:34px 28px 0}
+.hero{
+  background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:28px; box-shadow:var(--shadow);
+  padding:34px 38px; overflow:hidden; position:relative;
+}
+.hero:before{content:"";position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--green),#38bdf8,var(--blue))}
+.badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.badge{display:inline-flex;padding:6px 12px;border-radius:999px;color:var(--green);background:var(--green2);border:1px solid #BDE7D3;font-size:13px;font-weight:800}
+.hero h1{margin:0 0 14px;max-width:1000px;font-size:40px;line-height:1.2;letter-spacing:-.035em}
+.hero p{margin:0;color:var(--sub);max-width:1000px;font-size:17px}
+.info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:24px}
+.info-card{background:#F8FAFC;border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+.info-card strong{display:block;color:#111827;font-size:14px;margin-bottom:3px}
+.info-card span{display:block;color:var(--sub);font-size:13px;line-height:1.45}
+.layout{max-width:1240px;margin:0 auto;padding:26px 28px 78px;display:grid;grid-template-columns:292px minmax(0,1fr);gap:26px}
+.sidebar{
+  position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(16px);border:1px solid var(--line);
+  border-radius:22px;box-shadow:0 14px 38px rgba(23,32,51,.06);padding:18px;
+}
+.sidebar h2{margin:0 0 12px;font-size:16px;color:#111827}
+.toc-item{display:grid;grid-template-columns:34px 1fr;gap:9px;padding:9px 10px;border-radius:13px;color:#344054;text-decoration:none;font-size:14px;line-height:1.35}
+.toc-item:hover{background:var(--blue2);color:#1749c6}
+.toc-item b{color:var(--green);font-size:12px}
+.article{background:var(--paper);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:34px 42px 46px}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:24px}
+.summary-card{border:1px solid var(--line);border-radius:20px;padding:16px 18px;background:linear-gradient(180deg,#fff,#F8FAFC)}
+.summary-card strong{display:block;margin-bottom:6px;color:#111827;font-size:15px}
+.summary-card span{display:block;color:var(--sub);font-size:14px;line-height:1.45}
+h2{
+  margin:42px -42px 20px;padding:26px 42px 18px;border-top:1px solid var(--line2);
+  background:linear-gradient(90deg,#F8FBFF 0%,#FFFFFF 80%);color:#0F172A;font-size:28px;line-height:1.3;letter-spacing:-.025em;
+}
+.section:first-of-type h2{margin-top:12px;border-top:0}
+h3{margin:30px 0 12px;color:#126b4d;font-size:21px;line-height:1.36}
+p{margin:12px 0;color:#243044;font-size:16.4px}
+ul,ol{margin:10px 0 18px 24px;padding:0}
+li{margin:6px 0;color:#243044;font-size:16.1px}
+code{
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;background:#F1F5F9;color:#9A3412;
+  border:1px solid #E2E8F0;padding:2px 6px;border-radius:7px;font-size:.92em;
+}
+.statement{margin:14px 0 20px;padding:16px 18px;border-radius:18px;background:linear-gradient(180deg,#F0FDF4,#FFFFFF);border:1px solid #BBF7D0;color:#14532D;font-weight:750}
+.statement-multi p{margin:6px 0;color:#14532D;font-weight:650}
+.code-card{margin:16px 0 22px;border-radius:18px;overflow:hidden;background:var(--code);border:1px solid #1f2937;box-shadow:0 16px 30px rgba(17,24,39,.12)}
+.code-head{display:flex;justify-content:space-between;align-items:center;background:#0B1120;border-bottom:1px solid #1F2937;padding:9px 14px}
+.code-head span{color:#93C5FD;font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+pre{margin:0;padding:17px 18px;overflow:auto;color:#E5E7EB;font-size:14px}
+pre code{background:transparent;border:0;color:inherit;padding:0;border-radius:0}
+.table-wrap{margin:18px 0 24px;border:1px solid var(--line);border-radius:18px;overflow:auto}
+table{width:100%;min-width:680px;border-collapse:collapse;background:#fff}
+th,td{padding:12px 14px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+th{background:#F8FAFC;color:#111827;font-size:14px;font-weight:850}
+td{color:#344054;font-size:14.7px}
+tr:last-child td{border-bottom:0}
+.math-block{
+  margin:16px 0 22px;padding:18px 20px;border-radius:18px;background:#F8FBFF;border:1px solid #DCEBFF;
+  overflow:auto;color:#111827;text-align:center;
+}
+.callout{display:grid;grid-template-columns:36px 1fr;gap:12px;margin:18px 0 22px;padding:16px 18px;background:var(--amber2);border:1px solid #FED7AA;border-radius:18px}
+.callout-icon{width:28px;height:28px;border-radius:50%;background:#FB923C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
+.callout-title{color:#9A3412;font-weight:850;margin-bottom:3px}
+.callout p{margin:6px 0;color:#7C2D12}
+.footer{max-width:1240px;margin:0 auto;padding:0 28px 46px;color:var(--sub);font-size:14px}
+@media(max-width:980px){
+  .topbar{padding:18px 16px 0}.hero{padding:28px 22px}.hero h1{font-size:30px}.info-grid,.summary{grid-template-columns:1fr}
+  .layout{grid-template-columns:1fr;padding:18px 16px 58px}.sidebar{position:relative;top:auto;max-height:none}.article{padding:26px 22px}
+  h2{margin-left:-22px;margin-right:-22px;padding-left:22px;padding-right:22px;font-size:24px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <section class="hero">
+    <div class="badges">
+      <span class="badge">MCM-PC</span><span class="badge">Stage 0</span><span class="badge">E0-TPE</span><span class="badge">源码更正版</span>
+    </div>
+    <h1>基于源码更正后的文本原型增强说明文档</h1>
+    <p>本报告修正此前关于 Point-Cache 文本模板的误判：实际实验实现使用 64 个模板，并对编码后的文本特征进行归一化、平均、再归一化。因此，E0-TPE-v1 的新意不是“从单模板到多模板”，而是在 Point-Cache 已有 64 模板文本原型基础上进行 vMF 收缩式文本原型构造。</p>
+    <div class="info-grid">
+      <div class="info-card"><strong>文档类型</strong><span>方法说明、数学推导、实验路线</span></div>
+      <div class="info-card"><strong>关键依据</strong><span>论文主文、BayesMM 思想、Point-Cache 源码实现</span></div>
+      <div class="info-card"><strong>术语统一</strong><span>text prototype 统一称为“文本原型”</span></div>
+      <div class="info-card"><strong>生成时间</strong><span>2026-05-15 10:25:22</span></div>
+    </div>
+  </section>
+</header>
+<main class="layout">
+  <aside class="sidebar"><h2>目录</h2><a class="toc-item" href="#0-关键更正结论"><b>01</b><span>0. 关键更正结论</span></a>
+<a class="toc-item" href="#1-E0-TPE-的实验名字更正"><b>02</b><span>1. E0-TPE 的实验名字更正</span></a>
+<a class="toc-item" href="#2-为什么必须结合源码而不是只看主文"><b>03</b><span>2. 为什么必须结合源码而不是只看主文？</span></a>
+<a class="toc-item" href="#3-Point-Cache-当前文本原型构造的严格数学表达"><b>04</b><span>3. Point-Cache 当前文本原型构造的严格数学表达</span></a>
+<a class="toc-item" href="#4-这意味着-E0-TPE-v0-要取消或改名"><b>05</b><span>4. 这意味着 E0-TPE-v0 要取消或改名</span></a>
+<a class="toc-item" href="#5-E0-TPE-v1-基于-Point-Cache-64-模板的-vMF-收缩式文本原型"><b>06</b><span>5. E0-TPE-v1：基于 Point-Cache 64 模板的 vMF 收缩式文本原型</span></a>
+<a class="toc-item" href="#6-E0-TPE-v1-与-Point-Cache-baseline-的数学关系"><b>07</b><span>6. E0-TPE-v1 与 Point-Cache baseline 的数学关系</span></a>
+<a class="toc-item" href="#7-MAP-形式与闭式解证明"><b>08</b><span>7. MAP 形式与闭式解证明</span></a>
+<a class="toc-item" href="#8-这不是标准-SLERP"><b>09</b><span>8. 这不是标准 SLERP</span></a>
+<a class="toc-item" href="#9-与-BayesMM-的关系"><b>10</b><span>9. 与 BayesMM 的关系</span></a>
+<a class="toc-item" href="#10-实验路线更正"><b>11</b><span>10. 实验路线更正</span></a>
+<a class="toc-item" href="#11-代码实现要求"><b>12</b><span>11. 代码实现要求</span></a>
+<a class="toc-item" href="#12-文档中需要删除或改写的旧说法"><b>13</b><span>12. 文档中需要删除或改写的旧说法</span></a>
+<a class="toc-item" href="#13-更正后的最终结论"><b>14</b><span>13. 更正后的最终结论</span></a></aside>
+  <article class="article">
+<div class="summary">
+  <div class="summary-card"><strong>核心更正</strong><span>Point-Cache 源码实际使用 64 个模板，不是单模板。</span></div>
+  <div class="summary-card"><strong>实验定位</strong><span>E0-TPE-v1 是在 64 模板文本原型上做 vMF 收缩。</span></div>
+  <div class="summary-card"><strong>下一步</strong><span>先做 E0-TPE-DIAG，再做 zero-shot 与 E1-BASE 对比。</span></div>
+</div>
+<p>生成时间：2026-05-15 10:25:22</p><div class="callout"><div class="callout-icon">!</div><div><div class="callout-title">关键说明</div><p>本文档是对原 <code>stage0_tpe_spherical_text_anchor.md</code> 和 <code>stage0_tpe_spherical_text_anchor_report.html</code> 的更正版。</p><p>更正重点：后续分析不能只看论文主文中的流程示意，还必须结合 Point-Cache 源码实现。根据源码，Point-Cache 实验实现并不是只使用一个固定文本模板，而是默认使用 <code>datasets/templates.py</code> 中的 64 个手工文本模板；每个模板先经过 CLIP/SLIP 文本编码器，得到该类别在该模板下的文本特征，再对这些文本特征进行归一化、平均、再归一化，得到最终每个类别的文本原型。</p></div></div><p>---</p><section class="section"><h2 id="0-关键更正结论"><span>0. 关键更正结论</span></h2><h3>0.1 之前需要更正的地方</h3><p>原文档中曾经把 Point-Cache 的文本端描述为：</p><div class="statement"><span>原始 Point-Cache 通常只用一个固定模板，例如 “a point cloud object of a {class}”。</span></div><p>这个说法不准确。</p><p>更准确的结论是：</p><div class="statement statement-multi"><p>Point-Cache 主文中出现的单模板表达主要是符号说明和流程示意；</p><p>但源码中的实际实验实现使用 64 个手工文本模板。</p></div><p>也就是说，Point-Cache baseline 的文本原型已经不是 single-prompt text prototype，而是：</p><div class="statement"><span>64-template normalized mean text prototype</span></div><p>中文统一称为：</p><div class="statement"><span>64 模板归一化平均文本原型</span></div><h3>0.2 源码依据</h3><p>在 Point-Cache 源码中，<code>datasets/templates.py</code> 定义了 <code>text_prompts</code>，长度为 64。典型模板包括：</p><div class="code-card"><div class="code-head"><span>python</span></div><pre><code>text_prompts = [
+    &quot;a point cloud model of {}.&quot;,
+    &quot;There is a {} in the scene.&quot;,
+    &quot;There is the {} in the scene.&quot;,
+    &quot;a photo of a {} in the scene.&quot;,
+    ...
+    &quot;a painting of a {}.&quot;
+]</code></pre></div><p>在 <code>utils/utils.py</code> 的 <code>clip_classifier(args, classnames, template, clip_model)</code> 中，实际流程是：</p><div class="code-card"><div class="code-head"><span>python</span></div><pre><code>for classname in classnames:
+    classname = classname.replace(&#x27;_&#x27;, &#x27; &#x27;)
+    texts = [t.format(classname) for t in template]
+
+    if args.lm3d == &#x27;uni3d&#x27; or args.lm3d == &#x27;ulip&#x27;:
+        texts = clip.tokenize(texts).cuda()
+    elif args.lm3d == &#x27;openshape&#x27;:
+        texts = open_clip.tokenizer.tokenize(texts).cuda()
+
+    class_embeddings = clip_model.encode_text(texts)
+    class_embeddings /= class_embeddings.norm(dim=-1, keepdim=True)
+
+    class_embedding = class_embeddings.mean(dim=0)
+    class_embedding /= class_embedding.norm()
+
+    clip_weights.append(class_embedding)
+
+clip_weights = torch.stack(clip_weights, dim=1).cuda()</code></pre></div><p>因此，真实流程是：</p><div class="statement statement-multi"><p>64 个文本模板</p><p>→ 每个模板填入类别名</p><p>→ tokenize</p><p>→ CLIP/SLIP text encoder</p><p>→ 得到 64 个文本特征向量</p><p>→ 每个文本特征向量 L2 归一化</p><p>→ 对 64 个单位文本特征向量求平均</p><p>→ 再 L2 归一化</p><p>→ 得到该类别最终文本原型</p></div><p>---</p><section class="section"><h2 id="1-E0-TPE-的实验名字更正"><span>1. E0-TPE 的实验名字更正</span></h2><h3>1.1 E0-TPE 是什么？</h3><p><code>E0-TPE</code> 的完整英文是：</p><div class="statement"><span>Experiment 0 - Text Prototype Enhancement</span></div><p>中文统一称为：</p><div class="statement"><span>第 0 个实验：文本原型增强</span></div><p>其中：</p><div class="table-wrap"><table><tr><th>缩写</th><th>英文</th><th>中文</th></tr><tr><td>E0</td><td>Experiment 0</td><td>第 0 个实验</td></tr><tr><td>T</td><td>Text</td><td>文本</td></tr><tr><td>P</td><td>Prototype</td><td>原型</td></tr><tr><td>E</td><td>Enhancement</td><td>增强</td></tr></table></div><h3>1.2 为什么叫 E0？</h3><p>因为它在逻辑上位于所有 cache 实验之前。</p><p>此前路线是：</p><div class="statement"><span>E1-BASE → E2-EMR → E3-GLC → E4-CANC</span></div><p>这些实验都默认了一个前提：</p><div class="statement"><span>文本原型已经足够可靠。</span></div><p>但 Point-Cache 的 zero-shot prediction、pseudo-label、entropy、margin、cache update 都依赖文本原型。如果文本原型存在问题，后续所有 cache 规则都会被影响。</p><p>因此，文本端应该补成更上游的阶段：</p><div class="statement"><span>E0-TPE → E1-BASE → E2-EMR → E3-GLC → E4-CANC → E5-MCM</span></div><h3>1.3 更正后的 E0-TPE 子实验命名</h3><p>由于 Point-Cache baseline 已经使用 64 个模板，所以不能再把“多模板平均”当成新方法。</p><p>更正后的实验命名应为：</p><div class="table-wrap"><table><tr><th>实验编号</th><th>英文名称</th><th>中文名称</th><th>是否已被 Point-Cache baseline 包含</th></tr><tr><td>E0-TPE-BASE</td><td>Point-Cache 64-template Normalized Mean Text Prototype</td><td>Point-Cache 64 模板归一化平均文本原型</td><td>是</td></tr><tr><td>E0-TPE-DIAG</td><td>Text Prototype Dispersion Diagnosis</td><td>文本原型离散度诊断</td><td>否</td></tr><tr><td>E0-TPE-v1</td><td>vMF-Shrunk Text Prototype over Point-Cache 64 Templates</td><td>基于 Point-Cache 64 模板的 vMF 收缩式文本原型</td><td>否</td></tr><tr><td>E0-TPE-v2</td><td>DeepSeek Paraphrase Expansion with vMF-Shrunk Text Prototype</td><td>DeepSeek 改写扩充 + vMF 收缩式文本原型</td><td>否，后续再做</td></tr></table></div><p>---</p><section class="section"><h2 id="2-为什么必须结合源码而不是只看主文"><span>2. 为什么必须结合源码而不是只看主文？</span></h2><h3>2.1 主文中的单模板是符号示意</h3><p>Point-Cache 主文为了说明 zero-shot inference，会写类似：</p><div class="statement"><span>a point cloud object of a {class}</span></div><p>这类表达主要是为了公式和流程图简洁。它说明文本输入的形式，但不等价于实际实验中只用了一个模板。</p><p>因此，不能仅根据主文示意推断实际实现是 single prompt。</p><h3>2.2 源码才决定实验真实设置</h3><p>实际实验跑的是代码，不是论文里的简化符号。源码中 <code>clip_classifier</code> 明确对 <code>template</code> 中的所有模板逐个编码，然后平均。因此，我们后续做实验必须以源码为准。</p><h3>2.3 后续工作规则</h3><p>后续分析必须遵守：</p><div class="statement statement-multi"><p>先看论文主文理解方法目标；</p><p>再看 Supplement / Appendix 理解实验细节；</p><p>最后看源码确认真实实现。</p></div><p>尤其是以下内容不能只看论文：</p><ol><li>文本模板数量；</li><li>文本特征是否先归一化；</li><li>平均后是否再归一化；</li><li>cache update 的真实顺序；</li><li>local cache 是否独立更新；</li><li>summary 里 corruption suffix 的真实映射；</li><li>runner 是否使用了同一个 <code>clip_classifier</code>。</li></ol><p>---</p><section class="section"><h2 id="3-Point-Cache-当前文本原型构造的严格数学表达"><span>3. Point-Cache 当前文本原型构造的严格数学表达</span></h2><h3>3.1 符号说明</h3><div class="table-wrap"><table><tr><th>符号</th><th>含义</th></tr><tr><td>\(c\)</td><td>类别编号</td></tr><tr><td>\(C\)</td><td>类别总数</td></tr><tr><td>\(m\)</td><td>文本模板编号</td></tr><tr><td>\(M\)</td><td>文本模板数量。Point-Cache 默认 \(M=64\)</td></tr><tr><td>\(t_m(\cdot)\)</td><td>第 \(m\) 个文本模板</td></tr><tr><td>\(p_c^{(m)}\)</td><td>将类别名填入第 \(m\) 个模板后得到的完整 prompt</td></tr><tr><td>\(\mathcal E_{text}\)</td><td>CLIP/SLIP/OpenCLIP 文本编码器</td></tr><tr><td>\(\mathbf u_c^{(m)}\)</td><td>第 \(m\) 个 prompt 编码后的原始文本特征</td></tr><tr><td>\(\mathbf z_c^{(m)}\)</td><td>第 \(m\) 个 prompt 的 L2 归一化文本特征</td></tr><tr><td>\(\mathbf m_c\)</td><td>Point-Cache 默认的 64 模板平均方向</td></tr><tr><td>\(\mathbf t_c^{PC}\)</td><td>Point-Cache 默认最终文本原型</td></tr><tr><td>\(\mathbf a_c^T\)</td><td>E0-TPE-v1 生成的新文本原型</td></tr></table></div><h3>3.2 从模板字符串到 prompt</h3><p>Point-Cache 不是直接对类别名编码，而是先构造模板化文本。</p><p>对类别 \(c\)，第 \(m\) 个模板是：</p><div class="math-block">\[
+t_m(\cdot)
+\]</div><p>填入类别名后得到：</p><div class="math-block">\[
+p_c^{(m)} = t_m(c)
+\]</div><p>例如类别为 <code>chair</code> 时：</p><div class="statement statement-multi"><p>a point cloud model of chair.</p><p>There is a chair in the scene.</p><p>a photo of a chair.</p><p>a toy chair.</p><p>...</p></div><h3>3.3 每个 prompt 先经过文本编码器</h3><p>每个 prompt 字符串必须先经过文本编码器：</p><div class="math-block">\[
+\mathbf u_c^{(m)}
+=
+\mathcal E_{text}(p_c^{(m)})
+\in \mathbb R^d
+\]</div><p>这一步非常关键。</p><p>E0-TPE 不是对文本字符串做数学处理，而是对文本编码器输出的特征向量做数学处理。</p><h3>3.4 每个文本特征先 L2 归一化</h3><p>源码中：</p><div class="code-card"><div class="code-head"><span>python</span></div><pre><code>class_embeddings /= class_embeddings.norm(dim=-1, keepdim=True)</code></pre></div><p>数学上是：</p><div class="math-block">\[
+\mathbf z_c^{(m)}
+=
+\frac{\mathbf u_c^{(m)}}{\|\mathbf u_c^{(m)}\|_2}
+\]</div><p>因此：</p><div class="math-block">\[
+\|\mathbf z_c^{(m)}\|_2=1
+\]</div><p>所有模板特征都位于单位超球面：</p><div class="math-block">\[
+\mathbf z_c^{(m)}\in \mathbb S^{d-1}
+\]</div><h3>3.5 Point-Cache 默认 64 模板归一化平均文本原型</h3><p>源码中：</p><div class="code-card"><div class="code-head"><span>python</span></div><pre><code>class_embedding = class_embeddings.mean(dim=0)
+class_embedding /= class_embedding.norm()</code></pre></div><p>数学上是：</p><div class="math-block">\[
+\bar{\mathbf z}_c
+=
+\frac{1}{M}
+\sum_{m=1}^{M}
+\mathbf z_c^{(m)}
+\]</div><p>然后：</p><div class="math-block">\[
+\mathbf t_c^{PC}
+=
+\frac{\bar{\mathbf z}_c}{\|\bar{\mathbf z}_c\|_2}
+=
+\frac{\sum_{m=1}^{M}\mathbf z_c^{(m)}}{
+\left\|\sum_{m=1}^{M}\mathbf z_c^{(m)}\right\|_2
+}
+\]</div><p>也就是：</p><div class="math-block">\[
+\mathbf t_c^{PC}=\mathbf m_c
+\]</div><p>其中：</p><div class="math-block">\[
+\mathbf m_c
+=
+\frac{\sum_{m=1}^{M}\mathbf z_c^{(m)}}{
+\left\|\sum_{m=1}^{M}\mathbf z_c^{(m)}\right\|_2
+}
+\]</div><p>所以，Point-Cache baseline 已经在做：</p><div class="statement"><span>normalized mean direction on the unit hypersphere</span></div><p>中文：</p><div class="statement"><span>单位超球面上的归一化平均方向</span></div><p>---</p><section class="section"><h2 id="4-这意味着-E0-TPE-v0-要取消或改名"><span>4. 这意味着 E0-TPE-v0 要取消或改名</span></h2><h3>4.1 原 E0-TPE-v0 的问题</h3><p>原文档把 E0-TPE-v0 定义为：</p><div class="statement"><span>固定模板 prompt ensemble</span></div><p>但源码说明 Point-Cache baseline 已经做了固定模板 prompt ensemble，而且用了 64 个模板。</p><p>因此，原来的 E0-TPE-v0 不能作为新实验。</p><h3>4.2 更正后的说法</h3><p>应改为：</p><div class="statement"><span>E0-TPE-BASE = Point-Cache default 64-template normalized mean text prototype.</span></div><p>中文：</p><div class="statement"><span>E0-TPE-BASE = Point-Cache 默认 64 模板归一化平均文本原型。</span></div><p>它不是新方法，而是 baseline 的文本端实现。</p><h3>4.3 E0-TPE-v1 的真正新意</h3><p>E0-TPE-v1 不再是“多模板平均”，而是：</p><div class="statement statement-multi"><p>在同样 64 个模板、同样文本编码器、同样归一化特征的基础上，</p><p>进一步利用 64 个模板特征的方向一致性，构造类别自适应的 vMF 收缩式文本原型。</p></div><p>也就是说，变量控制非常干净：</p><div class="table-wrap"><table><tr><th>项目</th><th>E0-TPE-BASE</th><th>E0-TPE-v1</th></tr><tr><td>文本模板</td><td>同一组 64 templates</td><td>同一组 64 templates</td></tr><tr><td>文本编码器</td><td>相同</td><td>相同</td></tr><tr><td>每个模板特征归一化</td><td>是</td><td>是</td></tr><tr><td>是否使用 64 个模板特征</td><td>是</td><td>是</td></tr><tr><td>最终聚合方式</td><td>归一化平均</td><td>vMF 收缩式聚合</td></tr><tr><td>是否改 cache 规则</td><td>否</td><td>否</td></tr><tr><td>是否引入 DeepSeek</td><td>否</td><td>否</td></tr></table></div><p>---</p><section class="section"><h2 id="5-E0-TPE-v1-基于-Point-Cache-64-模板的-vMF-收缩式文本原型"><span>5. E0-TPE-v1：基于 Point-Cache 64 模板的 vMF 收缩式文本原型</span></h2><h3>5.1 核心问题</h3><p>Point-Cache 默认方法对所有类别都同等相信 64 个模板的平均方向：</p><div class="math-block">\[
+\mathbf t_c^{PC}=\mathbf m_c
+\]</div><p>但不同类别的 64 个模板特征可能有不同的方向一致性。</p><p>例如：</p><ul><li>类别 A 的 64 个模板特征方向高度一致；</li><li>类别 B 的 64 个模板特征方向分散；</li><li>类别 C 的某些模板可能产生语义偏移。</li></ul><p>Point-Cache 默认方法没有显式区分这些情况。</p><p>E0-TPE-v1 的核心目标是：</p><div class="statement statement-multi"><p>如果 64 个模板特征方向一致，则继续信任平均方向；</p><p>如果方向分散，则将文本原型部分收缩回基础 prompt 的方向。</p></div><h3>5.2 平均合向量长度</h3><p>定义：</p><div class="math-block">\[
+\bar R_c
+=
+\left\|
+\frac{1}{M}
+\sum_{m=1}^{M}
+\mathbf z_c^{(m)}
+\right\|_2
+\]</div><p>由于每个 \(\mathbf z_c^{(m)}\) 都是单位向量，有：</p><div class="math-block">\[
+0\le \bar R_c\le 1
+\]</div><p>解释：</p><div class="table-wrap"><table><tr><th>\(\bar R_c\)</th><th>含义</th></tr><tr><td>接近 1</td><td>64 个模板特征方向高度一致</td></tr><tr><td>中等</td><td>模板之间存在一定语义分散</td></tr><tr><td>接近 0</td><td>模板方向高度分散，平均方向不稳定</td></tr></table></div><p>证明：</p><p>由三角不等式：</p><div class="math-block">\[
+\left\|\sum_{m=1}^{M}\mathbf z_c^{(m)}\right\|_2
+\le
+\sum_{m=1}^{M}\|\mathbf z_c^{(m)}\|_2
+=
+M
+\]</div><p>所以：</p><div class="math-block">\[
+\bar R_c
+=
+\frac{1}{M}
+\left\|
+\sum_{m=1}^{M}\mathbf z_c^{(m)}
+\right\|_2
+\le 1
+\]</div><p>又因为范数非负：</p><div class="math-block">\[
+0\le \bar R_c\le 1
+\]</div><h3>5.3 vMF 浓度估计</h3><p>vMF 分布，即 von Mises-Fisher distribution，中文可写作冯·米塞斯-费舍尔分布。它是单位超球面上的方向分布。</p><p>其密度为：</p><div class="math-block">\[
+p(\mathbf z;\boldsymbol\mu,\kappa)
+=
+C_d(\kappa)\exp(\kappa\boldsymbol\mu^\top\mathbf z)
+\]</div><p>其中：</p><div class="table-wrap"><table><tr><th>符号</th><th>含义</th></tr><tr><td>\(\mathbf z\)</td><td>单位超球面上的随机向量</td></tr><tr><td>\(\boldsymbol\mu\)</td><td>均值方向，\(\</td><td>\boldsymbol\mu\</td><td>_2=1\)</td></tr><tr><td>\(\kappa\)</td><td>浓度参数</td></tr><tr><td>\(C_d(\kappa)\)</td><td>归一化常数</td></tr><tr><td>\(d\)</td><td>特征维度</td></tr></table></div><p>直观解释：</p><ul><li>\(\kappa=0\)：接近球面均匀分布；</li><li>\(\kappa\) 越大：样本越集中在 \(\boldsymbol\mu\) 附近；</li><li>\(\kappa\to\infty\)：所有样本几乎集中到一个方向。</li></ul><p>根据平均合向量长度，可以近似估计浓度：</p><div class="math-block">\[
+\hat\kappa_c
+\approx
+\frac{\bar R_c(d-\bar R_c^2)}{1-\bar R_c^2}
+\]</div><p>实现时必须加入数值稳定：</p><div class="math-block">\[
+\bar R_c \leftarrow \operatorname{clip}(\bar R_c,\epsilon,1-\epsilon)
+\]</div><p>否则当 \(\bar R_c\to 1\) 时，分母 \(1-\bar R_c^2\to0\)，会出现数值爆炸。</p><h3>5.4 基础 prompt 的选择</h3><p>由于 Point-Cache 64 个模板中第一个模板是：</p><div class="statement"><span>a point cloud model of {}.</span></div><p>它比大量 “a photo of ...” 模板更符合点云任务，因此可以将它作为基础 prompt：</p><div class="math-block">\[
+\mathbf z_c^{base}=\mathbf z_c^{(1)}
+\]</div><p>注意这里的基础 prompt 也必须经过同一个文本编码器，并且经过 L2 归一化。</p><p>也就是说：</p><div class="statement"><span>基础 prompt 不是原始字符串，而是第一个模板编码后的单位文本特征。</span></div><h3>5.5 自适应收缩权重</h3><p>定义：</p><div class="math-block">\[
+w_c
+=
+\frac{\hat\kappa_c}{\hat\kappa_c+\kappa_0}
+\]</div><p>其中：</p><ul><li>\(w_c\in[0,1]\)；</li><li>\(\hat\kappa_c\) 越大，说明 64 个模板越一致，越相信平均方向 \(\mathbf m_c\)；</li><li>\(\hat\kappa_c\) 越小，说明 64 个模板越分散，越收缩回基础 prompt \(\mathbf z_c^{base}\)；</li><li>\(\kappa_0\) 是基础 prompt 的先验强度。</li></ul><p>不要直接固定：</p><div class="math-block">\[
+\kappa_0=2
+\]</div><p>因为在高维特征空间中 \(\hat\kappa_c\) 可能非常大。更稳妥的做法是按所有类别的 \(\hat\kappa_c\) 标定：</p><div class="math-block">\[
+\kappa_0
+=
+\frac{\rho}{1-\rho}
+\operatorname{median}_{c}(\hat\kappa_c)
+\]</div><p>其中 \(\rho\) 表示希望在“中等模板一致性类别”上基础 prompt 所占的平均权重。</p><p>例如：</p><div class="math-block">\[
+\rho=0.3
+\]</div><p>表示希望基础 prompt 在中位类别上约占 30%。</p><h3>5.6 最终 vMF 收缩式文本原型</h3><p>最终文本原型定义为：</p><div class="math-block">\[
+\mathbf a_c^T
+=
+\frac{
+(1-w_c)\mathbf z_c^{base}
++
+w_c\mathbf m_c
+}{
+\left\|
+(1-w_c)\mathbf z_c^{base}
++
+w_c\mathbf m_c
+\right\|_2
+}
+\]</div><p>其中：</p><ul><li>\(\mathbf m_c\)：Point-Cache 默认 64 模板平均方向；</li><li>\(\mathbf z_c^{base}\)：基础 prompt 的文本特征；</li><li>\(w_c\)：类别自适应权重；</li><li>\(\mathbf a_c^T\)：E0-TPE-v1 生成的新文本原型。</li></ul><p>---</p><section class="section"><h2 id="6-E0-TPE-v1-与-Point-Cache-baseline-的数学关系"><span>6. E0-TPE-v1 与 Point-Cache baseline 的数学关系</span></h2><p>Point-Cache baseline：</p><div class="math-block">\[
+\mathbf t_c^{PC}=\mathbf m_c
+\]</div><p>E0-TPE-v1：</p><div class="math-block">\[
+\mathbf a_c^T
+=
+\operatorname{Normalize}
+\left(
+(1-w_c)\mathbf z_c^{base}
++
+w_c\mathbf m_c
+\right)
+\]</div><p>当：</p><div class="math-block">\[
+w_c=1
+\]</div><p>时：</p><div class="math-block">\[
+\mathbf a_c^T
+=
+\mathbf m_c
+=
+\mathbf t_c^{PC}
+\]</div><p>所以 Point-Cache baseline 是 E0-TPE-v1 的一个特殊情况。</p><p>当：</p><div class="math-block">\[
+0&lt;w_c&lt;1
+\]</div><p>时，E0-TPE-v1 在基础 prompt 和 64 模板平均方向之间做类别自适应收缩。</p><p>当：</p><div class="math-block">\[
+w_c=0
+\]</div><p>时：</p><div class="math-block">\[
+\mathbf a_c^T=\mathbf z_c^{base}
+\]</div><p>也就是只使用基础 prompt。</p><p>因此，E0-TPE-v1 不是推翻 Point-Cache 的多模板平均，而是在它之上增加了：</p><div class="statement"><span>类别级文本模板一致性建模。</span></div><p>---</p><section class="section"><h2 id="7-MAP-形式与闭式解证明"><span>7. MAP 形式与闭式解证明</span></h2><h3>7.1 后验目标</h3><p>将基础 prompt 看作先验方向，将 64 模板平均方向看作数据方向，可以构造：</p><div class="math-block">\[
+\mathbf a_c^T
+=
+\arg\max_{\mathbf z\in\mathbb S^{d-1}}
+\left[
+\kappa_0(\mathbf z_c^{base})^\top\mathbf z
++
+\hat\kappa_c\mathbf m_c^\top\mathbf z
+\right]
+\]</div><p>令：</p><div class="math-block">\[
+\mathbf q_c
+=
+\kappa_0\mathbf z_c^{base}
++
+\hat\kappa_c\mathbf m_c
+\]</div><p>则目标变为：</p><div class="math-block">\[
+\mathbf a_c^T
+=
+\arg\max_{\|\mathbf z\|_2=1}
+\mathbf q_c^\top\mathbf z
+\]</div><h3>7.2 Cauchy-Schwarz 证明</h3><p>根据 Cauchy-Schwarz 不等式：</p><div class="math-block">\[
+\mathbf q_c^\top\mathbf z
+\le
+\|\mathbf q_c\|_2\|\mathbf z\|_2
+\]</div><p>因为：</p><div class="math-block">\[
+\|\mathbf z\|_2=1
+\]</div><p>所以：</p><div class="math-block">\[
+\mathbf q_c^\top\mathbf z
+\le
+\|\mathbf q_c\|_2
+\]</div><p>当：</p><div class="math-block">\[
+\mathbf z
+=
+\frac{\mathbf q_c}{\|\mathbf q_c\|_2}
+\]</div><p>时取等号。</p><p>因此闭式解为：</p><div class="math-block">\[
+\mathbf a_c^T
+=
+\frac{
+\kappa_0\mathbf z_c^{base}
++
+\hat\kappa_c\mathbf m_c
+}{
+\left\|
+\kappa_0\mathbf z_c^{base}
++
+\hat\kappa_c\mathbf m_c
+\right\|_2
+}
+\]</div><p>等价写成权重形式就是：</p><div class="math-block">\[
+\mathbf a_c^T
+=
+\frac{
+(1-w_c)\mathbf z_c^{base}
++
+w_c\mathbf m_c
+}{
+\left\|
+(1-w_c)\mathbf z_c^{base}
++
+w_c\mathbf m_c
+\right\|_2
+}
+\]</div><h3>7.3 为什么输出仍在单位超球面上？</h3><p>因为最后做了 L2 归一化：</p><div class="math-block">\[
+\|\mathbf a_c^T\|_2
+=
+\left\|
+\frac{\mathbf q_c}{\|\mathbf q_c\|_2}
+\right\|_2
+=
+1
+\]</div><p>所以 E0-TPE-v1 不会改变类别间文本原型的模长，不会引入模长偏置。</p><p>---</p><section class="section"><h2 id="8-这不是标准-SLERP"><span>8. 这不是标准 SLERP</span></h2><p>之前文档中把该操作写成 SLERP 不够严谨。</p><p>更准确表述是：</p><div class="statement"><span>它是归一化球面加权均值，也可以解释为 vMF 后验自然参数方向的 MAP 解。</span></div><p>标准 SLERP 公式是：</p><div class="math-block">\[
+\operatorname{slerp}(\mathbf u,\mathbf v;t)
+=
+\frac{\sin((1-t)\theta)}{\sin\theta}\mathbf u
++
+\frac{\sin(t\theta)}{\sin\theta}\mathbf v
+\]</div><p>其中：</p><div class="math-block">\[
+\theta=\arccos(\mathbf u^\top\mathbf v)
+\]</div><p>而 E0-TPE-v1 使用的是：</p><div class="math-block">\[
+\frac{(1-w)\mathbf u+w\mathbf v}{\|(1-w)\mathbf u+w\mathbf v\|_2}
+\]</div><p>所以不要写“严格 SLERP”，应写：</p><div class="statement"><span>normalized spherical weighted mean, related to SLERP but not identical to standard SLERP.</span></div><p>中文：</p><div class="statement"><span>归一化球面加权均值，与 SLERP 有关，但不是标准 SLERP。</span></div><p>---</p><section class="section"><h2 id="9-与-BayesMM-的关系"><span>9. 与 BayesMM 的关系</span></h2><p>BayesMM 的思想对我们有启发：它不是只用固定文本原型，而是把文本 prompt 扩展成多个 paraphrases，并用这些 embeddings 建立 textual distribution，捕捉 prompt variants 的语义多样性。</p><p>但 BayesMM 使用的是欧氏 Gaussian textual distribution。</p><p>我们的 E0-TPE-v1 只借鉴其核心思想：</p><div class="statement"><span>多个文本表达可以刻画文本原型的不确定性。</span></div><p>但不直接照搬 Gaussian 建模，而是结合 Point-Cache / CLIP 的余弦推理几何，在单位超球面上建模。</p><p>对比：</p><div class="table-wrap"><table><tr><th>项目</th><th>BayesMM</th><th>E0-TPE-v1</th></tr><tr><td>输入</td><td>LLM paraphrases</td><td>Point-Cache 已有 64 templates</td></tr><tr><td>处理对象</td><td>编码后的文本 embeddings</td><td>编码后的文本 embeddings</td></tr><tr><td>分布空间</td><td>欧氏空间 \(\mathbb R^d\)</td><td>单位超球面 \(\mathbb S^{d-1}\)</td></tr><tr><td>分布假设</td><td>Gaussian</td><td>vMF / 方向统计</td></tr><tr><td>新增变量</td><td>textual covariance</td><td>平均合向量长度 \(\bar R_c\)、浓度 \(\hat\kappa_c\)</td></tr><tr><td>输出</td><td>MAP textual prototype</td><td>vMF 收缩式文本原型</td></tr><tr><td>是否改 cache</td><td>是完整分布学习框架</td><td>初期不改 cache，只替换文本原型</td></tr></table></div><p>---</p><section class="section"><h2 id="10-实验路线更正"><span>10. 实验路线更正</span></h2><h3>10.1 不再做“固定模板多模板平均”作为新实验</h3><p>因为 baseline 已经做了。</p><h3>10.2 先做 E0-TPE-DIAG</h3><p>目的：</p><div class="statement"><span>不改推理，只分析 64 个模板 embedding 的类别级分散程度。</span></div><p>输出指标：</p><div class="table-wrap"><table><tr><th>指标</th><th>含义</th></tr><tr><td>\(\bar R_c\)</td><td>类别 c 的 64 模板方向一致性</td></tr><tr><td>\(\hat\kappa_c\)</td><td>类别 c 的 vMF 浓度</td></tr><tr><td>\(\angle(\mathbf z_c^{base},\mathbf m_c)\)</td><td>基础 prompt 与 64 模板平均方向的夹角</td></tr><tr><td>nearest text prototype</td><td>文本原型之间最相近的类别</td></tr><tr><td>inter-class cosine margin</td><td>类别间文本原型间隔</td></tr></table></div><p>先做诊断可以判断：</p><div class="statement statement-multi"><p>64 模板是否已经高度一致；</p><p>vMF 收缩是否可能产生足够大的变化。</p></div><p>如果所有类别 \(\bar R_c\) 都接近 1，且 \(\mathbf z_c^{base}\) 与 \(\mathbf m_c\) 夹角很小，那么 vMF 收缩可能几乎不改变结果。</p><p>如果部分类别 \(\bar R_c\) 明显低，说明 E0-TPE-v1 有发挥空间。</p><h3>10.3 再做 E0-TPE-v1-ZS</h3><p>只替换文本原型，不使用 cache。</p><p>对比：</p><div class="table-wrap"><table><tr><th>实验</th><th>文本原型</th><th>cache</th></tr><tr><td>ZS-BASE</td><td>Point-Cache 64 模板归一化平均文本原型</td><td>否</td></tr><tr><td>E0-TPE-v1-ZS</td><td>vMF 收缩式文本原型</td><td>否</td></tr></table></div><p>观察：</p><ul><li>zero-shot accuracy；</li><li>entropy；</li><li>top-1/top-2 margin；</li><li>class-wise accuracy；</li><li>prediction changed rate；</li><li>changed-and-correct rate；</li><li>changed-and-wrong rate。</li></ul><h3>10.4 最后做 E0-TPE-v1 + E1-BASE</h3><p>只替换 <code>clip_weights</code>，不改 cache update 规则。</p><p>对比：</p><div class="table-wrap"><table><tr><th>实验</th><th>文本原型</th><th>cache</th></tr><tr><td>E1-BASE</td><td>Point-Cache 64 模板归一化平均文本原型</td><td>原始 hierarchical cache</td></tr><tr><td>E0-TPE-v1 + E1</td><td>vMF 收缩式文本原型</td><td>原始 hierarchical cache</td></tr></table></div><p>这样可以判断：</p><div class="statement"><span>文本原型聚合方式变化是否能改善原始 Point-Cache hierarchical baseline。</span></div><p>---</p><section class="section"><h2 id="11-代码实现要求"><span>11. 代码实现要求</span></h2><h3>11.1 不能只对最终 <code>clip_weights</code> 做处理</h3><p>因为最终 <code>clip_weights</code> 已经是平均后的文本原型，里面丢失了 64 个模板之间的分散信息。</p><p>E0-TPE-v1 必须在 <code>clip_classifier</code> 内部或替代函数中实现，保留：</p><div class="statement"><span>class_embeddings: [num_templates, dim]</span></div><p>也就是：</p><div class="code-card"><div class="code-head"><span>python</span></div><pre><code>class_embeddings = clip_model.encode_text(texts)
+class_embeddings /= class_embeddings.norm(dim=-1, keepdim=True)</code></pre></div><p>之后立即计算：</p><div class="code-card"><div class="code-head"><span>python</span></div><pre><code>mean_vec = class_embeddings.mean(dim=0)
+R_bar = mean_vec.norm()
+m_c = mean_vec / mean_vec.norm()
+z_base = class_embeddings[base_template_index]</code></pre></div><p>再构造：</p><div class="code-card"><div class="code-head"><span>python</span></div><pre><code>kappa_hat = R_bar * (d - R_bar ** 2) / (1 - R_bar ** 2)
+w = kappa_hat / (kappa_hat + kappa_0)
+
+text_proto = (1 - w) * z_base + w * m_c
+text_proto = text_proto / text_proto.norm()</code></pre></div><h3>11.2 新函数建议命名</h3><p>建议新增：</p><div class="code-card"><div class="code-head"><span>python</span></div><pre><code>clip_classifier_tpe_v1(args, classnames, template, clip_model)</code></pre></div><p>不要直接覆盖原始 <code>clip_classifier</code>，这样便于对比 baseline。</p><h3>11.3 runner 命名建议</h3><p>zero-shot 诊断：</p><div class="statement"><span>run_e0_tpe_v1_zs_modelnetc_suffix2_corruptions_dual_gpu.sh</span></div><p>Point-Cache hierarchical：</p><div class="statement"><span>run_e0_tpe_v1_hierarchical_modelnetc_suffix2_corruptions_dual_gpu.sh</span></div><p>all35：</p><div class="statement"><span>run_e0_tpe_v1_hierarchical_modelnetc_all35_corruptions_dual_gpu.sh</span></div><p>---</p><section class="section"><h2 id="12-文档中需要删除或改写的旧说法"><span>12. 文档中需要删除或改写的旧说法</span></h2><h3>12.1 删除</h3><div class="statement"><span>原始 Point-Cache 只使用一个固定模板。</span></div><h3>12.2 改成</h3><div class="statement"><span>Point-Cache 主文使用单模板作为公式和流程示意，但源码实际实现使用 64 个手工文本模板，并对每个模板编码后的文本特征进行归一化、平均、再归一化，得到每个类别的文本原型。</span></div><h3>12.3 删除</h3><div class="statement"><span>E0-TPE-v0 = 固定模板 prompt ensemble。</span></div><h3>12.4 改成</h3><div class="statement statement-multi"><p>E0-TPE-BASE = Point-Cache 已有的 64 模板归一化平均文本原型。</p><p>E0-TPE-v1 = 在同一组 64 模板的编码特征上进行 vMF 收缩式文本原型构造。</p></div><h3>12.5 删除或弱化</h3><div class="statement"><span>高斯假设不成立。</span></div><h3>12.6 改成</h3><div class="statement"><span>欧氏 Gaussian 建模不是绝对错误，但当实际推理使用 L2-normalized embeddings 和 cosine similarity 时，单位超球面上的方向统计与该推理几何更加一致。</span></div><p>---</p><section class="section"><h2 id="13-更正后的最终结论"><span>13. 更正后的最终结论</span></h2><p>更正后，E0-TPE 的定位不是：</p><div class="statement"><span>从单模板升级到多模板。</span></div><p>而是：</p><div class="statement"><span>在 Point-Cache 已有 64 模板文本原型的基础上，利用每个类别 64 个模板 embedding 的方向一致性，构建类别自适应的 vMF 收缩式文本原型。</span></div><p>因此，下一步不是做普通 prompt ensemble，而是做：</p><div class="statement statement-multi"><p>E0-TPE-DIAG：先统计 64 模板 embedding 的方向分散程度；</p><p>E0-TPE-v1-ZS：只替换文本原型，测试 zero-shot；</p><p>E0-TPE-v1 + E1-BASE：替换文本原型后跑原始 hierarchical Point-Cache。</p></div><p>这条路线同时满足：</p><ol><li>与 Point-Cache 源码实现一致；</li><li>与 BayesMM 的文本分布思想相关；</li><li>不混入 DeepSeek 新变量；</li><li>不直接改 cache 规则；</li><li>能清楚判断收益是否来自文本原型处理。</li></ol></article>
+</main>
+<footer class="footer">建议项目路径：<code>docs/reports/stage0_tpe_spherical_text_anchor_report.html</code>。</footer>
+</body>
+</html>

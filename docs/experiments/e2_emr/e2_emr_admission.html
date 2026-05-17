@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E2-EMR: Entropy–Margin Reliability Cache Admission</title>
+  <style>
+    :root{
+      --bg:#090b10; --panel:#111827; --panel2:#0f172a; --text:#e5e7eb; --muted:#9ca3af;
+      --line:#243244; --blue:#60a5fa; --cyan:#22d3ee; --green:#34d399; --red:#fb7185;
+      --yellow:#fbbf24; --purple:#a78bfa; --code:#0b1220;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at top left,#12213b 0,#090b10 36%,#07080d 100%);color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;line-height:1.62}
+    .wrap{max-width:1180px;margin:0 auto;padding:42px 28px 70px}
+    .hero{border:1px solid rgba(96,165,250,.28);background:linear-gradient(135deg,rgba(17,24,39,.94),rgba(15,23,42,.75));border-radius:26px;padding:34px;box-shadow:0 22px 70px rgba(0,0,0,.35)}
+    .tag{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:999px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.28);color:#bfdbfe;font-size:13px;font-weight:700;letter-spacing:.02em}
+    h1{font-size:38px;line-height:1.1;margin:20px 0 12px;letter-spacing:-.03em}
+    h2{font-size:25px;margin:34px 0 14px;letter-spacing:-.02em}
+    h3{font-size:18px;margin:22px 0 10px;color:#dbeafe}
+    p{color:#cbd5e1;margin:10px 0}.muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:22px}
+    .card{background:linear-gradient(180deg,rgba(17,24,39,.94),rgba(15,23,42,.88));border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 15px 45px rgba(0,0,0,.22)}
+    .span4{grid-column:span 4}.span6{grid-column:span 6}.span8{grid-column:span 8}.span12{grid-column:span 12}
+    .metric{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:8px}.metric small{font-size:16px;color:var(--muted);font-weight:600}
+    .green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}.yellow{color:var(--yellow)}.purple{color:var(--purple)}
+    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:16px;background:rgba(2,6,23,.32)}
+    th,td{padding:13px 14px;border-bottom:1px solid rgba(148,163,184,.16);text-align:left;white-space:nowrap}
+    th{font-size:13px;color:#bfdbfe;background:rgba(30,41,59,.65);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+    td{font-size:15px;color:#e5e7eb}.right{text-align:right}.center{text-align:center}
+    tr:last-child td{border-bottom:none}.delta-pos{color:var(--green);font-weight:800}.delta-neg{color:var(--red);font-weight:800}.delta-zero{color:var(--muted);font-weight:800}
+    .formula{font-family:"Times New Roman", Cambria, serif;font-size:27px;text-align:center;padding:20px;border-radius:18px;background:rgba(2,6,23,.62);border:1px solid rgba(96,165,250,.22);margin:14px 0;color:#f8fafc}
+    .formula .sub{font-size:.68em;vertical-align:sub}.formula .sup{font-size:.68em;vertical-align:super}
+    .code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:var(--code);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:#d1d5db;overflow:auto;font-size:13px}
+    .barrow{display:grid;grid-template-columns:155px 1fr 70px;gap:12px;align-items:center;margin:12px 0}.barbox{height:11px;background:#172033;border-radius:999px;overflow:hidden;border:1px solid rgba(148,163,184,.16)}.bar{height:100%;border-radius:999px}.bar.pos{background:linear-gradient(90deg,#10b981,#22d3ee)}.bar.neg{background:linear-gradient(90deg,#fb7185,#fbbf24)}
+    .callout{padding:17px 18px;border-radius:18px;border:1px solid rgba(251,191,36,.25);background:rgba(251,191,36,.08);color:#fde68a}
+    .ok{border-color:rgba(52,211,153,.24);background:rgba(52,211,153,.08);color:#bbf7d0}.bad{border-color:rgba(251,113,133,.24);background:rgba(251,113,133,.08);color:#fecdd3}
+    ul{margin:8px 0 0;padding-left:22px;color:#cbd5e1}li{margin:7px 0}
+    .footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+    @media(max-width:900px){.span4,.span6,.span8{grid-column:span 12}h1{font-size:30px}table{display:block;overflow-x:auto}.wrap{padding:28px 16px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="tag">Experiment E2-EMR · Stage 2 Ablation</div>
+      <h1>Entropy–Margin Reliability Cache Admission</h1>
+      <p class="muted">本实验验证一个最小创新模块：把 Point-Cache 原始的 entropy-only positive cache admission 改成 entropy + top-1/top-2 margin 的 reliability score。实验结论是：该模块在 global corruption 上有正向信号，但 7 类 corruption 平均未超过原始 hierarchical cache，因此它更适合作为后续 Global–Local Consistency 的动机实验。</p>
+      <div class="grid">
+        <div class="card span4"><div class="muted">Experiment Name</div><div class="metric blue">E2-EMR</div><p>Entropy–Margin Reliability</p></div>
+        <div class="card span4"><div class="muted">Best Single Gain</div><div class="metric green">+0.53 <small>pts</small></div><p>on add_global_2</p></div>
+        <div class="card span4"><div class="muted">Average Delta</div><div class="metric red">−0.31 <small>pts</small></div><p>over 7 corruptions</p></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card span12">
+        <h2>1. 实验命名</h2>
+        <table>
+          <tr><th>Field</th><th>Value</th></tr>
+          <tr><td>正式实验名</td><td><b>Entropy–Margin Reliability Cache Admission</b></td></tr>
+          <tr><td>短名</td><td><b>E2-EMR</b></td></tr>
+          <tr><td>代码阶段</td><td>Stage 2 · Reliability Score v1</td></tr>
+          <tr><td>实验目的</td><td>检验“只看 entropy”是否可以被“entropy + margin”改进</td></tr>
+          <tr><td>论文位置</td><td>Experiments · Ablation Study / Motivation for Global–Local Consistency</td></tr>
+        </table>
+      </div>
+
+      <div class="card span6">
+        <h2>2. 我们现在做了什么？</h2>
+        <p>原始 Point-Cache 在 positive cache 中更偏向保存低熵样本。E2-EMR 的改动很小：不改 backbone、不训练模型、不改 final logits 融合，只改变 positive global/local cache 的样本排序与替换规则。</p>
+        <div class="code">Baseline: lower entropy → better cache entry
+E2-EMR: higher reliability score → better cache entry</div>
+        <p>Reliability v1 文件中已经显式加入 <code>compute_prediction_margin()</code> 和 <code>compute_reliability_score()</code>，并在在线测试循环中用 reliability score 更新 positive cache。</p>
+      </div>
+      <div class="card span6">
+        <h2>3. top-1/top-2 margin 是什么？</h2>
+        <p>模型会对每个类别输出概率。top-1 是概率最高的类别，top-2 是概率第二高的类别。它们的差值就是 margin：</p>
+        <div class="formula">M(x) = p<span class="sub">(1)</span>(x) − p<span class="sub">(2)</span>(x)</div>
+        <p>如果 margin 大，说明模型明显更相信第一类；如果 margin 小，说明第一类和第二类很接近，样本处于混淆边界附近。</p>
+      </div>
+
+      <div class="card span12">
+        <h2>4. Reliability Score 公式</h2>
+        <div class="formula">R(x) = −H(x) + λ<span class="sub">m</span>M(x)</div>
+        <table>
+          <tr><th>符号</th><th>含义</th><th>作用</th></tr>
+          <tr><td>R(x)</td><td>样本 x 的可靠性分数</td><td>越大越适合进入 positive cache</td></tr>
+          <tr><td>H(x)</td><td>预测熵 / uncertainty</td><td>越大越不确定，因此前面加负号</td></tr>
+          <tr><td>M(x)</td><td>top-1/top-2 probability margin</td><td>越大表示类别区分越清楚</td></tr>
+          <tr><td>λ<sub>m</sub></td><td>margin 项权重</td><td>当前 v1 使用 1.0</td></tr>
+        </table>
+        <div class="callout">直观解释：一个可靠的 cache 样本应该同时满足“预测熵低”和“top-1 明显高于 top-2”。</div>
+      </div>
+
+      <div class="card span12">
+        <h2>5. 实验设置</h2>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Backbone</td><td>ULIP-2</td></tr>
+          <tr><td>Dataset</td><td>ModelNet-C</td></tr>
+          <tr><td>Corruptions</td><td>add_global_2, add_local_2, dropout_global_2, dropout_local_2, rotate_2, scale_2, jitter_2</td></tr>
+          <tr><td>Baseline</td><td>Original Point-Cache Hierarchical Cache</td></tr>
+          <tr><td>Method</td><td>Reliability v1 + Hierarchical Cache</td></tr>
+          <tr><td>Changed component</td><td>Positive cache admission / replacement rule</td></tr>
+          <tr><td>Unchanged components</td><td>Backbone, text classifier, negative cache, global/local retrieval, final logits formula</td></tr>
+        </table>
+      </div>
+
+      <div class="card span12">
+        <h2>6. 结果总表</h2>
+        <table>
+          <tr><th>Corruption</th><th class="right">Baseline HC</th><th class="right">Reliability v1</th><th class="right">Delta</th><th>Observation</th></tr>
+          <tr><td>add_global_2</td><td class="right">68.15</td><td class="right">68.68</td><td class="right delta-pos">+0.53</td><td>Positive signal</td></tr>
+          <tr><td>add_local_2</td><td class="right">61.30</td><td class="right">60.25</td><td class="right delta-neg">−1.05</td><td>Local corruption hurts</td></tr>
+          <tr><td>dropout_global_2</td><td class="right">73.22</td><td class="right">73.34</td><td class="right delta-pos">+0.12</td><td>Slight gain</td></tr>
+          <tr><td>dropout_local_2</td><td class="right">63.65</td><td class="right">63.01</td><td class="right delta-neg">−0.64</td><td>Local structure issue</td></tr>
+          <tr><td>rotate_2</td><td class="right">73.30</td><td class="right">72.85</td><td class="right delta-neg">−0.45</td><td>Geometry shift not solved</td></tr>
+          <tr><td>scale_2</td><td class="right">70.46</td><td class="right">69.85</td><td class="right delta-neg">−0.61</td><td>Scale robustness drops</td></tr>
+          <tr><td>jitter_2</td><td class="right">29.58</td><td class="right">29.54</td><td class="right delta-neg">−0.04</td><td>Nearly unchanged</td></tr>
+          <tr><td><b>Average</b></td><td class="right"><b>62.81</b></td><td class="right"><b>62.50</b></td><td class="right delta-neg"><b>−0.31</b></td><td><b>Not final method</b></td></tr>
+        </table>
+      </div>
+
+      <div class="card span6">
+        <h2>7. Delta 可视化</h2>
+        <div class="barrow"><div>add_global_2</div><div class="barbox"><div class="bar pos" style="width:50%"></div></div><div class="delta-pos">+0.53</div></div>
+        <div class="barrow"><div>add_local_2</div><div class="barbox"><div class="bar neg" style="width:100%"></div></div><div class="delta-neg">−1.05</div></div>
+        <div class="barrow"><div>dropout_global_2</div><div class="barbox"><div class="bar pos" style="width:11%"></div></div><div class="delta-pos">+0.12</div></div>
+        <div class="barrow"><div>dropout_local_2</div><div class="barbox"><div class="bar neg" style="width:61%"></div></div><div class="delta-neg">−0.64</div></div>
+        <div class="barrow"><div>rotate_2</div><div class="barbox"><div class="bar neg" style="width:43%"></div></div><div class="delta-neg">−0.45</div></div>
+        <div class="barrow"><div>scale_2</div><div class="barbox"><div class="bar neg" style="width:58%"></div></div><div class="delta-neg">−0.61</div></div>
+        <div class="barrow"><div>jitter_2</div><div class="barbox"><div class="bar neg" style="width:4%"></div></div><div class="delta-neg">−0.04</div></div>
+      </div>
+      <div class="card span6">
+        <h2>8. 分析结论</h2>
+        <div class="callout ok"><b>正向信号：</b>entropy + margin 在 add_global_2 和 dropout_global_2 上提升，说明 margin 对全局类别混淆有帮助。</div>
+        <br />
+        <div class="callout bad"><b>主要问题：</b>它在 add_local_2、dropout_local_2、rotate_2、scale_2 上下降，说明 class-level margin 无法可靠处理局部结构损坏和几何变换。</div>
+        <p>因此，E2-EMR 的定位不是最终方法，而是一个关键 ablation：它证明“只加入分类 margin 仍不够”，从而自然引出下一阶段的 global-local consistency。</p>
+      </div>
+
+      <div class="card span12">
+        <h2>9. 可写进论文的英文素材</h2>
+        <h3>[Section: Experiments / Ablation Study]</h3>
+        <p><i>A simple entropy-margin reliability score improves global corruption cases but degrades under local and geometric corruptions. This indicates that class-level confidence alone is insufficient for robust 3D test-time cache admission. Reliable point-cloud cache construction should further consider the structural consistency between global object features and local part evidence.</i></p>
+        <h3>[Section: Method Motivation]</h3>
+        <p><i>Although top-1/top-2 margin helps identify less ambiguous predictions, it remains a class-level criterion and ignores whether the global object prediction is supported by local part evidence. This motivates our next reliability signal: global-local structural consistency.</i></p>
+      </div>
+
+      <div class="card span12">
+        <h2>10. 下一步</h2>
+        <p>下一阶段建议命名为：</p>
+        <div class="code">E3-GLC: Global–Local Consistency Reliability</div>
+        <p>核心公式可以扩展为：</p>
+        <div class="formula">R(x) = −H(x) + λ<span class="sub">m</span>M(x) + λ<span class="sub">c</span>C<span class="sub">global-local</span>(x)</div>
+        <p>目标是解决 E2-EMR 在 local corruption 和 geometric corruption 下不稳定的问题。</p>
+      </div>
+    </section>
+
+    <div class="footer">
+      Generated for MCM-PC project · Stage 2 experiment documentation · Suggested filename: docs/reports/e2_emr_cache_admission.html
+    </div>
+  </div>
+</body>
+</html>

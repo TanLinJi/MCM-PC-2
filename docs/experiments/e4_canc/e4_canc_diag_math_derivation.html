@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MCM-PC · E4-CANC-DIAG v2 Revised Derivation</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --bg:#080c16; --panel:#111827; --panel2:#162033; --text:#e6edf8; --muted:#9ca8bd;
+  --cyan:#67e8f9; --violet:#a78bfa; --green:#86efac; --yellow:#fde68a; --red:#fca5a5;
+  --border:#2b3958; --code:#0b1220;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  color:var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(103,232,249,.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(167,139,250,.10), transparent 32%),
+    linear-gradient(135deg,#070a13 0%,#0b1020 45%,#111827 100%);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",Arial,sans-serif;
+  line-height:1.72;
+}
+.container{max-width:1220px;margin:0 auto;padding:38px 24px 80px}
+.hero{
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(103,232,249,.13),rgba(167,139,250,.10));
+  border-radius:26px;
+  padding:34px;
+  box-shadow:0 20px 70px rgba(0,0,0,.34);
+}
+h1{font-size:34px;margin:0 0 12px;line-height:1.25}
+.subtitle{color:var(--muted);font-size:16px;margin:6px 0 0}
+.badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.badge{border:1px solid var(--border);background:rgba(255,255,255,.045);color:#dbeafe;border-radius:999px;padding:6px 11px;font-size:13px}
+.card{
+  margin-top:22px;
+  border:1px solid var(--border);
+  background:rgba(17,24,39,.88);
+  border-radius:20px;
+  padding:26px;
+  box-shadow:0 14px 42px rgba(0,0,0,.24);
+}
+h2{margin:0 0 16px;font-size:24px;border-left:4px solid var(--cyan);padding-left:12px}
+h3{font-size:19px;margin:24px 0 10px;color:#dbeafe}
+p{margin:10px 0}.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse;margin:14px 0;border-radius:12px;overflow:hidden}
+th,td{border:1px solid var(--border);padding:10px 12px;text-align:left;vertical-align:top}
+th{background:rgba(103,232,249,.10);color:#e0f2fe}
+td{background:rgba(255,255,255,.025)}
+.formula{background:rgba(11,18,32,.78);border:1px solid var(--border);border-radius:16px;padding:12px 16px;margin:16px 0;overflow-x:auto}
+.callout{border:1px solid var(--border);border-left:5px solid var(--cyan);background:rgba(103,232,249,.07);border-radius:14px;padding:14px 16px;margin:16px 0}
+.warn{border-left-color:var(--yellow);background:rgba(253,230,138,.08)}
+.danger{border-left-color:var(--red);background:rgba(252,165,165,.08)}
+.good{border-left-color:var(--green);background:rgba(134,239,172,.08)}
+code{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:2px 6px;color:#dbeafe}
+.footer{margin-top:24px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<section class="hero">
+  <h1>MCM-PC · E4-CANC-DIAG v2 修正版数学推导</h1>
+  <p class="subtitle">根据漏洞审查再次修正：边界条件可行性、base-rate / precision、entropy-margin 耦合、local probability 聚合依据。</p>
+  <p class="subtitle"><b>核心立场：</b>E4 现在仍然是诊断实验，不是直接修改 negative cache 的方法实验。</p>
+  <div class="badges">
+    <span class="badge">Stage: E4</span>
+    <span class="badge">Experiment: CANC-DIAG</span>
+    <span class="badge">Output: Diagnostics only</span>
+    <span class="badge">Dataset: ModelNet-C</span>
+    <span class="badge">Backbone: ULIP-2</span>
+  </div>
+</section>
+
+<section class="card">
+<h2>1. 对漏洞审查的判断</h2>
+<table>
+<tr><th>审查点</th><th>是否成立</th><th>修正结论</th></tr>
+<tr>
+<td>边界条件 \(M_g<\tau_m\) 与 \(p_g^{(1)}>\tau_p\) 可能互斥</td>
+<td>成立</td>
+<td>必须加入可行性约束 \(\tau_m>2\tau_p-1\)，否则 candidate 可能恒为空。</td>
+</tr>
+<tr>
+<td>只看 \(P(\hat y_g\ne y\mid I_D)\) 的相对提升存在 base-rate fallacy</td>
+<td>成立</td>
+<td>除了 enrichment，还必须看绝对 precision / PPV，例如 \(P(\hat y_g\ne y\mid I_D)>\tau_{err}\)。</td>
+</tr>
+<tr>
+<td>\(I_H\) 与 \(I_M\) 存在耦合，因此 overlap 分解无意义</td>
+<td>部分成立</td>
+<td>二者确实耦合，但不是同义反覆。仍要做 overlap，只是不能把 \(I_H\) 与 \(I_M\) 当作完全正交信号。</td>
+</tr>
+<tr>
+<td>“平均概率保证概率分布”的表述不充分</td>
+<td>成立</td>
+<td>softmax of averaged logits 也合法。真正依据是 linear opinion pool 更适合诊断 part-level disagreement；同时应补充 max-part disagreement 指标。</td>
+</tr>
+</table>
+</section>
+
+<section class="card">
+<h2>2. 概率定义</h2>
+<p>令 global logits 为 \(z_g(x)\in\mathbb{R}^C\)，local part logits 为 \(z_{l,r}(x)\in\mathbb{R}^C\)，其中 \(r=1,\dots,P\)。</p>
+<div class="formula">
+\[
+p_g(k\mid x)=\operatorname{softmax}(z_g(x))_k
+\]
+\[
+p_{l,r}(k\mid x)=\operatorname{softmax}(z_{l,r}(x))_k
+\]
+\[
+p_l^{mean}(k\mid x)=\frac1P\sum_{r=1}^{P}p_{l,r}(k\mid x)
+\]
+</div>
+
+<div class="callout warn">
+<b>修正表述：</b>选择 \(p_l^{mean}\) 的理由不是“它才是合法概率分布”，因为
+\(\operatorname{softmax}(\frac1P\sum_r z_{l,r})\) 也是合法分布。
+更准确的理由是：\(p_l^{mean}\) 是 local part predictive distributions 的线性池化，能更直接反映各 part 的平均支持度。
+</div>
+
+<p>但是为了诊断 local conflict，平均概率可能会稀释单个强冲突 part。因此 E4-DIAG 同时统计 max-part 版本。</p>
+</section>
+
+<section class="card">
+<h2>3. Global uncertainty 与 boundary candidate 的可行性</h2>
+<p>global normalized entropy 和 global margin：</p>
+<div class="formula">
+\[
+H_g(x)=
+-\frac1{\log C}
+\sum_{k=1}^{C}p_g(k\mid x)\log p_g(k\mid x),
+\qquad 0\le H_g(x)\le1
+\]
+\[
+M_g(x)=p_g^{(1)}(x)-p_g^{(2)}(x),
+\qquad 0\le M_g(x)\le1
+\]
+</div>
+
+<h3>3.1 边界条件的可行性约束</h3>
+<p>若定义：</p>
+<div class="formula">
+\[
+I_M(x)=
+\mathbf{1}[M_g(x)<\tau_m]\cdot
+\mathbf{1}[p_g^{(1)}(x)>\tau_p],
+\]
+</div>
+<p>则存在一个必要条件。因为：</p>
+<div class="formula">
+\[
+p_g^{(1)}+p_g^{(2)}\le1
+\]
+\[
+M_g=p_g^{(1)}-p_g^{(2)}
+\Rightarrow
+p_g^{(2)}=p_g^{(1)}-M_g
+\]
+\[
+2p_g^{(1)}-M_g\le1
+\Rightarrow
+M_g\ge 2p_g^{(1)}-1.
+\]
+</div>
+
+<p>如果 \(p_g^{(1)}>\tau_p\)，则：</p>
+<div class="formula">
+\[
+M_g>2\tau_p-1.
+\]
+</div>
+
+<p>同时又要求 \(M_g<\tau_m\)，因此非空的必要条件是：</p>
+<div class="formula">
+\[
+\tau_m>2\tau_p-1.
+\]
+</div>
+
+<div class="callout danger">
+  <b>实验前必须检查：</b>
+  如果 \(\tau_p=0.8\)，则必须有 \(\tau_m>0.6\)。若设 \(\tau_m=0.5\)，则 \(I_M\) 必然为空。
+</div>
+
+<p>建议代码中加入断言：</p>
+<div class="formula">
+\[
+\boxed{\tau_m>\max(0,2\tau_p-1)}
+\]
+</div>
+</section>
+
+<section class="card">
+<h2>4. Entropy 与 margin 的耦合：修正后的说法</h2>
+<p>审查中指出 \(H_g\) 与 \(M_g\) 不是独立信号，这是正确的。但“二者近似同义反覆”过强。</p>
+
+<p>给定 margin \(M_g=m\)，一个低 entropy 的极端分布可以把质量集中在 top-1/top-2：</p>
+<div class="formula">
+\[
+p_g^{(1)}=\frac{1+m}{2},
+\qquad
+p_g^{(2)}=\frac{1-m}{2},
+\qquad
+p_g^{(k)}=0\ (k\ge3).
+\]
+</div>
+
+<p>因此 entropy 的一个下界形式是：</p>
+<div class="formula">
+\[
+H_g(x)\ge
+\frac{
+-\frac{1+m}{2}\log\frac{1+m}{2}
+-\frac{1-m}{2}\log\frac{1-m}{2}
+}{\log C}.
+\]
+</div>
+
+<p>当 \(m=0\) 时：</p>
+<div class="formula">
+\[
+H_g(x)\ge \frac{\log 2}{\log C}.
+\]
+</div>
+
+<div class="callout warn">
+  对 ModelNet40，\(\log2/\log40\approx0.188\)。这说明小 margin 并不必然意味着高 entropy。
+  因此 \(I_H\) 与 \(I_M\) 有数学耦合，但不是同一个条件，overlap 统计仍然有价值。
+</div>
+
+<p>修正后的实验解释：</p>
+<ul>
+<li>\(I_H\)：中等 entropy 的不确定样本；</li>
+<li>\(I_M\)：top-1/top-2 接近且 top-1 仍有一定置信度的边界候选；</li>
+<li>\(I_D\)：local evidence 与 global prediction 冲突的候选。</li>
+</ul>
+</section>
+
+<section class="card">
+<h2>5. Global-local conflict 的两个版本</h2>
+<p>global prediction：</p>
+<div class="formula">
+\[
+\hat y_g=\arg\max_k p_g(k\mid x).
+\]
+</div>
+
+<h3>5.1 Mean-local disagreement</h3>
+<p>用平均 local probability 定义：</p>
+<div class="formula">
+\[
+D_{gl}^{mean}(x)=
+\left[
+\max_{k\ne\hat y_g}p_l^{mean}(k\mid x)
+-
+p_l^{mean}(\hat y_g\mid x)
+\right]_+.
+\]
+</div>
+
+<h3>5.2 Max-part disagreement</h3>
+<p>为了避免平均概率稀释单个强冲突 part，额外统计：</p>
+<div class="formula">
+\[
+D_{gl}^{max}(x)=
+\max_{r}
+\left[
+\max_{k\ne\hat y_g}p_{l,r}(k\mid x)
+-
+p_{l,r}(\hat y_g\mid x)
+\right]_+.
+\]
+</div>
+
+<div class="callout good">
+  <b>诊断阶段不急着二选一。</b>
+  先同时输出 \(D_{gl}^{mean}\) 与 \(D_{gl}^{max}\)，比较哪个更能提升
+  \(P(\hat y_g\ne y\mid I_D=1)\)。
+</div>
+
+<p>重要限制仍然成立：</p>
+<div class="formula">
+\[
+D_{gl}^{mean}(x)>\tau_d
+\not\Rightarrow
+\hat y_g\ne y,
+\qquad
+D_{gl}^{max}(x)>\tau_d
+\not\Rightarrow
+\hat y_g\ne y.
+\]
+</div>
+</section>
+
+<section class="card">
+<h2>6. Base-rate fallacy 修正：不仅看 enrichment，也看 precision</h2>
+<p>令 \(W=\mathbf{1}[\hat y_g\ne y]\)，\(I_D=\mathbf{1}[D_{gl}>\tau_d]\)。</p>
+
+<p>之前只要求：</p>
+<div class="formula">
+\[
+P(W=1\mid I_D=1)>P(W=1)
+\]
+</div>
+<p>这是必要但不充分的。因为如果总体错误率是 \(10\%\)，冲突条件下错误率提高到 \(20\%\)，仍然有 \(80\%\) 的冲突样本 global 是正确的。</p>
+
+<p>修正后的诊断标准至少包含两个量：</p>
+<div class="formula">
+\[
+\text{Enrichment}(I_D)=
+P(W=1\mid I_D=1)-P(W=1)
+\]
+\[
+\text{Precision}(I_D)=P(W=1\mid I_D=1)
+\]
+</div>
+
+<p>进入真正 CANC 的更保守条件：</p>
+<div class="formula">
+\[
+P(W=1\mid I_D=1)>\tau_{err},
+\qquad \tau_{err}\ge0.5
+\]
+<p>或对更保守候选：</p>
+\[
+P(W=1\mid I_D=1,I_M=1)>\tau_{err}.
+\]
+</div>
+
+<div class="callout danger">
+  若 precision 不高，不能把 conflict 样本当作 negative evidence，否则会产生大量 false negative cache pollution。
+</div>
+</section>
+
+<section class="card">
+<h2>7. Conservative candidate rule</h2>
+<p>不建议直接使用：</p>
+<div class="formula">
+\[
+I_{or}=I_H\lor I_M\lor I_D.
+\]
+</div>
+
+<p>原因是候选集合膨胀不等于有限容量 cache 更好。更保守的诊断候选为：</p>
+<div class="formula">
+\[
+I_{safe}=I_H\lor(I_M\land I_D).
+\]
+</div>
+
+<p>进一步展开：</p>
+<div class="formula">
+\[
+I_H=\mathbf{1}[\tau_l<H_g<\tau_u]
+\]
+\[
+I_M=\mathbf{1}[M_g<\tau_m]\cdot\mathbf{1}[p_g^{(1)}>\tau_p]
+\]
+\[
+I_D=\mathbf{1}[D_{gl}>\tau_d].
+\]
+</div>
+
+<div class="callout">
+  后续若要真正实现 CANC，新增候选应优先来自 \(I_M\land I_D\)，而不是所有 \(I_D\)。
+</div>
+</section>
+
+<section class="card">
+<h2>8. E4-CANC-DIAG 必须输出的统计指标</h2>
+<table>
+<tr><th>指标</th><th>数学形式</th><th>意义</th></tr>
+<tr><td><code>global_error_rate</code></td><td>\(P(W=1)\)</td><td>global pseudo-label 原始错误率</td></tr>
+<tr><td><code>conflict_mean_rate</code></td><td>\(P(D_{gl}^{mean}>\tau_d)\)</td><td>mean-local conflict 比例</td></tr>
+<tr><td><code>conflict_max_rate</code></td><td>\(P(D_{gl}^{max}>\tau_d)\)</td><td>max-part conflict 比例</td></tr>
+<tr><td><code>wrong_given_conflict_mean</code></td><td>\(P(W=1\mid D_{gl}^{mean}>\tau_d)\)</td><td>mean conflict 的错误定位 precision</td></tr>
+<tr><td><code>wrong_given_conflict_max</code></td><td>\(P(W=1\mid D_{gl}^{max}>\tau_d)\)</td><td>max-part conflict 的错误定位 precision</td></tr>
+<tr><td><code>wrong_given_safe_mean</code></td><td>\(P(W=1\mid I_M=1,D_{gl}^{mean}>\tau_d)\)</td><td>保守候选 precision</td></tr>
+<tr><td><code>wrong_given_safe_max</code></td><td>\(P(W=1\mid I_M=1,D_{gl}^{max}>\tau_d)\)</td><td>保守候选 precision</td></tr>
+<tr><td><code>local_alt_correct_given_conflict</code></td><td>\(P(k_l^\star=y\mid I_D=1)\)</td><td>local alternative 是否常是正确类别</td></tr>
+<tr><td><code>candidate_or_rate</code></td><td>\(P(I_H\lor I_M\lor I_D)\)</td><td>激进候选膨胀程度</td></tr>
+<tr><td><code>candidate_safe_rate</code></td><td>\(P(I_H\lor(I_M\land I_D))\)</td><td>保守候选比例</td></tr>
+</table>
+</section>
+
+<section class="card">
+<h2>9. Pairwise boundary cache 的必要信息</h2>
+<p>如果诊断支持 CANC，后续 cache 不能只保存样本，还应保存混淆类别对：</p>
+<div class="formula">
+\[
+(\hat y_g,\ k_l^\star,\ D_{gl})
+\]
+</div>
+
+<p>对应 pairwise boundary cache：</p>
+<div class="formula">
+\[
+\mathcal{B}_{\hat y_g,k_l^\star}.
+\]
+</div>
+
+<p>其中 \(k_l^\star\) 应按所采用的 conflict 定义确定：</p>
+<ul>
+<li>mean-local 版本：\(k_l^\star=\arg\max_{k\ne\hat y_g}p_l^{mean}(k\mid x)\)</li>
+<li>max-part 版本：记录产生最大冲突的 part \(r^\star\) 及其 alternative class</li>
+</ul>
+</section>
+
+<section class="card">
+<h2>10. 修正后的下一步计划</h2>
+<table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>实验名</td><td>E4-CANC-DIAG-v2: Conflict Signal Validation</td></tr>
+<tr><td>Runner</td><td><code>Point-Cache/runners/model_with_hierarchical_caches_e4_canc_diag.py</code></td></tr>
+<tr><td>Script</td><td><code>Point-Cache/scripts/recur-pc/run_e4_canc_diag_hierarchical_modelnetc_all_corruptions_dual_gpu.sh</code></td></tr>
+<tr><td>是否改变模型输出</td><td>不改变。只统计诊断指标。</td></tr>
+<tr><td>关键判断</td><td>\(P(W=1\mid I_D=1)\) 是否有足够高的绝对 precision，而不仅是相对提升。</td></tr>
+<tr><td>若成立</td><td>进入 E4-CANC-v0，实现 conservative pairwise boundary cache。</td></tr>
+<tr><td>若不成立</td><td>停止 CANC，转向 class compactness 或 prototype purification。</td></tr>
+</table>
+</section>
+
+<section class="card">
+<h2>11. 论文写作素材</h2>
+<h3>[Method Motivation]</h3>
+<p class="muted">
+Global-local disagreement is not directly treated as negative evidence, since local predictions can also be corrupted. We therefore first validate whether disagreement increases both the relative enrichment and the absolute precision of global pseudo-label errors.
+</p>
+
+<h3>[Diagnostics]</h3>
+<p class="muted">
+We evaluate mean-local and max-part disagreement signals separately. This distinction allows us to determine whether average local support or the strongest conflicting local part better identifies unreliable global predictions.
+</p>
+
+<h3>[Limitation]</h3>
+<p class="muted">
+Entropy, margin, and disagreement are not independent signals. In particular, entropy and global margin are coupled through the probability simplex, so overlap statistics are reported to avoid over-counting candidate samples.
+</p>
+</section>
+
+<div class="footer">Generated for MCM-PC project · E4-CANC-DIAG v2 · 2026-05-14 11:26:24</div>
+
+</div>
+</body>
+</html>
