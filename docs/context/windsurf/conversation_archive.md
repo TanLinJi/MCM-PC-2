@@ -1,0 +1,397 @@
+# MCM-PC Project Conversation Archive
+
+> 整理时间：2026-05-14  
+
+---
+
+## 0. 项目基本信息
+
+| 项目项 | 内容 |
+|---|---|
+| 项目暂定名 | MCM-PC / Multi-Cache Matrix for 3D Point Cloud Test-time Adaptation |
+| 当前代码仓库 | `https://github.com/TanLinJi/MCM-PC-2.git` |
+| 本地路径 | `/root/autodl-tmp/MCM-PC-2` |
+| 主工程路径 | `/root/autodl-tmp/MCM-PC-2/Point-Cache` |
+| 主要基线 | Point-Cache |
+| 参考方法 | MCP 多缓存思想；BayesMM 的文本处理思想；MF-CLIP / margin 相关思想 |
+| 当前阶段 | Stage 3 / E3-GLC 初步测试 |
+| 硬件 | 2 × Tesla T4 |
+
+---
+
+## 1. 关键上传记录
+
+| 顺序 | 上传/生成内容 | 作用 |
+|---:|---|---|
+| 1 | `Chen 等 - 2025 - Multi-cache enhanced prototype learning...pdf` | MCP 文献，参考 entropy / align / negative 多缓存思想 |
+| 2 | `CVPR_2026_Adapting Point Cloud Analysis via Multimodal Bayesian Distribution Learning.pdf` | BayesMM 文献，仅参考文本处理/分布建模思想 |
+| 3 | `CVPR_2025_Point-Cache_Test-time_Dynamic_and_Hierarchical_Cache...pdf` | Point-Cache 基线论文 |
+| 4 | `Point-Cache-main.zip` | Point-Cache 代码源 |
+| 5 | 多张服务器截图 / VS Code 截图 | 代码结构、GPU 状态、文件状态确认 |
+| 6 | `zs_infer.py` | 用于定位 zero-shot wandb 报错位置 |
+| 7 | `model_with_hierarchical_caches.py` | Reliability v1 修改过程中的代码检查 |
+| 8 | `reliability_v1_hierarchical_ulip2_modelnetc_add_global2_20260513_221735.log` | E2-EMR 单 corruption 结果日志 |
+| 9 | `summary_baseline_hierarchical.csv` | 原始 Hierarchical 全 corruption 结果 |
+| 10 | `summary_reliability_v1_hierarchical.csv` | E2-EMR 全 corruption 结果 |
+| 11 | `model_with_hierarchical_caches_reliability_v1.py` | E2-EMR runner 文件 |
+| 12 | `粘贴的文本 (1).txt` | E3-GLC 单 corruption 日志输出 |
+| 13 | 生成的 HTML proposal / roadmap / E2 report | 阶段性说明文档 |
+
+---
+
+## 2. 用户偏好与工作规范记录
+
+| 时间/阶段 | 用户要求 | 后续规则 |
+|---|---|---|
+| 早期方案讨论 | 后续论文想法要用英文写，并标注放入 Abstract / Introduction / Related Work / Method / Experiments 哪一节 | 已记录为长期偏好 |
+| 公式展示反馈 | 不要用代码块形式显示公式，要用可读数学排版 | 后续默认使用 LaTeX 排版公式 |
+| 代码修改反馈 | 你已经上传过代码，不要反复要求用户 `grep` 或贴已有代码 | 后续优先基于已有代码和上传文件判断；只在需要真实运行结果/报错时让用户贴输出 |
+| 实验命令反馈 | 实验命令以后都保存成脚本，不要只给长命令 | 后续所有实验以 `scripts/recur-pc/*.sh` 形式保存 |
+| 日志管理反馈 | 脚本输出需要保存到此前记录的日志文件夹 | 日志默认保存到 `Point-Cache/logs/recur-pc/` |
+| 脚本命名反馈 | 同一实验脚本命名要统一，不要出现不同风格 | 统一格式：`run_<experiment_id>_<method>_<dataset>_<scope>_<gpu_mode>.sh` |
+
+---
+
+## 3. 研究思路讨论记录
+
+### 3.1 用户初始问题
+
+用户提出：希望把 MCP 的多缓存方法迁移到三维点云中，以 Point-Cache 为基线改造，并参考 BayesMM 的文本处理方法，完成一个可以投稿 AAAI / NeurIPS / CVPR / ICCV / ECCV 等顶会的方案。用户也说明自己是小白，需要从思路分析、创新点、代码、实验、论文全流程指导。
+
+### 3.2 助手关键判断
+
+- 方案工程上可行。
+- 但“Point-Cache + MCP + BayesMM 文本处理”的直接拼接不够顶会级创新。
+- 更好的主线应是：
+
+\[
+\text{Reliability-Aware Multi-Cache Matrix for 3D Test-Time Adaptation}
+\]
+
+核心问题：
+
+> 低熵样本不一定是可靠缓存样本；3D 点云 cache admission 应该同时考虑 confidence、margin、compactness、global-local consistency、negative/boundary evidence。
+
+### 3.3 曾讨论过的潜在创新点
+
+| 创新点 | 当前定位 |
+|---|---|
+| Multi-Cache Matrix | 主框架方向 |
+| Entropy + Margin Reliability | 已完成 E2-EMR 阶段实验 |
+| Global-Local Consistency | 当前 Stage 3 / E3-GLC 正在验证 |
+| Confusion-Aware Negative Cache | 后续候选 Stage 4 |
+| Adaptive Evidence Fusion | 后续候选模块 |
+| vMF / Spherical Text Prior | 辅助模块，不作为主创新 |
+| Adaptive Cache Budget | 后期增强模块 |
+
+---
+
+## 4. Git 与工程初始化记录
+
+### 4.1 仓库结构
+
+用户服务器路径：
+
+```text
+/root/autodl-tmp/MCM-PC-2/
+├── ICCV25-MCP/
+└── Point-Cache/
+```
+
+后来确认 `Point-Cache/data` 大小约 31G，需要 Git 忽略。
+
+### 4.2 Git 设置结果
+
+| 项 | 内容 |
+|---|---|
+| 本地 Git 根目录 | `/root/autodl-tmp/MCM-PC-2` |
+| 远端仓库 | `https://github.com/TanLinJi/MCM-PC-2.git` |
+| 初始干净提交 | `c92b011 chore: initialize MCM-PC-2 workspace` |
+| 主要分支 | `main`, `baseline-repro`, `mcm-pc-reliability-v1` |
+| 忽略内容 | `Point-Cache/data/`, 权重、`.pt`, `.pth`, `.npy`, `.zip`, `logs/`, `wandb/`, `__pycache__`, `.pyc` 等 |
+
+### 4.3 Git 清理过程
+
+- 发现 `Point-Cache/notebook/owl_shape_feat.pt` 被追踪。
+- 使用 `git rm --cached` 从历史中移除并 `commit --amend`。
+- 清理了 27 个 `.pyc` / `__pycache__` 文件。
+- 最终确认：
+
+```text
+git ls-files | grep -E '(^|/)data/|\.pth$|\.pt$|\.ckpt$|\.zip$|\.npy$|\.npz$|\.pkl$|\.tar$|\.tar\.gz$'
+```
+
+无输出，说明无大文件误入 Git。
+
+---
+
+## 5. Stage 1：Point-Cache Baseline Reproduction
+
+### 5.1 实验设置
+
+| 项 | 内容 |
+|---|---|
+| Backbone | ULIP-2 |
+| Dataset | ModelNet-C |
+| 初始 corruption | `add_global_2` |
+| npoints | 1024 |
+| GPU | Tesla T4 |
+| 分支 | `baseline-repro` |
+
+### 5.2 关键修复
+
+原始 `zs_infer.py` 存在无条件 `wandb.log()`，导致不使用 wandb 时崩溃：
+
+```text
+wandb.errors.errors.Error: You must call wandb.init() before wandb.log()
+```
+
+修复方式：
+
+```python
+if args.wandb:
+    wandb.log(...)
+```
+
+之后 global / hierarchical runner 也做了类似处理或通过 `WANDB_MODE=offline` 规避。
+
+### 5.3 Baseline 结果
+
+| Stage | Method | Accuracy | Delta vs Zero-shot |
+|---|---|---:|---:|
+| 1.1 | Zero-shot | 65.19 | - |
+| 1.2 | Global Cache | 67.06 | +1.87 |
+| 1.3 | Hierarchical Cache | 68.15 | +2.96 |
+
+结论：原始 Point-Cache 在服务器上复现成功，趋势正确：
+
+\[
+\text{Zero-shot} < \text{Global Cache} < \text{Hierarchical Cache}
+\]
+
+---
+
+## 6. 脚本与日志规范
+
+### 6.1 脚本位置
+
+```text
+Point-Cache/scripts/recur-pc/
+```
+
+### 6.2 日志位置
+
+```text
+Point-Cache/logs/recur-pc/
+```
+
+`logs/` 存放实验原始终端输出、每个 corruption 的 `.log` 文件、summary CSV。该目录不提交 Git。
+
+### 6.3 命名规范
+
+统一格式：
+
+```text
+run_<experiment_id>_<method>_<dataset>_<scope>_<gpu_mode>.sh
+```
+
+示例：
+
+```text
+run_e2_emr_hierarchical_modelnetc_all_corruptions_gpu1.sh
+run_e3_glc_hierarchical_modelnetc_all_corruptions_gpu1.sh
+run_e3_glc_hierarchical_modelnetc_all_corruptions_dual_gpu.sh
+run_baseline_hierarchical_modelnetc_all_corruptions_gpu0.sh
+```
+
+---
+
+## 7. Stage 2 / E2-EMR：Entropy–Margin Reliability Cache Admission
+
+### 7.1 实验名称
+
+```text
+E2-EMR: Entropy–Margin Reliability Cache Admission
+```
+
+中文：熵-间隔可靠性缓存准入实验。
+
+### 7.2 用户问题与解释
+
+用户问：top-1/top-2 margin 是什么？当前做的工作是什么？公式是什么意思？
+
+回答要点：
+
+- top-1/top-2 margin 是模型最相信类别与第二相信类别之间的概率差。
+
+\[
+M(x)=p_{(1)}(x)-p_{(2)}(x)
+\]
+
+- 原始 Point-Cache 只看 entropy / loss：低熵样本更容易进入 positive cache。
+- E2-EMR 改为看 reliability score：
+
+\[
+R(x)=-H(x)+\lambda_m M(x)
+\]
+
+### 7.3 原来与现在的区别
+
+| 项 | 原始 Point-Cache | E2-EMR |
+|---|---|---|
+| positive cache 准入依据 | entropy / loss 越低越好 | reliability score 越高越好 |
+| 是否考虑 top-2 类别 | 否 | 是 |
+| 替换规则 | 新样本 entropy 更低则替换 | 新样本 reliability 更高则替换 |
+| negative cache | 不变 | 不变 |
+| final logits | 不变 | 不变 |
+
+### 7.4 单 corruption 结果
+
+| Method | Corruption | Accuracy |
+|---|---|---:|
+| Original Hierarchical | add_global_2 | 68.15 |
+| E2-EMR | add_global_2 | 68.68 |
+
+提升：
+
+\[
+68.68-68.15=+0.53
+\]
+
+### 7.5 全 corruption 结果
+
+| Corruption | Baseline Hierarchical | E2-EMR | Delta |
+|---|---:|---:|---:|
+| add_global_2 | 68.15 | 68.68 | +0.53 |
+| add_local_2 | 61.30 | 60.25 | -1.05 |
+| dropout_global_2 | 73.22 | 73.34 | +0.12 |
+| dropout_local_2 | 63.65 | 63.01 | -0.64 |
+| rotate_2 | 73.30 | 72.85 | -0.45 |
+| scale_2 | 70.46 | 69.85 | -0.61 |
+| jitter_2 | 29.58 | 29.54 | -0.04 |
+| **Average** | **62.81** | **62.50** | **-0.31** |
+
+### 7.6 结论
+
+E2-EMR 是阶段性成果，但不是最终方法。
+
+关键结论：
+
+> Entropy + margin 在 global corruption 上有效，但全 corruption 平均不稳定，尤其在 local corruption 和几何变换上下降。这说明仅靠分类置信度和类别 margin 不足，需要加入 3D 特有的 global-local consistency。
+
+论文素材：
+
+```text
+[Section: Method / Ablation Motivation]
+A simple entropy-margin reliability score improves global corruption cases but degrades under local and geometric corruptions. This indicates that class-level confidence alone is insufficient for 3D test-time cache admission. Reliable point-cloud cache construction should further consider structural consistency between global object features and local part evidence.
+```
+
+---
+
+## 8. Stage 3 / E3-GLC：Global-Local Consistency Reliability
+
+### 8.1 实验名称
+
+```text
+E3-GLC: Global-Local Consistency Reliability Cache Admission
+```
+
+中文：全局-局部一致性可靠性缓存准入实验。
+
+### 8.2 动机
+
+E2-EMR 在 local corruption 上下降，说明只看全局分类置信度不够。点云方法需要考虑：
+
+> 全局预测认为样本属于某类时，局部 part evidence 是否也支持该类。
+
+### 8.3 公式
+
+\[
+R(x)=-H(x)+\lambda_mM(x)+\lambda_cC_{\text{global-local}}(x)
+\]
+
+其中：
+
+\[
+C_{\text{global-local}}(x)=p_{\text{local}}(\hat{y}_{\text{global}})
+\]
+
+含义：全局预测类别在局部 part 平均概率中的支持程度。
+
+### 8.4 代码文件
+
+| 文件 | 作用 |
+|---|---|
+| `runners/model_with_hierarchical_caches.py` | 保持原始 baseline |
+| `runners/model_with_hierarchical_caches_reliability_v1.py` | E2-EMR |
+| `runners/model_with_hierarchical_caches_reliability_v2_glc.py` | E3-GLC |
+
+### 8.5 单 corruption 测试结果
+
+已知日志时间戳：`20260514_163512`。
+
+| Method | Corruption | Accuracy |
+|---|---|---:|
+| Original Hierarchical | add_global_2 | 68.15 |
+| E2-EMR | add_global_2 | 68.68 |
+| E3-GLC | add_global_2 | 68.31 |
+
+分析：
+
+- E3-GLC 比 baseline 高 `+0.16`。
+- E3-GLC 比 E2-EMR 低 `-0.37`。
+- 这在 `add_global_2` 上可以接受，因为 GLC 主要预期改善 local corruption，而不是 global corruption。
+
+### 8.6 下一步计划
+
+- 将 E3-GLC 脚本改为双卡版本。
+- 采用 corruption 级并行，而不是拆分单个在线流。
+- 跑完整 7 corruption，比较平均值与 local corruption 表现。
+
+---
+
+## 9. 双卡运行原则
+
+用户问：能不能改成双卡版本？
+
+结论：可以，但方式是 corruption 级并行：
+
+\[
+\text{GPU0 跑一部分 corruption}
+\]
+
+\[
+\text{GPU1 跑另一部分 corruption}
+\]
+
+不能把同一个 corruption 的测试流拆成两半，因为 Point-Cache / MCM-PC 是在线 cache adaptation，cache 会随着样本顺序更新。拆分单个流会导致：
+
+\[
+C_t^{(0)}\neq C_t^{(1)}
+\]
+
+从而不再等价于原始在线测试设定。
+
+---
+
+## 10. 当前待办
+
+| 优先级 | 任务 | 状态 |
+|---:|---|---|
+| 1 | 统一脚本命名 | 已确认规则，需重命名历史脚本 |
+| 2 | 运行 E3-GLC 7 corruption 双卡实验 | 待执行 / 进行中 |
+| 3 | 上传 `summary_e3_glc...csv` 后分析 | 待完成 |
+| 4 | 更新 `docs/experiment_log.md` | 待 E3 完成后更新 |
+| 5 | 写 Stage 3 HTML / Markdown 阶段报告 | 待 E3 完成后生成 |
+| 6 | 决定 Stage 4 是否做 Confusion-Aware Negative Cache | 待 E3 结果决定 |
+
+---
+
+## 11. 当前项目结论快照
+
+1. Point-Cache baseline 已经成功复现。
+2. E2-EMR 是一个有效阶段成果，但平均性能略低于 baseline。
+3. E2 的结果支持了下一步做 global-local consistency 的动机。
+4. E3-GLC 单 corruption 跑通，add_global_2 上略高于 baseline。
+5. 需要完整 7 corruption 结果来判断 E3 是否真正优于 baseline。
+
