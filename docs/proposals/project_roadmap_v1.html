@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MCM-PC Project Roadmap</title>
+<style>
+  :root{
+    --bg:#070b14; --panel:#0e1628; --panel2:#101b31; --muted:#90a4c7; --text:#eaf1ff;
+    --line:#223657; --cyan:#59d9ff; --violet:#a78bfa; --green:#67e8a4; --yellow:#fde68a; --red:#fb7185;
+    --blue:#60a5fa; --shadow:0 20px 60px rgba(0,0,0,.38); --radius:22px;
+  }
+  *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 20% -10%,rgba(89,217,255,.16),transparent 35%),radial-gradient(circle at 95% 10%,rgba(167,139,250,.13),transparent 30%),linear-gradient(180deg,#070b14,#0a0f1e 45%,#070b14);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,"Microsoft YaHei",sans-serif;line-height:1.68}
+  a{color:var(--cyan)} .wrap{max-width:1180px;margin:0 auto;padding:42px 24px 80px}.hero{position:relative;overflow:hidden;border:1px solid rgba(89,217,255,.2);border-radius:32px;padding:44px;background:linear-gradient(135deg,rgba(14,22,40,.92),rgba(16,27,49,.78));box-shadow:var(--shadow)}
+  .hero:before{content:"";position:absolute;right:-160px;top:-160px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(89,217,255,.24),transparent 65%)}
+  .badge{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(89,217,255,.28);background:rgba(89,217,255,.08);color:#c7f4ff;padding:6px 12px;border-radius:999px;font-size:13px;letter-spacing:.2px}.hero h1{font-size:48px;line-height:1.08;margin:18px 0 14px}.hero p{max-width:850px;color:var(--muted);font-size:17px}.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.pill{border:1px solid var(--line);background:#0b1324;color:#b9c8e8;border-radius:999px;padding:8px 13px;font-size:13px}
+  .toc{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0}.toc a{text-decoration:none;color:var(--text);background:rgba(14,22,40,.72);border:1px solid var(--line);border-radius:18px;padding:14px;transition:.2s}.toc a:hover{transform:translateY(-2px);border-color:rgba(89,217,255,.5)}
+  section{margin-top:34px}.section-title{display:flex;align-items:center;gap:12px;margin:0 0 18px}.section-title .num{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#06101e;font-weight:800}.section-title h2{font-size:28px;margin:0}.card{background:linear-gradient(180deg,rgba(14,22,40,.9),rgba(12,19,35,.86));border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.mini h3,.card h3{margin-top:0}.muted{color:var(--muted)}.ok{color:var(--green)}.warn{color:var(--yellow)}.bad{color:var(--red)}.cyan{color:var(--cyan)}.violet{color:var(--violet)}
+  table{width:100%;border-collapse:collapse;border-spacing:0;overflow:hidden;border-radius:18px;background:#0c1425;border:1px solid var(--line)}th,td{border-bottom:1px solid #1e2f4d;padding:12px 14px;text-align:left;vertical-align:top}th{background:#101c32;color:#d9e7ff;font-weight:700}tr:last-child td{border-bottom:0}.tag{display:inline-block;border-radius:999px;padding:3px 9px;font-size:12px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.05);margin:2px}.tag.green{border-color:rgba(103,232,164,.35);color:#b7ffd5}.tag.blue{border-color:rgba(96,165,250,.35);color:#c4ddff}.tag.yellow{border-color:rgba(253,230,138,.35);color:#fff1a8}.tag.red{border-color:rgba(251,113,133,.35);color:#ffc2cd}.tag.violet{border-color:rgba(167,139,250,.35);color:#ddd2ff}
+  .matrix{display:grid;grid-template-columns:130px repeat(3,1fr);gap:1px;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--line)}.cell{background:#0d1729;padding:14px;min-height:94px}.head{background:#13213a;font-weight:800;color:#d9e7ff}.rowhead{background:#101c32;font-weight:800;color:#c7f4ff}.cell small{color:var(--muted);display:block;margin-top:6px}.timeline{position:relative;margin-left:8px}.timeline:before{content:"";position:absolute;left:15px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--cyan),var(--violet))}.tl{display:grid;grid-template-columns:54px 1fr;gap:16px;position:relative;margin:18px 0}.dot{width:32px;height:32px;border-radius:50%;background:#07111f;border:2px solid var(--cyan);box-shadow:0 0 0 6px rgba(89,217,255,.08);z-index:1}.tl .body{background:#0d1729;border:1px solid var(--line);border-radius:18px;padding:16px 18px}.tl h3{margin:0 0 8px}.checklist{display:grid;gap:8px}.checklist div{padding-left:25px;position:relative}.checklist div:before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:900}.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:#060b13;border:1px solid #1e2f4d;color:#d9f3ff;padding:14px 16px;border-radius:16px;overflow:auto;font-size:13px;line-height:1.6}.note{border-left:4px solid var(--cyan);background:rgba(89,217,255,.07);padding:14px 16px;border-radius:14px}.danger{border-left:4px solid var(--red);background:rgba(251,113,133,.07);padding:14px 16px;border-radius:14px}.success{border-left:4px solid var(--green);background:rgba(103,232,164,.07);padding:14px 16px;border-radius:14px}
+  .paperbox{border:1px dashed rgba(89,217,255,.35);border-radius:18px;padding:16px;background:rgba(89,217,255,.05)}.paperbox b{color:#d9f3ff}.footer{margin-top:44px;color:var(--muted);font-size:13px;text-align:center}@media(max-width:900px){.grid,.grid3,.grid4,.toc{grid-template-columns:1fr}.hero h1{font-size:34px}.matrix{grid-template-columns:1fr}.head,.rowhead{min-height:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <span class="badge">MCM-PC · Research & Engineering Manual</span>
+    <h1>Multi-Cache Matrix for 3D Point Cloud Test-time Adaptation</h1>
+    <p>一个面向“小白到论文”的完整执行说明书：以 Point-Cache 为主工程骨架，参考 MCP 的多缓存思想，引入球面文本建模 vMF 与类内紧凑性/类间边界联合选择机制，逐步形成可实验、可写作、可投稿的研究项目。</p>
+    <div class="meta">
+      <span class="pill">主线代码：Point-Cache</span><span class="pill">参考代码：MCP</span><span class="pill">核心创新：Spherical Text Prior + Cache Matrix</span><span class="pill">硬件预算：2 × Tesla T4</span><span class="pill">目标：先可复现，再冲顶会</span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <a href="#big-picture">01 总体思路</a><a href="#method">02 方法设计</a><a href="#timeline">03 任务时间表</a><a href="#code">04 代码改造</a><a href="#git">05 Git 管理</a><a href="#paper">06 论文写作</a><a href="#experiments">07 实验矩阵</a><a href="#risks">08 风险控制</a>
+  </nav>
+
+  <section id="big-picture">
+    <div class="section-title"><span class="num">01</span><h2>总体判断与项目定位</h2></div>
+    <div class="grid">
+      <div class="card">
+        <h3>题目评价</h3>
+        <p><b>Multi-Cache Matrix for 3D Point Cloud Test-time Adaptation</b> 可以用，但要让 “Matrix” 成为真实方法，而不是装饰词。建议正式题目：</p>
+        <p class="success"><b>MCM-3D: Spherical Multi-Cache Matrix for Test-Time Point Cloud Adaptation</b></p>
+        <p>更稳妥的版本：</p>
+        <ul>
+          <li><b>Multi-Cache Matrix for Test-Time Point Cloud Generalization</b></li>
+          <li><b>Spherical Semantic Multi-Cache for 3D Test-Time Adaptation</b></li>
+          <li><b>Compactness-Aware Multi-Cache Matrix for Open-Vocabulary 3D Recognition</b></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>项目目标</h3>
+        <p>不要把项目写成 “MCP 迁移到 Point-Cache”。更强的叙事是：</p>
+        <p class="note">现有 3D cache 方法主要依赖低熵伪标签和离散样本记忆，但忽略了文本特征的球面几何、类内紧凑性、类间边界，以及 global/local 层级下不同证据源之间的结构化协同。</p>
+        <p>因此我们提出一个 <b>cache matrix</b>：行是 3D 层级，列是缓存证据类型，再由球面文本分布作为语义先验。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="method">
+    <div class="section-title"><span class="num">02</span><h2>方法设计：从 Point-Cache 到 MCM-PC</h2></div>
+    <div class="card">
+      <h3>2.1 Multi-Cache Matrix 的具体含义</h3>
+      <div class="matrix">
+        <div class="cell head">层级 × 缓存</div><div class="cell head">Entropy Cache</div><div class="cell head">Align Cache</div><div class="cell head">Negative Cache</div>
+        <div class="cell rowhead">Global Level</div>
+        <div class="cell">低熵全局特征<br><small>稳定初始化类别全局原型，保留 high-confidence global fingerprints。</small></div>
+        <div class="cell">紧凑全局特征<br><small>根据球面文本原型 + 当前视觉原型判断是否靠近类别中心。</small></div>
+        <div class="cell">全局不确定特征<br><small>用于抑制错误类别，做 prediction calibration。</small></div>
+        <div class="cell rowhead">Local Level</div>
+        <div class="cell">低熵局部 part 特征<br><small>沿用 Point-Cache 的 local patch / k-means part centers。</small></div>
+        <div class="cell">紧凑局部 part 特征<br><small>判断局部结构是否与类别局部原型一致，尤其针对 drop-local、jitter。</small></div>
+        <div class="cell">局部不确定 part 特征<br><small>当整体预测可能正确但局部证据冲突时，作为局部负证据。</small></div>
+      </div>
+    </div>
+
+    <div class="grid3" style="margin-top:18px">
+      <div class="card mini">
+        <h3>创新 A：vMF 文本球面先验</h3>
+        <p>Point-Cache 对文本模板做平均；BayesMM 用 Gaussian 描述文本分布。我们的切入点是：多模态模型通常使用归一化特征与 cosine similarity，文本向量实际住在单位球面上。用 <b>von Mises-Fisher distribution</b> 建模更自然。</p>
+        <div class="code">p(t | μ_c, κ_c) = C_d(κ_c) exp(κ_c μ_c^T t),  ||t|| = ||μ_c|| = 1</div>
+      </div>
+      <div class="card mini">
+        <h3>创新 B：Compactness + Margin 选择</h3>
+        <p>样本进入 cache 不只看 entropy，还看它与目标类别中心的角距离，以及它和第二候选类别之间的 margin。这样能避免 “低熵但偏离类别簇” 的错误样本污染 cache。</p>
+        <div class="code">score = confidence + λ1 * compactness + λ2 * margin - λ3 * local_conflict</div>
+      </div>
+      <div class="card mini">
+        <h3>创新 C：Global-Local 证据协同</h3>
+        <p>Point-Cache 已有 global/local 两层，但没有把每层分成不同证据缓存。MCM-PC 把全局结构、局部结构、正证据、负证据、文本先验统一到一个 matrix 中。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h3>2.2 vMF 文本模块的最小可行版本</h3>
+      <table>
+        <tr><th>版本</th><th>做法</th><th>代码难度</th><th>论文价值</th></tr>
+        <tr><td>TextMean</td><td>对模板文本特征 L2 normalize 后取平均，再 normalize。</td><td><span class="tag green">低</span></td><td>作为 baseline，证明普通平均有限。</td></tr>
+        <tr><td>Text-vMF</td><td>估计每类文本 mean direction μ_c 和 concentration κ_c。</td><td><span class="tag yellow">中</span></td><td>核心创新：球面语义先验。</td></tr>
+        <tr><td>Text-vMF + Shrinkage</td><td>由于 prompt 数少、高维估计不稳，对 κ_c 做截断/平滑。</td><td><span class="tag yellow">中</span></td><td>提高稳定性，适合写进方法与消融。</td></tr>
+        <tr><td>Hierarchical vMF</td><td>为 global 和 local 分别设文本/视觉球面原型。</td><td><span class="tag red">高</span></td><td>后期冲顶会时再做。</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <div class="section-title"><span class="num">03</span><h2>14 周任务时间表</h2></div>
+    <div class="timeline">
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 0 周：工程冻结与 Git 起步</h3><div class="checklist"><div>确认服务器环境、显卡、CUDA、conda、数据路径。</div><div>Point-Cache 作为主仓库；MCP 作为参考仓库，不混在一起。</div><div>建立分支：baseline-repro、mcm-dev、paper-draft。</div><div>创建 docs/experiment_log.md 和 docs/idea_bank.md。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 1–2 周：复现 Point-Cache</h3><div class="checklist"><div>先跑 zero-shot：zs_infer.py。</div><div>再跑 global cache：model_with_global_cache.py。</div><div>最后跑 hierarchical cache：model_with_hierarchical_caches.py。</div><div>只使用 ModelNet-C + ULIP/ULIP-2，避免一开始跑大模型。</div><div>产出表格：ZS / Global / Hierar 在 1–2 个 corruption 上的 accuracy。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 3 周：文本模板与 TextMean 重构</h3><div class="checklist"><div>梳理 Point-Cache 的 datasets/templates.py 和 llm/*.json。</div><div>新建 mcm_pc/text_prior.py。</div><div>实现统一接口：build_text_features(classnames, templates, mode='mean')。</div><div>确保结果与原始 Point-Cache 接近，作为 sanity check。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 4 周：Text-vMF 原型</h3><div class="checklist"><div>实现 vMF mean direction μ_c。</div><div>估计或设定 concentration κ_c：先固定 κ，再尝试按 prompt 分散度估计。</div><div>替换 zero-shot text logits：从普通 text feature 改为 vMF text prior logits。</div><div>消融：Mean vs Normalized-Mean vs vMF。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 5–6 周：Global Align Cache</h3><div class="checklist"><div>复制 model_with_hierarchical_caches.py 为 model_with_mcm_pc.py。</div><div>实现 global entropy cache 与 global align cache 分离。</div><div>更新规则加入 compactness：样本必须低熵且接近 prototype center。</div><div>加入 margin：top-1 与 top-2 类别的角相似差距。</div><div>先不做 local 和 negative，保持单变量可控。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 7 周：Local Align Cache</h3><div class="checklist"><div>沿用 Point-Cache 的 local part features。</div><div>对每类维护 local prototype 或 part prototype bank。</div><div>将 local cache 从 “跟随 global” 升级为 “局部一致性评分”。</div><div>重点测试 drop-local、jitter、add-local。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 8 周：Negative Cache 与 Reflection</h3><div class="checklist"><div>实现高熵样本的校准后再入负缓存。</div><div>规则：校准后可靠 → 正缓存；中等不确定 → negative；过度混乱 → discard。</div><div>让 negative logits 作为抑制项，而不是简单相加。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 9–10 周：完整 MCM-PC 集成</h3><div class="checklist"><div>统一 global/local × entropy/align/negative 的 CacheMatrix 类。</div><div>写配置参数，避免在 runner 中硬编码。</div><div>加入日志：cache 命中率、替换次数、平均熵、平均 compactness、平均 margin。</div><div>初步跑完整 ModelNet-C 七种 corruption。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 11–12 周：实验扩展与消融</h3><div class="checklist"><div>扩展到 ScanObjectNN-C、ModelNet40、ScanObjectNN hardest。</div><div>消融：vMF、Align、Negative、Local、Margin、Cache size、κ。</div><div>比较：ZS、Point-Cache Global、Point-Cache Hierar、MCP-style naive migration、MCM-PC。</div><div>记录显存与速度。</div></div></div></div>
+      <div class="tl"><div class="dot"></div><div class="body"><h3>第 13–14 周：论文初稿</h3><div class="checklist"><div>写 Abstract、Introduction、Related Work、Method。</div><div>画主框架图：Spherical Text Prior + Multi-Cache Matrix。</div><div>整理主表与消融表。</div><div>准备失败案例与可视化：t-SNE、cache compactness curve、online accuracy curve。</div></div></div></div>
+    </div>
+  </section>
+
+  <section id="code">
+    <div class="section-title"><span class="num">04</span><h2>代码改造说明</h2></div>
+    <div class="grid">
+      <div class="card">
+        <h3>是否都在 Point-Cache 代码上改？</h3>
+        <p><b>是，主工程必须在 Point-Cache 上改。</b> 原因是你的任务、数据集、3D backbone、global/local feature、runner、scripts 都已经在 Point-Cache 中。MCP 是 2D CLIP 的实现，只用于看思想和部分函数风格，不建议把 MCP 代码强行搬进来。</p>
+        <p class="note">推荐策略：复制 Point-Cache 的 runner，创建新模块，不直接大改原始文件。这样 baseline 永远可复现。</p>
+      </div>
+      <div class="card">
+        <h3>建议新增/修改文件</h3>
+        <div class="code">Point-Cache/
+├── mcm_pc/
+│   ├── __init__.py
+│   ├── text_vmf.py          # vMF 文本球面先验
+│   ├── cache_matrix.py      # global/local × entropy/align/negative
+│   ├── scoring.py           # entropy + compactness + margin
+│   ├── metrics.py           # compactness, margin, cache stats
+│   └── logging_utils.py
+├── runners/
+│   └── model_with_mcm_pc.py # 新主入口
+├── scripts/
+│   └── eval_mcm_pc.sh
+└── configs/
+    └── mcm_pc_default.yaml</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h3>最小改造顺序</h3>
+      <table>
+        <tr><th>优先级</th><th>动作</th><th>判断成功的标准</th></tr>
+        <tr><td>P0</td><td>复制原始 hierarchical runner，不改逻辑，只改文件名。</td><td>结果与原始 hierarchical cache 基本一致。</td></tr>
+        <tr><td>P1</td><td>把文本特征计算封装成函数。</td><td>TextMean 结果不下降或只微小波动。</td></tr>
+        <tr><td>P2</td><td>加入 vMF text logits。</td><td>至少在部分 corruption / dataset 上提升。</td></tr>
+        <tr><td>P3</td><td>加入 align cache。</td><td>cache compactness 上升，accuracy 不显著下降。</td></tr>
+        <tr><td>P4</td><td>加入 margin score。</td><td>伪标签污染减少，尤其在 fine-grained / noisy 场景有效。</td></tr>
+        <tr><td>P5</td><td>加入 negative cache。</td><td>错误高置信类别被抑制，top-5 entropy/accuracy 曲线更好。</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="git">
+    <div class="section-title"><span class="num">05</span><h2>Git 工作流与阶段性总结</h2></div>
+    <div class="grid">
+      <div class="card">
+        <h3>分支策略</h3>
+        <div class="code">main                  # 保持可运行
+baseline-repro        # 只做复现
+text-vmf              # 文本球面模块
+align-cache           # compactness / margin cache
+egative-cache        # negative calibration
+mcm-pc-integrated     # 完整方法
+paper-draft           # 论文与图表</div>
+      </div>
+      <div class="card">
+        <h3>提交信息模板</h3>
+        <div class="code">git add runners/model_with_mcm_pc.py mcm_pc/text_vmf.py
+
+git commit -m "feat(text): add vMF textual prior for class prototypes"
+
+git tag -a v0.2-text-vmf -m "Text-vMF module runnable on ModelNet-C"</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h3>每个阶段你发给我的信息格式</h3>
+      <p>每次做完一个阶段，你把下面 6 项发给我，我就能帮你总结阶段成果、写实验日志、判断下一步。</p>
+      <div class="code">阶段：第 X 周 / 模块名
+Git commit hash：xxxxxxx
+运行命令：bash scripts/xxx.sh
+数据集/模型：ModelNet-C / ULIP-2
+结果：ZS xx, Point-Cache xx, Ours xx
+问题：报错 / 速度 / 显存 / 指标异常</div>
+    </div>
+  </section>
+
+  <section id="paper">
+    <div class="section-title"><span class="num">06</span><h2>论文写作大纲与英文素材库</h2></div>
+    <div class="grid">
+      <div class="paperbox">
+        <h3>Abstract 中可写</h3>
+        <p><b>Core sentence:</b> We propose MCM-PC, a spherical multi-cache matrix framework for test-time point cloud adaptation, which organizes online geometric evidence into a global-local cache matrix and anchors cache updates with von Mises-Fisher textual priors.</p>
+        <p><b>放置位置：</b>Abstract 第 2–3 句，介绍方法。</p>
+      </div>
+      <div class="paperbox">
+        <h3>Introduction 中可写</h3>
+        <p><b>Problem sentence:</b> Existing cache-based 3D adaptation methods prioritize low-entropy samples, yet low entropy alone does not guarantee compact and semantically aligned class-wise distributions under corruptions and geometric shifts.</p>
+        <p><b>放置位置：</b>Introduction 第 2 段，讲现有方法不足。</p>
+      </div>
+      <div class="paperbox">
+        <h3>Method 中可写</h3>
+        <p><b>Method sentence:</b> Instead of averaging prompt embeddings in Euclidean space, we model normalized textual embeddings on the hypersphere using a von Mises-Fisher distribution, where the mean direction provides a spherical semantic anchor and the concentration parameter reflects prompt-level semantic reliability.</p>
+        <p><b>放置位置：</b>Method 的 Textual Prior 小节。</p>
+      </div>
+      <div class="paperbox">
+        <h3>Related Work 中可写</h3>
+        <p><b>Related sentence:</b> Compared with Point-Cache, which stores global and local fingerprints of online test samples, our method further decomposes hierarchical caches into positive, compactness-aware, and negative evidence streams.</p>
+        <p><b>放置位置：</b>Related Work 的 Cache-based TTA 小节末尾。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="experiments">
+    <div class="section-title"><span class="num">07</span><h2>实验矩阵</h2></div>
+    <div class="card">
+      <table>
+        <tr><th>实验类型</th><th>数据集</th><th>模型</th><th>对比方法</th><th>目的</th></tr>
+        <tr><td>快速 sanity check</td><td>ModelNet-C 单 corruption</td><td>ULIP / ULIP-2</td><td>ZS, Global, Hierar, Ours</td><td>验证代码没有跑偏。</td></tr>
+        <tr><td>鲁棒性主实验</td><td>ModelNet-C 七种 corruption</td><td>ULIP, ULIP-2, OpenShape</td><td>Point-Cache, BayesMM, Ours</td><td>证明对 corruptions 有效。</td></tr>
+        <tr><td>真实扫描泛化</td><td>ScanObjectNN / ScanObjectNN-C</td><td>ULIP-2, OpenShape</td><td>Point-Cache, Ours</td><td>证明不是只对合成数据有效。</td></tr>
+        <tr><td>大类别泛化</td><td>Objaverse-LVIS</td><td>ULIP-2</td><td>Point-Cache, Ours</td><td>验证文本先验与 cache 规模稳定性。</td></tr>
+        <tr><td>消融</td><td>ModelNet-C + ScanObjectNN</td><td>ULIP-2</td><td>去掉 vMF / align / margin / negative / local</td><td>证明每个模块都有贡献。</td></tr>
+        <tr><td>效率</td><td>ModelNet40 / ModelNet-C</td><td>ULIP-2</td><td>ZS, Point-Cache, Ours</td><td>报告 FPS、显存、cache 参数量。</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="risks">
+    <div class="section-title"><span class="num">08</span><h2>风险控制</h2></div>
+    <div class="grid3">
+      <div class="card"><h3>风险 1：创新被认为拼接</h3><p class="danger">解决：把核心贡献放在 “球面文本先验 + cache matrix + compactness/margin selection”，不要只写 MCP 迁移。</p></div>
+      <div class="card"><h3>风险 2：vMF 不提升</h3><p class="danger">解决：先做 TextMean / NormalizedMean / fixed-κ vMF / estimated-κ vMF 四组消融。即使平均精度提升不大，也可以从 calibration、稳定性、large-class 上找优势。</p></div>
+      <div class="card"><h3>风险 3：T4 跑不动</h3><p class="danger">解决：先 ULIP/ULIP-2，batch size=1，fp16，少 corruption，少数据集。Uni3D 和 Objaverse-LVIS 放到最后。</p></div>
+    </div>
+  </section>
+
+  <div class="footer">Generated for the MCM-PC project · Keep Point-Cache reproducible, add MCM-PC incrementally, write evidence as you code.</div>
+</div>
+</body>
+</html>

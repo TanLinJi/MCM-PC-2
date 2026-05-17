@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCM-PC Top Conference Proposal</title>
+  <script>
+    window.MathJax = {
+      tex: {inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]']]},
+      svg: {fontCache: 'global'}
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+  <style>
+    :root {
+      --bg: #070b12;
+      --panel: #0d1320;
+      --panel-2: #111a2b;
+      --card: #121c2e;
+      --card-soft: #162338;
+      --text: #e6edf7;
+      --muted: #9fb0c7;
+      --faint: #687891;
+      --accent: #69e7ff;
+      --accent-2: #9b8cff;
+      --accent-3: #5cffb1;
+      --warn: #ffd166;
+      --danger: #ff6b81;
+      --line: rgba(151, 169, 203, 0.18);
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --radius: 22px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(105, 231, 255, .16), transparent 28%),
+        radial-gradient(circle at 82% 0%, rgba(155, 140, 255, .18), transparent 34%),
+        radial-gradient(circle at 70% 70%, rgba(92, 255, 177, .08), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.72;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .layout {
+      display: grid;
+      grid-template-columns: 292px minmax(0, 1fr);
+      gap: 24px;
+      width: min(1480px, 100%);
+      margin: 0 auto;
+      padding: 26px;
+    }
+    aside {
+      position: sticky;
+      top: 22px;
+      height: calc(100vh - 44px);
+      overflow: auto;
+      background: rgba(13, 19, 32, .78);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      padding: 20px;
+    }
+    .brand {
+      padding: 12px 12px 18px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+    .brand .tag { color: var(--accent-3); font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .brand h1 { font-size: 22px; line-height: 1.16; margin: 8px 0 10px; }
+    .brand p { margin: 0; color: var(--muted); font-size: 13px; }
+    nav a {
+      display: block;
+      padding: 9px 12px;
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      margin: 2px 0;
+    }
+    nav a:hover {
+      background: rgba(105, 231, 255, .08);
+      color: var(--text);
+      text-decoration: none;
+    }
+    main { min-width: 0; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(17, 26, 43, .94), rgba(13, 19, 32, .86));
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      padding: 44px;
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -30% auto;
+      width: 460px;
+      height: 460px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(105, 231, 255, .18), transparent 65%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 12px;
+      border: 1px solid rgba(105, 231, 255, .26);
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(105, 231, 255, .08);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .hero h2 {
+      font-size: clamp(34px, 6vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.05em;
+      margin: 0 0 18px;
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 920px;
+      margin: 0 0 28px;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+    .chip {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+      border-radius: 999px;
+      padding: 8px 13px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    section {
+      margin-top: 24px;
+      background: rgba(13, 19, 32, .76);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: 0 14px 44px rgba(0,0,0,.20);
+      backdrop-filter: blur(12px);
+    }
+    section h2 {
+      margin: 0 0 18px;
+      font-size: 30px;
+      letter-spacing: -0.03em;
+      line-height: 1.18;
+    }
+    section h3 {
+      margin: 28px 0 10px;
+      font-size: 21px;
+      letter-spacing: -0.02em;
+    }
+    section h4 {
+      margin: 18px 0 8px;
+      font-size: 16px;
+      color: var(--accent);
+    }
+    p { margin: 0 0 14px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; color: var(--faint); }
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .card {
+      background: linear-gradient(180deg, rgba(22, 35, 56, .90), rgba(18, 28, 46, .84));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      min-width: 0;
+    }
+    .card h3, .card h4 { margin-top: 0; }
+    .card.accent { border-color: rgba(105, 231, 255, .36); background: linear-gradient(180deg, rgba(105, 231, 255, .10), rgba(18, 28, 46, .78)); }
+    .card.green { border-color: rgba(92, 255, 177, .32); background: linear-gradient(180deg, rgba(92, 255, 177, .08), rgba(18, 28, 46, .78)); }
+    .card.purple { border-color: rgba(155, 140, 255, .36); background: linear-gradient(180deg, rgba(155, 140, 255, .10), rgba(18, 28, 46, .78)); }
+    .card.warn { border-color: rgba(255, 209, 102, .34); background: linear-gradient(180deg, rgba(255, 209, 102, .08), rgba(18, 28, 46, .78)); }
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+    .kpi .num { font-size: 28px; font-weight: 800; letter-spacing: -.04em; color: var(--accent); }
+    .kpi .label { color: var(--muted); font-size: 13px; }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      margin: 14px 0;
+    }
+    th, td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: rgba(105, 231, 255, .08);
+      color: var(--text);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    tr:last-child td { border-bottom: 0; }
+    td { color: #d7e3f5; }
+    .formula {
+      overflow-x: auto;
+      padding: 18px;
+      margin: 16px 0;
+      border-radius: 18px;
+      border: 1px solid rgba(105, 231, 255, .22);
+      background: rgba(7, 11, 18, .55);
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: rgba(105, 231, 255, .07);
+      padding: 14px 16px;
+      border-radius: 0 14px 14px 0;
+      color: var(--muted);
+      margin: 16px 0;
+    }
+    .warning {
+      border-left-color: var(--warn);
+      background: rgba(255, 209, 102, .07);
+    }
+    .danger {
+      border-left-color: var(--danger);
+      background: rgba(255, 107, 129, .07);
+    }
+    code, pre {
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    pre {
+      margin: 14px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #050812;
+      color: #cde6ff;
+      overflow: auto;
+      line-height: 1.55;
+    }
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .step {
+      position: relative;
+      min-height: 110px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+      padding: 15px;
+    }
+    .step::after {
+      content: "→";
+      position: absolute;
+      right: -18px;
+      top: 40%;
+      color: var(--accent);
+      font-weight: 800;
+    }
+    .step:last-child::after { content: ""; }
+    .step .idx {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(105, 231, 255, .13);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .step strong { display: block; line-height: 1.25; margin-bottom: 6px; }
+    .timeline {
+      position: relative;
+      margin-top: 14px;
+    }
+    .milestone {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 18px;
+      margin: 0 0 16px;
+    }
+    .week {
+      color: var(--accent-3);
+      font-family: var(--mono);
+      font-weight: 800;
+      padding-top: 18px;
+    }
+    .milestone .box {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      padding: 17px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .badge.must { color: #d7fff0; border-color: rgba(92, 255, 177, .26); background: rgba(92, 255, 177, .07); }
+    .badge.exp { color: #e9e2ff; border-color: rgba(155, 140, 255, .30); background: rgba(155, 140, 255, .08); }
+    .badge.risk { color: #ffe7a8; border-color: rgba(255, 209, 102, .30); background: rgba(255, 209, 102, .07); }
+    .paper-snippet {
+      border: 1px solid rgba(155, 140, 255, .26);
+      background: rgba(155, 140, 255, .06);
+      border-radius: 16px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+    .paper-snippet .where {
+      color: var(--accent-2);
+      font-family: var(--mono);
+      font-size: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .paper-snippet blockquote {
+      margin: 0;
+      color: #ecf2ff;
+      font-size: 15px;
+      border-left: 3px solid var(--accent-2);
+      padding-left: 14px;
+    }
+    .footer {
+      margin: 24px 0 0;
+      color: var(--faint);
+      text-align: center;
+      font-size: 13px;
+    }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; padding: 14px; }
+      aside { position: relative; height: auto; top: 0; }
+      .grid.two, .grid.three, .grid.four, .kpi { grid-template-columns: 1fr; }
+      .pipeline { grid-template-columns: 1fr; }
+      .step::after { content: "↓"; right: 50%; top: auto; bottom: -20px; }
+      .milestone { grid-template-columns: 1fr; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <div class="tag">Research Proposal</div>
+        <h1>MCM-PC 顶会论文方案</h1>
+        <p>Reliability-Aware Multi-Cache Matrix for Test-Time Point Cloud Adaptation</p>
+      </div>
+      <nav>
+        <a href="#overview">0. 项目总览</a>
+        <a href="#motivation">1. 背景与问题</a>
+        <a href="#gap">2. 研究空白</a>
+        <a href="#idea">3. 核心思想</a>
+        <a href="#method">4. 方法设计</a>
+        <a href="#innovations">5. 创新点总结</a>
+        <a href="#experiments">6. 实验计划</a>
+        <a href="#implementation">7. 工程实现</a>
+        <a href="#timeline">8. 时间表</a>
+        <a href="#paper">9. 论文写作素材</a>
+        <a href="#risks">10. 风险与备选</a>
+        <a href="#refs">11. 参考基础</a>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="hero" id="overview">
+        <div class="eyebrow">MCM-PC · Proposal · Top Conference Track</div>
+        <h2><span class="gradient-text">Reliability-Aware Multi-Cache Matrix</span><br/>for 3D Point Cloud Test-Time Adaptation</h2>
+        <p class="subtitle">
+          本 proposal 面向 AAAI / NeurIPS / CVPR / ICCV / ECCV 等顶会目标，围绕 Point-Cache 基线进行方法升级，吸收 MCP 的多缓存思想与 BayesMM 的“非经验融合”启发，但将主线重新定义为：<b>3D 点云测试时缓存不应只依赖低熵，而应显式建模可靠性、类内紧凑、类间混淆、全局-局部一致性与自适应证据融合。</b>
+        </p>
+        <div class="chips">
+          <span class="chip">主仓库：Point-Cache</span>
+          <span class="chip">参考思想：MCP / BayesMM</span>
+          <span class="chip">任务：Open-Vocabulary 3D Recognition</span>
+          <span class="chip">场景：Test-Time Adaptation</span>
+          <span class="chip">硬件：2 × Tesla T4 可做初版</span>
+        </div>
+        <div class="kpi">
+          <div class="card"><div class="num">3 × 3</div><div class="label">结构层级 × 可靠性角色的 Cache Matrix</div></div>
+          <div class="card"><div class="num">4</div><div class="label">核心可靠性信号：Entropy / Compactness / Margin / Global-Local Consistency</div></div>
+          <div class="card"><div class="num">6+</div><div class="label">主要实验维度：鲁棒性、泛化、消融、显存、速度、可解释性</div></div>
+          <div class="card"><div class="num">14–18</div><div class="label">建议周周期：复现 → 模块 → 完整实验 → 写作</div></div>
+        </div>
+      </div>
+
+      <section id="motivation">
+        <h2>1. 背景与问题</h2>
+        <div class="grid two">
+          <div class="card accent">
+            <h3>Point-Cache 给我们的基础</h3>
+            <p>
+              Point-Cache 已经证明：在 3D 多模态大模型中，仅依赖 zero-shot 文本分类无法充分利用测试流分布；通过在线构建 global cache 与 local cache，可以显著提升鲁棒性和泛化能力。
+            </p>
+            <p class="muted">
+              它的优势是训练免费、plug-and-play、支持 ULIP / ULIP-2 / OpenShape / Uni3D 等 3D foundation models。
+            </p>
+          </div>
+          <div class="card purple">
+            <h3>但是 Point-Cache 仍然不够</h3>
+            <p>
+              Point-Cache 主要根据低熵样本更新 cache。它默认：低熵样本更可靠。但在点云 corruption、局部缺失、旋转、噪声点、类别相似等情况下，低熵样本也可能是“自信但错误”的伪标签。
+            </p>
+            <p class="muted">
+              因此，我们的核心问题不是“是否使用 cache”，而是“什么样的测试样本值得被 cache 信任”。
+            </p>
+          </div>
+        </div>
+        <div class="note">
+          <b>核心判断：</b>想冲顶会，不能只做 “Point-Cache + MCP”。我们需要提出一个更一般、更 3D、更可解释的可靠性缓存框架。
+        </div>
+      </section>
+
+      <section id="gap">
+        <h2>2. 研究空白：现有方法缺什么？</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>方法</th>
+              <th>已有优势</th>
+              <th>留下的问题</th>
+              <th>我们如何切入</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Point-Cache</b></td>
+              <td>Global + Local hierarchical cache；训练免费；适合 3D open-vocabulary recognition。</td>
+              <td>主要用 entropy 判断样本质量；local cache 跟随 global admission；固定 logit 权重。</td>
+              <td>引入 reliability score、global-local consistency、confusion-aware negative cache、自适应融合。</td>
+            </tr>
+            <tr>
+              <td><b>MCP</b></td>
+              <td>Entropy cache、align cache、negative cache；指出类内紧凑性重要。</td>
+              <td>面向 2D VLM；没有 3D global/local 结构；negative cache 没有显式类别对混淆。</td>
+              <td>把“多缓存”升级为 3D cache matrix，并扩展到类别对边界证据。</td>
+            </tr>
+            <tr>
+              <td><b>BayesMM</b></td>
+              <td>指出 cache 信息丢失和固定权重融合问题；提出 Bayesian fusion。</td>
+              <td>偏分布建模；不是 cache matrix；文本 Gaussian 不是我们的主线。</td>
+              <td>借鉴“非经验融合”思想，用 reliability-gated fusion 替代固定权重。</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note warning">
+          <b>定位原则：</b>BayesMM 是强竞争对手。我们不能只说“我们也用文本分布”，而要强调我们解决的是 <b>cache 可靠性建模</b> 和 <b>3D global-local 边界证据组织</b>。
+        </div>
+      </section>
+
+      <section id="idea">
+        <h2>3. 总体思想：低熵不等于可靠</h2>
+        <p>
+          现有 cache-based TTA 常把低熵样本当作可靠样本。但在 3D 点云中，局部缺失、旋转、噪声和类别相似会导致模型出现“自信但错误”的预测。因此，我们定义更全面的可靠性。
+        </p>
+        <div class="formula">
+          \[
+          R(x) = -H(x)
+          + \lambda_1 \cdot \mathrm{sim}(f_x, \mu_{\hat{y}})
+          - \lambda_2 \cdot \max_{j \neq \hat{y}} \mathrm{sim}(f_x, \mu_j)
+          + \lambda_3 \cdot C_{\mathrm{global\text{-}local}}(x)
+          \]
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>项</th>
+              <th>意义</th>
+              <th>为什么需要</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>\(-H(x)\)</td>
+              <td>置信度</td>
+              <td>熵低说明模型更确定，但它只是可靠性的第一部分。</td>
+            </tr>
+            <tr>
+              <td>\(\mathrm{sim}(f_x, \mu_{\hat{y}})\)</td>
+              <td>类内紧凑性</td>
+              <td>样本应靠近其预测类别的中心，否则可能是离群点或错误伪标签。</td>
+            </tr>
+            <tr>
+              <td>\(\max_{j \neq \hat{y}} \mathrm{sim}(f_x, \mu_j)\)</td>
+              <td>类间混淆风险</td>
+              <td>如果它也很像其他类别，就不应被直接放入正 cache。</td>
+            </tr>
+            <tr>
+              <td>\(C_{\mathrm{global\text{-}local}}(x)\)</td>
+              <td>全局-局部一致性</td>
+              <td>3D 点云有局部结构，global 和 local 的一致性是 3D 专属可靠性信号。</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">
+          <b>一句话主张：</b>Reliable cache construction should jointly consider confidence, compactness, margin, and global-local structural consistency.
+        </div>
+      </section>
+
+      <section id="method">
+        <h2>4. 方法设计：MCM-PC</h2>
+        <h3>4.1 方法全流程</h3>
+        <div class="pipeline">
+          <div class="step"><div class="idx">1</div><strong>Input</strong><span class="muted">测试点云流 \(X_t\)</span></div>
+          <div class="step"><div class="idx">2</div><strong>Frozen Encoders</strong><span class="muted">Point encoder + text encoder</span></div>
+          <div class="step"><div class="idx">3</div><strong>Features</strong><span class="muted">Global feature + local part features + text anchors</span></div>
+          <div class="step"><div class="idx">4</div><strong>Reliability</strong><span class="muted">Entropy / compactness / margin / consistency</span></div>
+          <div class="step"><div class="idx">5</div><strong>Cache Matrix</strong><span class="muted">Positive / compact / boundary evidence</span></div>
+          <div class="step"><div class="idx">6</div><strong>Fusion</strong><span class="muted">Reliability-gated final prediction</span></div>
+        </div>
+
+        <h3>4.2 Multi-Cache Matrix</h3>
+        <p>
+          “Matrix” 不是标题噱头，而是方法结构。这里的行只代表 <b>3D 几何证据层级</b>，即 global object level 和 local part level；列代表不同的可靠性证据角色。
+          文本原型不作为矩阵中的一行，而是作为外部的 semantic anchor / textual prior，用于初始化、校准或融合。
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>结构层级</th>
+              <th>Confident / Entropy Evidence</th>
+              <th>Compact / Prototype Evidence</th>
+              <th>Boundary / Negative Evidence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Global Object Level</b></td>
+              <td>全局低熵样本，提供初始类别支持。</td>
+              <td>靠近全局类中心的样本，稳定 global prototype。</td>
+              <td>全局 top-1 / top-2 混淆样本，抑制错误类别。</td>
+            </tr>
+            <tr>
+              <td><b>Local Part Level</b></td>
+              <td>局部 part 预测稳定的样本。</td>
+              <td>局部结构与类别 part prototype 一致的样本。</td>
+              <td>global 与 local 冲突的样本，作为边界证据。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>4.3 Global-Local Consistency</h3>
+        <p>
+          Point-Cache 已经有 local cache，但 local cache 主要跟随 global cache 的样本选择。我们要显式判断 global 和 local 是否一致。
+        </p>
+        <div class="formula">
+          \[
+          C_{\mathrm{global\text{-}local}}(x)
+          = \mathrm{sim}\left(p^{g}(x), p^{l}(x)\right)
+          \]
+        </div>
+        <p>
+          其中 \(p^{g}(x)\) 是 global feature 得到的类别分布，\(p^{l}(x)\) 是 local part retrieval / local voting 得到的类别分布。
+        </p>
+        <table>
+          <thead>
+            <tr><th>情况</th><th>解释</th><th>处理方式</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Global 和 Local 一致，且低熵</td><td>样本高度可靠</td><td>进入 positive / compact cache</td></tr>
+            <tr><td>Global 低熵但 Local 冲突</td><td>可能是局部缺失或全局误判</td><td>进入 boundary cache 或降低权重</td></tr>
+            <tr><td>Global 不确定但 Local 明确</td><td>局部结构可能提供纠正信号</td><td>加强 local evidence</td></tr>
+            <tr><td>Global 和 Local 都混乱</td><td>无可靠证据</td><td>丢弃或进入弱 negative cache</td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.4 Confusion-Aware Negative Cache</h3>
+        <p>
+          普通 negative cache 存“不确定样本”；我们进一步存“这个样本在哪两个类别之间混淆”。
+        </p>
+        <div class="formula">
+          \[
+          a = \arg\max_c p_c(x), \qquad
+          b = \arg\max_{c \neq a} p_c(x)
+          \]
+          \[
+          m(x) = p_a(x) - p_b(x)
+          \]
+        </div>
+        <p>
+          如果一个样本满足中等熵和小 margin：
+        </p>
+        <div class="formula">
+          \[
+          H_{\mathrm{low}} < H(x) < H_{\mathrm{high}},
+          \qquad m(x) < \tau_m
+          \]
+        </div>
+        <p>
+          那么它不进入 top-1 类别的 positive cache，而是进入类别对边界缓存：
+        </p>
+        <div class="formula">
+          \[
+          x \rightarrow \mathcal{B}_{a,b}
+          \]
+        </div>
+        <div class="note">
+          例如 chair / stool、table / desk、cup / vase 等类别对，如果反复出现小 margin 样本，就说明这些类别之间存在稳定混淆边界。
+        </div>
+
+        <h3>4.5 Reliability-Gated Evidence Fusion</h3>
+        <p>
+          Point-Cache 使用固定权重 \(\alpha_g\)、\(\alpha_l\)。我们改为按样本动态融合。
+        </p>
+        <div class="formula">
+          \[
+          \tilde{z}(x)
+          = w_t(x) z_t(x)
+          + w_g(x) z_g(x)
+          + w_l(x) z_l(x)
+          - w_b(x) z_b(x)
+          \]
+        </div>
+        <table>
+          <thead>
+            <tr><th>权重</th><th>对应证据</th><th>由什么决定</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>\(w_t(x)\)</td><td>Text prior</td><td>文本稳定性、文本-几何一致性</td></tr>
+            <tr><td>\(w_g(x)\)</td><td>Global cache</td><td>global compactness、global margin</td></tr>
+            <tr><td>\(w_l(x)\)</td><td>Local cache</td><td>global-local consistency、local part confidence</td></tr>
+            <tr><td>\(w_b(x)\)</td><td>Boundary / negative cache</td><td>小 margin、confusion cache 相似度</td></tr>
+          </tbody>
+        </table>
+        <div class="formula">
+          \[
+          \sum_{s \in \{t,g,l,b\}} w_s(x) = 1, \qquad w_s(x) \geq 0
+          \]
+        </div>
+      </section>
+
+      <section id="innovations">
+        <h2>5. 创新点总结</h2>
+        <div class="grid two">
+          <div class="card green">
+            <h3>Innovation 1: Reliability-Aware Multi-Cache Matrix</h3>
+            <p>把 3D 测试时证据组织成结构层级 × 可靠性角色的矩阵，而不是简单 global/local cache。</p>
+            <span class="badge must">主创新</span><span class="badge exp">Method</span>
+          </div>
+          <div class="card green">
+            <h3>Innovation 2: Compactness-Margin-Consistency Reliability</h3>
+            <p>不再只用 entropy，而是联合 confidence、compactness、inter-class margin、global-local consistency。</p>
+            <span class="badge must">主创新</span><span class="badge exp">Method + Ablation</span>
+          </div>
+          <div class="card green">
+            <h3>Innovation 3: Global-Local Consistency Guided Update</h3>
+            <p>显式判断全局形状和局部 part 证据是否一致，作为 3D 专属的 cache admission 信号。</p>
+            <span class="badge must">主创新</span><span class="badge exp">3D-specific</span>
+          </div>
+          <div class="card purple">
+            <h3>Innovation 4: Confusion-Aware Negative Cache</h3>
+            <p>从“样本不确定性”扩展到“类别对边界不确定性”，记录 chair-stool、table-desk 等混淆证据。</p>
+            <span class="badge must">强创新</span><span class="badge exp">解释性强</span>
+          </div>
+          <div class="card purple">
+            <h3>Innovation 5: Reliability-Gated Evidence Fusion</h3>
+            <p>用样本级可靠性动态调整 text、global、local、boundary 证据权重，替代固定 \(\alpha_g, \alpha_l\)。</p>
+            <span class="badge must">强创新</span><span class="badge exp">对标 BayesMM</span>
+          </div>
+          <div class="card warn">
+            <h3>Optional: Spherical / vMF Text Prior</h3>
+            <p>文本特征归一化后位于球面，可用 vMF 建模 prompt 分布。建议作为附加模块，不作为论文主线。</p>
+            <span class="badge risk">可选</span><span class="badge exp">辅助亮点</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="experiments">
+        <h2>6. 实验计划</h2>
+        <h3>6.1 主实验</h3>
+        <table>
+          <thead>
+            <tr><th>实验目标</th><th>数据集</th><th>模型</th><th>比较对象</th><th>预期证明</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Corruption Robustness</td>
+              <td>ModelNet-C, ScanObjectNN-C</td>
+              <td>ULIP, ULIP-2, OpenShape</td>
+              <td>Zero-shot, Point-Cache Global, Point-Cache Hierarchical, BayesMM</td>
+              <td>在点云扰动下更稳定。</td>
+            </tr>
+            <tr>
+              <td>Cross-Dataset Generalization</td>
+              <td>ModelNet40, ScanObjectNN hardest, OmniObject3D</td>
+              <td>ULIP-2, OpenShape</td>
+              <td>Point-Cache, BayesMM</td>
+              <td>不是只适合 corruption，也适合真实域偏移。</td>
+            </tr>
+            <tr>
+              <td>Large Vocabulary</td>
+              <td>Objaverse-LVIS</td>
+              <td>ULIP-2 / OpenShape</td>
+              <td>Point-Cache</td>
+              <td>cache matrix 在大类别数下仍有效。</td>
+            </tr>
+            <tr>
+              <td>Efficiency</td>
+              <td>ModelNet40, ModelNet-C</td>
+              <td>ULIP-2</td>
+              <td>Point-Cache</td>
+              <td>新增模块开销可控，适合 T4。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>6.2 消融实验</h3>
+        <table>
+          <thead>
+            <tr><th>配置</th><th>目的</th><th>预期结果</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Baseline: Point-Cache-H</td><td>确认复现基线</td><td>接近论文报告结果</td></tr>
+            <tr><td>+ Reliability Score</td><td>证明 entropy 不够</td><td>提升，尤其在 jitter / local dropout</td></tr>
+            <tr><td>+ Global-Local Consistency</td><td>证明 3D 结构一致性有效</td><td>提升局部腐蚀与细粒度类别</td></tr>
+            <tr><td>+ Confusion-Aware Negative Cache</td><td>证明类别对边界证据有效</td><td>降低 chair/stool, table/desk 等错误</td></tr>
+            <tr><td>+ Reliability-Gated Fusion</td><td>证明动态融合优于固定权重</td><td>跨数据集更稳定</td></tr>
+            <tr><td>+ vMF Text Prior</td><td>验证文本球面建模是否有增益</td><td>可作为附加提升或分析</td></tr>
+          </tbody>
+        </table>
+
+        <h3>6.3 可解释性分析</h3>
+        <div class="grid three">
+          <div class="card"><h4>Confusion Matrix</h4><p>统计 \(\mathcal{B}_{a,b}\) 中最常见的类别对，展示模型最容易混淆的 3D 类别。</p></div>
+          <div class="card"><h4>t-SNE / UMAP</h4><p>对比 Point-Cache 与 MCM-PC 后的特征分布，观察类内紧凑和类间分离。</p></div>
+          <div class="card"><h4>Online Curves</h4><p>画测试流过程中 accuracy、entropy、cache reliability 的变化曲线。</p></div>
+        </div>
+      </section>
+
+      <section id="implementation">
+        <h2>7. 工程实现计划</h2>
+        <p>主工程基于 Point-Cache 修改，MCP 只作为思想和局部代码参考，不建议直接把 MCP 项目合并进来。</p>
+        <h3>7.1 推荐目录结构</h3>
+        <pre>Point-Cache/
+├── mcm_pc/
+│   ├── __init__.py
+│   ├── reliability.py          # entropy / compactness / margin / global-local consistency
+│   ├── cache_matrix.py         # multi-cache matrix data structure
+│   ├── confusion_cache.py      # pairwise boundary cache
+│   ├── fusion.py               # reliability-gated evidence fusion
+│   ├── text_prior.py           # TextMean / optional vMF
+│   └── utils.py
+├── runners/
+│   └── model_with_mcm_pc.py
+├── scripts/
+│   └── eval_model_with_mcm_pc.sh
+├── docs/
+│   ├── experiment_log.md
+│   ├── change_log.md
+│   └── idea_bank.md
+└── paper_notes/
+    ├── abstract.md
+    ├── introduction.md
+    ├── method.md
+    └── experiments.md</pre>
+
+        <h3>7.2 Git 分支策略</h3>
+        <pre>main
+├── baseline-repro             # 只做原始 Point-Cache 复现
+├── mcm-pc-reliability          # 加 reliability score
+├── mcm-pc-global-local         # 加 global-local consistency
+├── mcm-pc-confusion-cache      # 加 confusion-aware negative cache
+├── mcm-pc-fusion               # 加 reliability-gated fusion
+└── paper-experiments           # 固化实验结果和论文表格</pre>
+
+        <h3>7.3 每次提交后的记录模板</h3>
+        <pre>阶段：
+分支：
+commit hash：
+修改文件：
+运行命令：
+数据集 / 模型：
+结果：
+是否优于 baseline：
+遇到的问题：
+下一步计划：</pre>
+        <div class="note">
+          你每次把这份记录发给我后，我会帮你总结阶段性成果，并判断哪些结果可以写进论文的 Method、Experiments 或 Appendix。
+        </div>
+      </section>
+
+      <section id="timeline">
+        <h2>8. 时间表：14–18 周路线</h2>
+        <div class="timeline">
+          <div class="milestone">
+            <div class="week">Week 0</div>
+            <div class="box"><b>环境与 Git 初始化</b><p class="muted">确认 Point-Cache 和 MCP 仓库、conda 环境、数据路径、CUDA / PyTorch 版本、T4 显存限制。建立 baseline-repro 与 mcm-pc-dev 分支。</p></div>
+          </div>
+          <div class="milestone">
+            <div class="week">Week 1–2</div>
+            <div class="box"><b>复现 Point-Cache</b><p class="muted">跑通 zero-shot、global cache、hierarchical cache。先用 ULIP / ULIP-2 + ModelNet-C。输出第一张 baseline 表格。</p></div>
+          </div>
+          <div class="milestone">
+            <div class="week">Week 3–4</div>
+            <div class="box"><b>Reliability Score 第一版</b><p class="muted">先实现 entropy + compactness + margin，不动 local 逻辑。目标：证明比纯低熵 admission 更稳。</p></div>
+          </div>
+          <div class="milestone">
+            <div class="week">Week 5–6</div>
+            <div class="box"><b>Global-Local Consistency</b><p class="muted">实现 global prediction 与 local part prediction 的一致性度量。目标：在 local dropout / add local / fine-grained 类别上提升。</p></div>
+          </div>
+          <div class="milestone">
+            <div class="week">Week 7–8</div>
+            <div class="box"><b>Confusion-Aware Negative Cache</b><p class="muted">实现 top-1/top-2 pairwise boundary cache。目标：降低易混类别错误，输出可解释 confusion pair 分析。</p></div>
+          </div>
+          <div class="milestone">
+            <div class="week">Week 9–10</div>
+            <div class="box"><b>Reliability-Gated Fusion</b><p class="muted">替代固定 \(\alpha_g, \alpha_l\)，引入样本级动态权重。目标：跨 corruption type 更稳定。</p></div>
+          </div>
+          <div class="milestone">
+            <div class="week">Week 11–12</div>
+            <div class="box"><b>完整实验矩阵</b><p class="muted">扩展到 ScanObjectNN-C、ModelNet40、OmniObject3D。根据算力决定是否跑 Objaverse-LVIS 和 Uni3D。</p></div>
+          </div>
+          <div class="milestone">
+            <div class="week">Week 13–14</div>
+            <div class="box"><b>论文初稿</b><p class="muted">完成 Abstract、Introduction、Related Work、Method、Experiments 初稿。补齐图表、公式和 ablation。</p></div>
+          </div>
+          <div class="milestone">
+            <div class="week">Week 15–18</div>
+            <div class="box"><b>冲刺与投稿版本</b><p class="muted">完善实验、补充可视化、精修故事线、准备 rebuttal 风格的局限性分析。选择 AAAI / NeurIPS / CVPR / ICCV / ECCV 对应格式。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="paper">
+        <h2>9. 论文写作素材：可以先保存</h2>
+        <div class="paper-snippet">
+          <div class="where">[Section: Abstract]</div>
+          <blockquote>
+            Existing cache-based test-time adaptation methods for point cloud recognition mainly rely on low-entropy samples to construct online memory. However, under geometric corruptions and domain shifts, low entropy does not necessarily indicate reliable evidence, as samples can be confidently misclassified, locally inconsistent, or located near confusing class boundaries. In this paper, we propose MCM-PC, a reliability-aware multi-cache matrix framework for test-time point cloud adaptation.
+          </blockquote>
+        </div>
+        <div class="paper-snippet">
+          <div class="where">[Section: Introduction]</div>
+          <blockquote>
+            We argue that reliable test-time cache construction for 3D point clouds should not be determined by prediction entropy alone. Instead, it should jointly consider intra-class compactness, inter-class margin, and global-local structural consistency, which together reflect whether an online sample can serve as trustworthy adaptation evidence.
+          </blockquote>
+        </div>
+        <div class="paper-snippet">
+          <div class="where">[Section: Method]</div>
+          <blockquote>
+            We formulate online test-time evidence as a cache matrix, where rows correspond to 3D geometric structural levels, including global object features and local part features, while columns correspond to reliability roles, including confident evidence, compact prototype evidence, and boundary-aware negative evidence. Textual prototypes are not treated as an additional cache level; instead, they serve as semantic anchors for prototype initialization and reliability-gated fusion.
+          </blockquote>
+        </div>
+        <div class="paper-snippet">
+          <div class="where">[Section: Method - Confusion-Aware Negative Cache]</div>
+          <blockquote>
+            Instead of treating all uncertain samples uniformly, we explicitly preserve their class-pair confusion structure. Samples with moderate entropy and small top-1/top-2 margins are stored in a pairwise boundary cache, which provides negative calibration signals for future samples located near historically ambiguous decision regions.
+          </blockquote>
+        </div>
+        <div class="paper-snippet">
+          <div class="where">[Section: Experiments]</div>
+          <blockquote>
+            We evaluate MCM-PC on corrupted, cross-domain, and large-vocabulary point cloud benchmarks. Beyond accuracy, we analyze cache reliability, confusion-pair distributions, memory usage, throughput, and feature compactness to validate both effectiveness and efficiency.
+          </blockquote>
+        </div>
+      </section>
+
+      <section id="risks">
+        <h2>10. 风险与备选方案</h2>
+        <table>
+          <thead>
+            <tr><th>风险</th><th>表现</th><th>解决方案</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>模块过多，工程复杂</td>
+              <td>代码容易失控，实验难以定位问题</td>
+              <td>严格按模块递进：Reliability → Consistency → Confusion Cache → Fusion。每次只改一个变量。</td>
+            </tr>
+            <tr>
+              <td>Confusion cache 抑制过强</td>
+              <td>正确类别也被压制，accuracy 下降</td>
+              <td>设置小权重 \(\eta\)，并只对小 margin / 中等熵样本启用。</td>
+            </tr>
+            <tr>
+              <td>动态融合不稳定</td>
+              <td>不同数据集需要调很多参数</td>
+              <td>先做简单 softmax gating，再做 ablation；如果不稳，退回固定权重 + reliability scaling。</td>
+            </tr>
+            <tr>
+              <td>BayesMM 很强，难以全面超过</td>
+              <td>平均结果不如 BayesMM</td>
+              <td>强调更低开销、更强可解释性、global-local 边界建模、大类别场景稳定性。</td>
+            </tr>
+            <tr>
+              <td>T4 算力不足</td>
+              <td>Uni3D / Objaverse-LVIS 跑不动</td>
+              <td>先用 ULIP / ULIP-2 + ModelNet-C / ScanObjectNN-C；大模型实验后期补。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="refs">
+        <h2>11. 参考基础与论文定位</h2>
+        <div class="grid three">
+          <div class="card">
+            <h3>Point-Cache</h3>
+            <p class="muted">主 baseline 与工程基础。提供 global/local cache、点云数据集评估、open-vocabulary 3D TTA 设置。</p>
+          </div>
+          <div class="card">
+            <h3>MCP / MCP++</h3>
+            <p class="muted">提供 multi-cache、align cache、negative cache、类内紧凑性分析启发。但我们需要 3D 化、结构化、类别对化。</p>
+          </div>
+          <div class="card">
+            <h3>BayesMM</h3>
+            <p class="muted">提供对 cache 容量和固定融合权重的批评。我们借鉴“自适应融合”的思想，但不把文本分布作为主创新。</p>
+          </div>
+        </div>
+        <div class="note">
+          <b>最终论文定位：</b>不是 “Point-Cache + MCP + vMF”，而是 <b>Reliability-Aware Cache Matrix for 3D Test-Time Adaptation</b>。
+        </div>
+      </section>
+
+      <div class="footer">
+        MCM-PC Proposal · Generated for research planning · Keep updating after each experiment milestone
+      </div>
+    </main>
+  </div>
+</body>
+</html>
