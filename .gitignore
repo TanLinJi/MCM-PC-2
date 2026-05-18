@@ -200,3 +200,6 @@ ICCV25-MCP/pretrained/
 logs/
 results/
 runs/
+
+# Point-Cache 实验结果与日志，不纳入 Git
+Point-Cache/results/
