@@ -1,6 +1,6 @@
 # MCM-PC-2 Documentation
 
-> **项目**：MCM-PC: Multi-Cache Matrix for 3D Point Cloud Test-Time Adaptation
+> **项目**：MCM-PC: Reliability-Aware Multi-Cache Matrix for Test-Time Adaptation of 3D Point Cloud Vision-Language Models
 >
 > **路径**：`/root/autodl-tmp/MCM-PC-2/docs/`
 
