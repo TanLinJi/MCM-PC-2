@@ -32,6 +32,7 @@ docs/
 | `user_preferences.md` | 用户工作偏好与项目规则（commit 规则、命名规则、跑分规则） |
 | `glossary.md` | 术语表（D/P/F/G/W 编号、anchor pollution、EMR/GLC/CANC 等中英文对照） |
 | `progress_log.md` | 关键里程碑数字日志 |
+| `project_tree.md` | 项目目录树（根目录与关键子树） |
 
 ## 二、`proposals/` — 创新点和方案
 
@@ -139,4 +140,6 @@ docs/
 
 ## Changelog
 
+- **2026-06-02** v1.2：将 `project/project_tree.md` 扩展为叶子样例版，补充 Point-Cache、docs/experiments、weights 等深层结构。
+- **2026-06-02** v1.1：新增 `project/project_tree.md`，整理当前仓库的目录树。
 - **2026-05-17** v1.0：初始结构落盘。归档了 `docs/new/` 中所有用户上传的资料，按 8 大类目录重新分类，统一英文命名。同时合并 E2-EMR 三份重复、两份代号说明，删除日志副本（原版在 `Point-Cache/logs/recur-pc/`）。
