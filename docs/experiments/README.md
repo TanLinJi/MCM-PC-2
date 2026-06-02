@@ -1,97 +1,79 @@
 # Experiments
 
-按 stage / 实验编号组织，所有人类可读的实验设计、说明、结果总结都在这里。
+This directory records the formal experiment sequence and experiment documentation for the MCM-PC project.
 
-> **原始数据放哪？** `.log`、`.json`、`.csv` 等运行日志保留在 `/root/autodl-tmp/MCM-PC-2/Point-Cache/logs/recur-pc/<run_id>/`，不复制到本目录。本目录只放说明文档和已经归纳过的 summary。
+Current paper direction:
 
----
+**MCM-PC: Reliability-Aware Multi-Cache Matrix for Test-Time Adaptation of 3D Point Cloud Vision-Language Models**
 
-## 子目录索引
+## 1. Formal Experiment Sequence
 
-### `stages/` — 阶段总结
+After the experiment numbering reset, the formal experiment sequence is defined as follows.
 
-线性时间线，每个 stage 一个 .md。读这个能快速掌握「我们做过什么 + 为什么」。
+| ID | Name | Purpose | Status |
+|---|---|---|---|
+| E0 | Point-Cache Baseline Reproduction and Analysis | Reproduce Point-Cache baselines and analyze baseline behavior | In progress |
+| E1 | Text Prototype Enhancement | Study point-cloud-aware templates and dynamically generated LLM prompts | Planned |
+| E2 | Reliability-Gated Local Cache | Dynamically control local cache contribution based on reliability | Planned |
+| E3 | Conflict-Aware Negative Suppression | Use unreliable global-local conflict as negative evidence | Planned |
+| E4 | Reliability-Aware Multi-Cache Matrix | Build the full MCM-PC framework | Planned |
+| E5 | Ablation Studies and Visualization | Conduct ablations, case studies, and paper figures | Planned |
 
-| 文件 | 阶段 | 主题 |
-|---|---|---|
-| `stage0_tpe_zero_shot_text_methods_summary.md` | Stage 0 | E0-TPE 4 种 zero-shot 文本方法对比 |
-| `stage0_tpe_spherical_text_anchor_corrected.md` | Stage 0 | 球面文本锚点（vMF）修订版 |
-| `stage1_baseline_repro.md` | Stage 1 | Point-Cache baseline 复现（ULIP-2） |
-| `stage2_emr.md` | Stage 2 | E2-EMR Entropy-Margin Reliability |
-| `stage3_glc.md` | Stage 3 | E3-GLC Global-Local Consistency |
-| `stage4_canc_diag.md` | Stage 4 | E4-CANC 诊断 + v0/v1 |
+## 2. E0: Baseline Reproduction and Analysis
 
-### `e0_tpe/` — Text Prototype Enhancement（零样本阶段）
+E0 includes the completed Point-Cache baseline reproduction and the corresponding result analysis.
 
-| 文件 | 用途 |
-|---|---|
-| `text_prototype_enhancement.md` | 实验设计与基本结论 |
-| `spherical_text_anchor_report.html` | 球面文本锚点详细报告（41 KB） |
+Current E0 assets include:
 
-### `e2_emr/` — Entropy-Margin Reliability cache admission
+- `baseline/`: markdown summaries of baseline results.
+- `baseline.zip`: archived baseline result documents.
+- `pointcache_repro/`: reproduction notes and commands.
+- `repro_log.md`: reproduction log.
 
-| 文件 | 用途 |
-|---|---|
-| `e2_emr_admission.md` | 实验说明 + Reliability Score 公式 |
-| `e2_emr_admission.html` | 同上，HTML 版（含 8 节解析、Δ 可视化） |
+E0 is not a new MCM-PC method experiment. It is the foundation for all later comparisons.
 
-### `e3_glc/` — Global-Local Consistency reliability
+## 3. Experiment Documentation Rule
 
-| 文件 | 用途 |
-|---|---|
-| `e3_glc_consistency.md` | E3-GLC 实验设计与失败复盘 |
-| `e3_glc_v1_math_derivation.html` | E3-GLC-v1 实验计划与数学推导 |
+Each formal experiment after E0 should have its own directory:
 
-### `e4_canc/` — Confusion / Conflict-Aware Negative Cache
+    docs/experiments/E*_name/
 
-| 文件 | 用途 |
-|---|---|
-| `e4_canc_overview.md` | E4-CANC 总览（核心想法 + 与 E3 的关系） |
-| `e4_canc_v0_conservative.md` | E4-CANC-v0 Conservative 版本 |
-| `e4_canc_v0_rule_explanation.html` | v0 规则解释与阶段分析 |
-| `e4_canc_diag_math_derivation.html` | E4-CANC-DIAG 数学推导（修订版） |
+Each experiment directory should include at least:
 
-### `pointcache_repro/` — Point-Cache 复现资料
+    log.md
+    analysis.md
 
-| 文件 | 用途 |
-|---|---|
-| `commands.md` | ZS / Global Cache / Hierarchical 三套复现命令 |
-| `reproduction_notes.md` | Point-Cache Fig 1a 复现说明，含 corruption 类型表 |
-| `project_structure.md` | Point-Cache 论文章节 ↔ 代码模块映射 |
+The two documents have different responsibilities:
 
----
+- `log.md` records commands, scripts, configurations, checkpoints, datasets, backbones, prompt sources, runtime notes, errors, fixes, and git commits.
+- `analysis.md` summarizes quantitative results, compares them with E0, identifies gains or failures, and explains whether the experiment supports the MCM-PC hypothesis.
 
-## 顶层文件
+The complete ICASSP paper draft is maintained separately under:
 
-| 文件 | 用途 |
-|---|---|
-| `experiment_summary.md` | 跨阶段实验汇总（baseline / E2 / E3 / E4 数字一览） |
-| `repro_log.md` | 复现操作日志 |
+    paper/ICASSP/
 
----
+The paper draft should be updated alongside experiments, rather than being written only after all experiments are finished.
 
-## 推荐阅读顺序
+## 4. Archived Legacy Experiments
 
-按时间线和实验编号顺序读最直观：
+Early exploratory experiments before the formal MCM-PC restart have been archived under:
 
-1. `pointcache_repro/project_structure.md` — 先理解 Point-Cache 代码骨架
-2. `pointcache_repro/commands.md` — 看复现命令
-3. `stages/stage1_baseline_repro.md` — Stage 1 复现
-4. `stages/stage2_emr.md` + `e2_emr/e2_emr_admission.md`
-5. `stages/stage3_glc.md` + `e3_glc/e3_glc_consistency.md`
-6. `stages/stage4_canc_diag.md` + `e4_canc/e4_canc_overview.md` + `e4_canc/e4_canc_v0_conservative.md`
-7. `stages/stage0_tpe_*` + `e0_tpe/*` — Stage 0 文本端探索
-8. `experiment_summary.md` — 数字汇总
+    docs/experiments/archive/legacy_pre_mcmpc_restart/
 
-## 新增实验怎么记录
+These legacy experiments do not occupy or affect the new E0-E5 numbering.
 
-1. **新建 stage**：`stages/stage<N>_<topic>.md`，遵循模板
-2. **新建实验子目录**（如果实验独立）：`e<N>_<short_name>/<short_name>.md`
-3. **runner 跑出新数字**：更新 `experiment_summary.md` 的对应行；更新 `project/progress_log.md`
-4. **如果是 quick test 失败**：记录在对应 stage 的 .md 末尾「失败复盘」段，不另开文件
+Archived legacy items include:
 
-## 命名规范
+- early text prototype enhancement attempts;
+- entropy/margin reliability experiments;
+- global-local consistency experiments;
+- conservative negative cache attempts;
+- old staged experiment notes.
 
-- 实验编号：`e<n>_<short_name>`（小写下划线，如 `e2_emr`、`e4_canc`）
-- 实验子文件名：`<eN>_<aspect>.md/.html`（如 `e4_canc_v0_conservative.md`）
-- HTML 报告：日期前缀放 `docs/reports/` 而非这里；本目录的 .html 是与对应 .md 等价的可视化版本
+## 5. Current Next Step
+
+The next formal work is:
+
+    E1: Text Prototype Enhancement
+
+Before modifying code, the E1 plan and prompt-source policy should be documented.
