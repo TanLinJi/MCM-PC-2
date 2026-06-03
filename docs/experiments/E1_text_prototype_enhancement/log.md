@@ -15,9 +15,9 @@
 |---|---|---|
 | `manual_full` | 原始完整手工模板集合 | Point-Cache baseline 默认使用的完整固定模板集合，作为 E0 兼容对照，不能删除或改写。 |
 | `manual_3d` | 点云/3D 相关手工模板子集 | 从 `manual_full` 中筛选出的更适合点云识别的模板集合，用于验证去掉 2D 图像风格模板是否有帮助。 |
-| `deepseek_static` | DeepSeek 离线固定描述集合 | 预先用 DeepSeek 生成并保存为 JSON 的类别描述，实验时只读取，不动态调用 API。 |
-| `deepseek_dynamic_init` | DeepSeek 实验初始化动态描述集合 | 每次实验启动时，根据当前数据集候选类别名称调用 DeepSeek 生成类别级点云描述；生成后固定用于整个测试流。 |
-| `manual3d_deepseek_dynamic_init` | 点云手工模板与 DeepSeek 动态描述融合 | 将 `manual_3d` 分支和 `deepseek_dynamic_init` 分支进行加权融合，是 E1 的主要候选方法。 |
+| `llm_static` | LLM 离线固定描述集合 | 预先用 LLM 生成并保存为 JSON 的类别描述，实验时只读取，不动态调用 API。 |
+| `llm_dynamic_init` | LLM 实验初始化动态描述集合 | 每次实验启动时，根据当前数据集候选类别名称调用 LLM 生成类别级点云描述；生成后固定用于整个测试流。 |
+| `manual3d_llm_dynamic_init` | 点云手工模板与 LLM 动态描述融合 | 将 `manual_3d` 分支和 `llm_dynamic_init` 分支进行加权融合，是 E1 的主要候选方法。 |
 | `prompt source` | 提示词来源 | 指构造文本原型时使用哪一种文本模板或类别描述来源。 |
 | `text prototype` | 文本原型 | 每个类别的文本特征表示，由该类别的多条提示词编码后平均或加权融合得到。 |
 | `dynamic-init` | 初始化阶段动态生成 | 在实验开始、测试流开始之前生成提示词；测试过程中不再更新。 |
@@ -27,7 +27,7 @@
 
 ## 实验目标
 
-E1 研究 Point-Cache 的文本原型构造方式是否可以通过点云语义相关模板和 DeepSeek 动态生成的类别级描述得到增强。
+E1 研究 Point-Cache 的文本原型构造方式是否可以通过点云语义相关模板和 LLM 动态生成的类别级描述得到增强。
 
 E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 
@@ -62,21 +62,21 @@ E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 - 保留与 point cloud、3D、object、shape、model、geometry、scene 等语义相关的模板；
 - 移除明显 2D 图像风格模板，例如 photo、image、picture、painting、sketch、cartoon、blurry、cropped、black-and-white 等。
 
-### deepseek_static：DeepSeek 离线固定描述集合
+### llm_static：LLM 离线固定描述集合
 
-`deepseek_static` 指提前使用 DeepSeek 生成并保存为 JSON 的固定类别描述。
+`llm_static` 指提前使用 LLM 生成并保存为 JSON 的固定类别描述。
 
 实验时只读取 JSON，不再调用 API。该设置主要用于可复现对照。
 
-### deepseek_dynamic_init：DeepSeek 实验初始化动态描述集合
+### llm_dynamic_init：LLM 实验初始化动态描述集合
 
-`deepseek_dynamic_init` 指每次实验启动时，根据当前数据集的候选类别名称调用 DeepSeek 生成类别级点云描述。
+`llm_dynamic_init` 指每次实验启动时，根据当前数据集的候选类别名称调用 LLM 生成类别级点云描述。
 
 该设置只允许使用候选类别名称，不允许使用测试样本真实标签、测试点云内容或单个样本预测结果。生成后的提示词会被保存，并在整个测试流中固定使用。
 
-### manual3d_deepseek_dynamic_init：点云手工模板与 DeepSeek 动态描述融合
+### manual3d_llm_dynamic_init：点云手工模板与 LLM 动态描述融合
 
-`manual3d_deepseek_dynamic_init` 指 `manual_3d` 分支和 `deepseek_dynamic_init` 分支的融合版本。
+`manual3d_llm_dynamic_init` 指 `manual_3d` 分支和 `llm_dynamic_init` 分支的融合版本。
 
 这是 E1 的主要候选方法。
 
@@ -90,8 +90,8 @@ E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 
 - `manual_full`
 - `manual_3d`
-- `deepseek_dynamic_init`
-- `manual3d_deepseek_dynamic_init`
+- `llm_dynamic_init`
+- `manual3d_llm_dynamic_init`
 
 ### 阶段 2：Point-Cache 文本原型对比
 
@@ -115,11 +115,47 @@ E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 
 初始化 E1 中文实验日志。
 
-当前尚未修改代码。
+添加 E1 文本原型增强的命令行参数入口，默认 `prompt_source=manual_full`，不改变 E0 baseline 行为。
+
+新增参数包括：
+
+- `--prompt-source`
+- `--llm-api-key-file`
+- `--llm-model`
+- `--dynamic-prompt-count`
+- `--prompt-static-weight`
+- `--prompt-dynamic-weight`
+
+## 代码改动记录
+
+### 2026-06-03：支持 manual_full / manual_3d 提示词来源
+
+本次改动：
+
+- 在 `datasets/templates.py` 中新增 `manual_3d_prompts`，由原始 `text_prompts` 自动筛选得到；
+- 新增 `datasets/prompt_utils.py`，统一根据 `--prompt-source` 选择提示词来源；
+- 修改 `modelnet40.py`、`modelnet_c.py`、`scanobjnn.py`、`sonn_c.py`，使其使用 `get_prompt_template(...)`；
+- 当前已支持：
+  - `manual_full`
+  - `manual_3d`
+- LLM 相关来源暂时只保留参数入口，后续实现。
+
+默认 `--prompt-source manual_full`，因此不改变 E0 baseline 默认行为。
 
 ## 运行命令
 
 待代码实现后补充。
+
+## 代码改动记录补充
+
+### 2026-06-03：重构 clip_classifier 文本原型构造接口
+
+本次改动：
+
+- 将 `clip_classifier()` 中的文本构造、文本编码和原型平均逻辑拆成辅助函数；
+- 当前继续支持原始 list 模板格式，因此 `manual_full` 和 `manual_3d` 均可正常工作；
+- 预留 dict 格式提示词支持，用于后续 LLM 生成的类别级描述；
+- 默认路径不改变 E0 baseline 行为。
 
 ## 实验结果
 
@@ -132,3 +168,58 @@ E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 ## Git 记录
 
 按每次相关提交持续补充。
+
+### 2026-06-03：支持两路文本原型加权融合
+
+本次改动：
+
+- 在 `clip_classifier()` 中增加“两路文本原型加权融合”能力；
+- 第一路用于 `manual_3d` 点云手工模板；
+- 第二路用于后续 LLM 生成的类别级描述；
+- 当前只是增加融合接口，不调用 LLM API；
+- 默认 `manual_full` 和 `manual_3d` 的原始模板平均逻辑不变，因此不影响 E0 baseline 默认行为。
+
+融合形式：
+
+    final_text_prototype =
+        static_weight * manual_3d_text_prototype
+        + dynamic_weight * llm_text_prototype
+
+默认计划：
+
+- static_weight = 0.75
+- dynamic_weight = 0.25
+
+### 2026-06-03：实现通用 LLM 初始化阶段动态提示词生成
+
+本次改动：
+
+- 新增 `Point-Cache/llm/llm_prompt_generator.py`；
+- 统一使用通用 LLM 命名，不再把 E1 方法绑定到 DeepSeek；
+- 当前默认 provider 是 `deepseek`，默认模型是 `deepseek-v4-pro`；
+- API key 固定读取 `Point-Cache/llm/secrets/llm_api_key.txt`；
+- API key 文件格式为单行 `sk-xxx`；
+- 支持根据数据集候选类别名称生成类别级点云描述；
+- 生成结果会保存到 `Point-Cache/results/E1_text_prototype_enhancement/prompts/`；
+- 再次运行时，如果缓存 JSON 已存在，默认直接读取，不重复调用 API；
+- 新增 `--force-regenerate-prompts`，用于强制重新生成。
+
+注意：
+
+- E1 只根据候选类别名称生成提示词；
+- 不使用测试样本真实标签；
+- 不使用测试点云内容；
+- 不根据单个样本预测结果生成提示词。
+
+
+### 2026-06-03：重命名 E1 动态提示词生成模块
+
+为避免与 Point-Cache 原始离线提示词生成脚本 `llm_generate_prompts.py` 混淆，将新增的通用 LLM 动态提示词生成模块重命名为：
+
+    Point-Cache/llm/e1_dynamic_prompt_generator.py
+
+说明：
+
+- `llm_generate_prompts.py` 是 Point-Cache 原始代码中的旧脚本，主要用于离线生成固定 GPT / PointLLM prompt JSON；
+- `e1_dynamic_prompt_generator.py` 是 E1 新增模块，用于实验初始化阶段根据候选类别名称动态生成类别级点云描述；
+- 两者用途不同，后续 E1 统一使用 `e1_dynamic_prompt_generator.py`。

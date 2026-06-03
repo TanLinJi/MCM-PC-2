@@ -4,7 +4,7 @@ import numpy as np
 
 from torch.utils.data import Dataset
 
-from .templates import text_prompts
+from .prompt_utils import get_prompt_template
 
 
 class SONN_C(Dataset):
@@ -16,8 +16,7 @@ class SONN_C(Dataset):
     def __init__(self, cfg):
         self.lm3d = cfg.lm3d
                 
-        self.template = text_prompts
-        
+        self.template = get_prompt_template(cfg)
         self.dataset_dir = cfg.sonn_c_root
         self.dataset_variant = cfg.sonn_variant
 

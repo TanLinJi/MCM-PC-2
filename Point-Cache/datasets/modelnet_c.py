@@ -6,7 +6,7 @@ from collections import OrderedDict
 import torch
 from torch.utils.data import Dataset
 
-from .templates import text_prompts
+from .prompt_utils import get_prompt_template
 
 
 class ModelNet_C(Dataset):
@@ -18,8 +18,7 @@ class ModelNet_C(Dataset):
     def __init__(self, cfg):
         self.lm3d = cfg.lm3d
         
-        self.template = text_prompts
-        
+        self.template = get_prompt_template(cfg)
         self.dataset_dir = cfg.modelnet_c_root
 
         self.classnames = []

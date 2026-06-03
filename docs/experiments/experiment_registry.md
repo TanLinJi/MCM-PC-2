@@ -20,7 +20,7 @@
 | 编号 | 实验名称 | 目标 | 当前状态 |
 |---|---|---|---|
 | E0 | Point-Cache baseline 复现与分析 | 复现 Point-Cache baseline，并分析 baseline 行为 | 复现与结果分析已完成 |
-| E1 | 文本原型增强 | 研究点云语义模板与 DeepSeek 动态生成提示词对文本原型的影响 | 文档初始化完成，代码未开始 |
+| E1 | 文本原型增强 | 研究点云语义模板与 LLM 动态生成提示词对文本原型的影响 | 文档初始化完成，代码未开始 |
 | E2 | 局部缓存可靠性门控 | 根据可靠性动态控制 local cache 贡献 | 计划中 |
 | E3 | 冲突感知负向抑制 | 将 global-local 冲突作为保守负向证据 | 计划中 |
 | E4 | 可靠性感知多缓存矩阵 | 构建完整 MCM-PC 方法 | 计划中 |
@@ -94,7 +94,7 @@ baseline 结果分析已经完成，相关结果文档已整理在 `docs/experim
 
 ### 目标
 
-研究 Point-Cache 的文本原型是否可以通过点云语义相关模板和 DeepSeek 动态生成的类别级描述得到增强。
+研究 Point-Cache 的文本原型是否可以通过点云语义相关模板和 LLM 动态生成的类别级描述得到增强。
 
 ### 动机
 
@@ -110,9 +110,9 @@ E1 因此先研究文本端增强，再进入后续 cache 机制修改。
 |---|---|---|
 | manual_full | 原始完整手工模板集合 | Point-Cache baseline 默认使用的完整固定模板集合，作为 E0 兼容对照 |
 | manual_3d | 点云/3D 相关手工模板子集 | 从 manual_full 中筛选出的点云语义相关模板集合 |
-| deepseek_static | DeepSeek 离线固定描述集合 | 提前生成并保存为 JSON，实验时只读取 |
-| deepseek_dynamic_init | DeepSeek 实验初始化动态描述集合 | 实验开始时根据候选类别名称生成，生成后冻结 |
-| manual3d_deepseek_dynamic_init | 点云手工模板与 DeepSeek 动态描述融合 | E1 的主要候选方法 |
+| llm_static | LLM 离线固定描述集合 | 提前生成并保存为 JSON，实验时只读取 |
+| llm_dynamic_init | LLM 实验初始化动态描述集合 | 实验开始时根据候选类别名称生成，生成后冻结 |
+| manual3d_llm_dynamic_init | 点云手工模板与 LLM 动态描述融合 | E1 的主要候选方法 |
 
 ### 动态提示词规则
 
@@ -136,13 +136,13 @@ E1 使用 dynamic-init，不使用 dynamic-online。
 
 E1 的主要候选方法是：
 
-    manual3d_deepseek_dynamic_init
+    manual3d_llm_dynamic_init
 
 推荐形式是分支级加权融合：
 
     text_prototype =
         static_weight * mean(manual_3d embeddings)
-        + dynamic_weight * mean(dynamic DeepSeek embeddings)
+        + dynamic_weight * mean(dynamic LLM embeddings)
 
 默认设置：
 
@@ -158,8 +158,8 @@ E1 的主要候选方法是：
 
 - manual_full
 - manual_3d
-- deepseek_dynamic_init
-- manual3d_deepseek_dynamic_init
+- llm_dynamic_init
+- manual3d_llm_dynamic_init
 
 阶段 2：Point-Cache 文本原型对比。
 
@@ -199,7 +199,7 @@ E1 决策文档与中文实验文档已经初始化。
 
 ### 下一步
 
-在进入代码修改前，检查并更新 .gitignore，确保 DeepSeek API key 本地文件不会被提交。
+在进入代码修改前，检查并更新 .gitignore，确保 LLM API key 本地文件不会被提交。
 
 ## 4. E2：局部缓存可靠性门控
 

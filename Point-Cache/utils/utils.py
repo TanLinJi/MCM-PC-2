@@ -60,6 +60,84 @@ def get_arguments():
     parser.add_argument('--wandb-log', dest='wandb', action='store_true', help='Whether you want to log to wandb. Include this flag to enable logging.')
     parser.add_argument('--print-freq', type=int, default=500, help='result print frequency')
     parser.add_argument('--cache-type', type=str, default='hierarchical', choices=['global', 'local', 'hierarchical', 'vis'])
+    
+    # E1: text prototype enhancement
+    parser.add_argument(
+        '--prompt-source',
+        type=str,
+        default='manual_full',
+        choices=[
+            'manual_full',
+            'manual_3d',
+            'llm_static',
+            'llm_dynamic_init',
+            'manual3d_llm_dynamic_init',
+        ],
+        help='Prompt source for text prototype construction.'
+    )
+    parser.add_argument(
+        '--llm-api-key-file',
+        type=str,
+        default='llm/secrets/llm_api_key.txt',
+        help='Local LLM API key file. The file is ignored by git.'
+    )
+    parser.add_argument(
+        '--llm-provider',
+        type=str,
+        default='deepseek',
+        help='LLM provider name used in saved prompt metadata.'
+    )
+    parser.add_argument(
+        '--llm-model',
+        type=str,
+        default='deepseek-v4-pro',
+        help='LLM model name used for dynamic prompt generation.'
+    )
+    parser.add_argument(
+        '--dynamic-prompt-count',
+        type=int,
+        default=25,
+        help='Number of LLM-generated dynamic prompts per class.'
+    )
+    parser.add_argument(
+        '--prompt-static-weight',
+        type=float,
+        default=0.75,
+        help='Static prompt branch weight for mixed text prototypes.'
+    )
+    parser.add_argument(
+        '--prompt-dynamic-weight',
+        type=float,
+        default=0.25,
+        help='Dynamic prompt branch weight for mixed text prototypes.'
+    )
+    parser.add_argument(
+        '--prompt-cache-dir',
+        type=str,
+        default='results/E1_text_prototype_enhancement/prompts',
+        help='Directory for saved LLM dynamic prompts.'
+    )
+    parser.add_argument(
+        '--llm-api-base-url',
+        type=str,
+        default='https://api.deepseek.com/chat/completions',
+        help='OpenAI-compatible chat completion API endpoint.'
+    )
+    parser.add_argument(
+        '--llm-temperature',
+        type=float,
+        default=0.7,
+        help='Sampling temperature for LLM prompt generation.'
+    )
+    parser.add_argument(
+        '--force-regenerate-prompts',
+        action='store_true',
+        default=False,
+        help='Regenerate LLM prompts even if cached prompt JSON exists.'
+    )
+    
+    # E1: text prototype enhancement :End
+
     parser.add_argument("--k_shot", type=int, default=3, help="number of shots cached in per class")
     parser.add_argument("--n_cluster", type=int, default=3, help="number of local clustered parts for a 3D object")
     parser.add_argument('--alpha', default=4.0, type=float, help="a balance factor to adjust the weights of cached logits")
@@ -203,38 +281,60 @@ def clip_classifier_img_weights(args, dataset, clip_model):
     return clip_weights_img_weights
 
 
+# 文本原型生成
 @torch.no_grad()
+
+def _is_weighted_prompt_fusion(template):
+    """Check whether template represents weighted fusion of two text prototype branches."""
+    return (
+        isinstance(template, dict)
+        and template.get("__mcmpc_prompt_type__") == "weighted_fusion"
+    )
+
+
+def _encode_weighted_prompt_fusion(classname, template, clip_model):
+    """Encode and fuse two text prototype branches for one class.
+
+    In E1, the two branches are:
+    1. manual_3d point-cloud-aware manual prompts;
+    2. LLM-generated class-level descriptions.
+    """
+    static_template = template["static_template"]
+    dynamic_template = template["dynamic_template"]
+
+    static_weight = float(template.get("static_weight", 0.75))
+    dynamic_weight = float(template.get("dynamic_weight", 0.25))
+
+    static_texts = _build_prompt_texts(classname, static_template)
+    dynamic_texts = _build_prompt_texts(classname, dynamic_template)
+
+    static_embedding = _encode_texts_as_prototype(static_texts, clip_model)
+    dynamic_embedding = _encode_texts_as_prototype(dynamic_texts, clip_model)
+
+    class_embedding = static_weight * static_embedding + dynamic_weight * dynamic_embedding
+    class_embedding /= class_embedding.norm()
+
+    return class_embedding
+
+
 def clip_classifier(args, classnames, template, clip_model):
-    clip_weights = []
+    with torch.no_grad():
+        clip_weights = []
 
-    for classname in classnames:
-        # option 1: use the manual template from `templates.py`
-        classname = classname.replace('_', ' ')
-        texts = [t.format(classname) for t in template]
-        # option 2: use the responses from the LLM
-        # texts = template[classname]
-        
-        if args.lm3d == 'uni3d' or args.lm3d == 'ulip':
-            texts = clip.tokenize(texts).cuda()
-        elif args.lm3d == 'openshape':
-            texts = open_clip.tokenizer.tokenize(texts).cuda()
-        # prompt ensemble for ImageNet
-        # class_embeddings: (n_temp, emb_dim)
-        class_embeddings = clip_model.encode_text(texts)
-        # class_embeddings: (n_temp, emb_dim)
-        class_embeddings /= class_embeddings.norm(dim=-1, keepdim=True)
-        # class_embeddings: (emb_dim,)
-        class_embedding = class_embeddings.mean(dim=0)
-        # class_embeddings: (emb_dim,)
-        class_embedding /= class_embedding.norm()
-        clip_weights.append(class_embedding)
+        for classname in classnames:
+            if _is_weighted_prompt_fusion(template):
+                class_embedding = _encode_weighted_prompt_fusion(
+                    classname,
+                    template,
+                    clip_model,
+                )
+            else:
+                texts = _build_prompt_texts(classname, template)
+                class_embedding = _encode_texts_as_prototype(texts, clip_model)
 
-    # NOTE torch.stack along the 
-    #       i. `dim=1` will make `clip_weights` have shape (emb_dim, n_cls)
-    #      ii. `dim=0` will make `clip_weights` have shape (n_cls, emb_dim)
-    # clip_weights: (emb_dim, n_cls)
-    clip_weights = torch.stack(clip_weights, dim=1).cuda()
-    
+            clip_weights.append(class_embedding)
+
+        clip_weights = torch.stack(clip_weights, dim=1).cuda()
     return clip_weights
 
 
