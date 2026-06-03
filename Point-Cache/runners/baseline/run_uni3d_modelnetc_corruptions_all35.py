@@ -63,7 +63,7 @@ def parse_args():
     baseline_parser.add_argument("--baseline-method", required=True, choices=["zs", "zs_global", "zs_global_local"])
     baseline_parser.add_argument("--baseline-method-full", required=True)
     baseline_parser.add_argument("--baseline-gpu", default="0")
-    baseline_parser.add_argument("--baseline-result-root", default="results/baseline")
+    baseline_parser.add_argument("--baseline-result-root", default="results/E0_baseline")
 
     baseline_args, remaining = baseline_parser.parse_known_args()
 

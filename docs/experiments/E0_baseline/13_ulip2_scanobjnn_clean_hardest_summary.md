@@ -46,7 +46,7 @@
 | 项目 | 路径或名称 |
 |---|---|
 | 公共脚本 | Point-Cache/scripts/baseline/13_run_ulip2_scanobjnn_clean_hardest_common.sh |
-| 结果根目录 | Point-Cache/results/baseline/ |
+| 结果根目录 | Point-Cache/results/E0_baseline/ |
 | 文档目录 | docs/experiments/baseline/ |
 | 数据文件 | Point-Cache/data/sonn_c/hardest/clean.h5 |
 | Backbone 权重 | Point-Cache/weights/ulip/pointbert_ulip2.pt |
@@ -380,28 +380,28 @@ bash scripts/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local_single_
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/13_1_ulip2_scanobjnn_clean_hardest_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/13_1_ulip2_scanobjnn_clean_hardest_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/13_1_ulip2_scanobjnn_clean_hardest_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/13_1_ulip2_scanobjnn_clean_hardest_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/13_1_ulip2_scanobjnn_clean_hardest_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/13_1_ulip2_scanobjnn_clean_hardest_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
 13_2：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
 13_3：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l

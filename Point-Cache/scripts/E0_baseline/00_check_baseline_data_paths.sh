@@ -5,7 +5,7 @@ PROJECT_ROOT="/root/autodl-tmp/MCM-PC-2"
 PC_ROOT="${PROJECT_ROOT}/Point-Cache"
 
 SCRIPT_DIR="${PC_ROOT}/scripts/baseline"
-RESULT_ROOT="${PC_ROOT}/results/baseline"
+RESULT_ROOT="${PC_ROOT}/results/E0_baseline"
 RUN_NAME="00_check_baseline_data_paths"
 RUN_DIR="${RESULT_ROOT}/${RUN_NAME}"
 LOG_DIR="${RUN_DIR}/logs"

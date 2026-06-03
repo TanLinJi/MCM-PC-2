@@ -54,7 +54,7 @@
 |---|---|
 | 公共脚本 | Point-Cache/scripts/baseline/04_run_ulip_scanobjnnc_hardest_corruptions_all35_common.sh |
 | 优化 runner | Point-Cache/runners/baseline/run_ulip_scanobjnnc_hardest_corruptions_all35.py |
-| 结果根目录 | Point-Cache/results/baseline/ |
+| 结果根目录 | Point-Cache/results/E0_baseline/ |
 | 文档目录 | docs/experiments/baseline/ |
 
 优化方式如下：
@@ -464,28 +464,28 @@ bash scripts/baseline/04_3_ulip_scanobjnnc_hardest_corruptions_all35_zs_global_l
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/04_1_ulip_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/04_1_ulip_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/04_1_ulip_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/04_1_ulip_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/04_1_ulip_scanobjnnc_hardest_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/04_1_ulip_scanobjnnc_hardest_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
 04_2：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/04_2_ulip_scanobjnnc_hardest_corruptions_all35_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/04_2_ulip_scanobjnnc_hardest_corruptions_all35_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/04_2_ulip_scanobjnnc_hardest_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/04_2_ulip_scanobjnnc_hardest_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/04_2_ulip_scanobjnnc_hardest_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/04_2_ulip_scanobjnnc_hardest_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
 04_3：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/04_3_ulip_scanobjnnc_hardest_corruptions_all35_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/04_3_ulip_scanobjnnc_hardest_corruptions_all35_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/04_3_ulip_scanobjnnc_hardest_corruptions_all35_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/04_3_ulip_scanobjnnc_hardest_corruptions_all35_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/04_3_ulip_scanobjnnc_hardest_corruptions_all35_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/04_3_ulip_scanobjnnc_hardest_corruptions_all35_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l

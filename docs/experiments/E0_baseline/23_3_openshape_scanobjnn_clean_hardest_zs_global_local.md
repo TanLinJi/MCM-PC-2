@@ -127,7 +127,7 @@ data/sonn_c/hardest/clean.h5
 
 输出目录：
 
-Point-Cache/results/baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/
+Point-Cache/results/E0_baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/
 
 输出内容：
 
@@ -448,12 +448,12 @@ bash scripts/baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local_sin
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
 
-tail -n +2 results/baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f13 | sort | uniq -c
+tail -n +2 results/E0_baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f13 | sort | uniq -c
 
-cat results/baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/summary.csv
+cat results/E0_baseline/23_3_openshape_scanobjnn_clean_hardest_zs_global_local/summary.csv

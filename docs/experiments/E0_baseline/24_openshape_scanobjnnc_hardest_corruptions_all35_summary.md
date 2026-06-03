@@ -55,7 +55,7 @@
 |---|---|
 | 公共脚本 | Point-Cache/scripts/baseline/24_run_openshape_scanobjnnc_hardest_corruptions_all35_common.sh |
 | 优化 runner | Point-Cache/runners/baseline/run_openshape_scanobjnnc_hardest_corruptions_all35.py |
-| 结果根目录 | Point-Cache/results/baseline/ |
+| 结果根目录 | Point-Cache/results/E0_baseline/ |
 | 文档目录 | docs/experiments/baseline/ |
 | OpenShape 权重 | Point-Cache/weights/openshape/openshape-pointbert-vitg14-rgb/model.pt |
 | OpenCLIP 权重 | Point-Cache/weights/openshape/open_clip_pytorch_model/vit-bigG-14/laion2b_s39b_b160k.bin |
@@ -576,28 +576,28 @@ bash scripts/baseline/24_3_openshape_scanobjnnc_hardest_corruptions_all35_zs_glo
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/24_1_openshape_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/24_1_openshape_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/24_1_openshape_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/24_1_openshape_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/24_1_openshape_scanobjnnc_hardest_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/24_1_openshape_scanobjnnc_hardest_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
 24_2：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/24_2_openshape_scanobjnnc_hardest_corruptions_all35_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/24_2_openshape_scanobjnnc_hardest_corruptions_all35_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/24_2_openshape_scanobjnnc_hardest_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/24_2_openshape_scanobjnnc_hardest_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/24_2_openshape_scanobjnnc_hardest_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/24_2_openshape_scanobjnnc_hardest_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
 24_3：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/24_3_openshape_scanobjnnc_hardest_corruptions_all35_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/24_3_openshape_scanobjnnc_hardest_corruptions_all35_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/24_3_openshape_scanobjnnc_hardest_corruptions_all35_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/24_3_openshape_scanobjnnc_hardest_corruptions_all35_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/24_3_openshape_scanobjnnc_hardest_corruptions_all35_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/24_3_openshape_scanobjnnc_hardest_corruptions_all35_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l

@@ -84,7 +84,7 @@ baseline 结果分析已经完成，相关结果文档已整理在 `docs/experim
 
 ### 结果路径
 
-- Point-Cache/results/baseline/
+- Point-Cache/results/E0_baseline/
 
 ### 下一步
 

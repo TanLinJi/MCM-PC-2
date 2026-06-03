@@ -53,7 +53,7 @@
 |---|---|
 | 公共脚本 | Point-Cache/scripts/baseline/12_run_ulip2_modelnetc_corruptions_all35_common.sh |
 | 优化 runner | Point-Cache/runners/baseline/run_ulip2_modelnetc_corruptions_all35.py |
-| 结果根目录 | Point-Cache/results/baseline/ |
+| 结果根目录 | Point-Cache/results/E0_baseline/ |
 | 文档目录 | docs/experiments/baseline/ |
 | Backbone 权重 | Point-Cache/weights/ulip/pointbert_ulip2.pt |
 | 文本编码器权重 | Point-Cache/weights/ulip/slip_base_100ep.pt |
@@ -505,28 +505,28 @@ bash scripts/baseline/12_3_ulip2_modelnetc_corruptions_all35_zs_global_local_sin
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/12_1_ulip2_modelnetc_corruptions_all35_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/12_1_ulip2_modelnetc_corruptions_all35_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/12_1_ulip2_modelnetc_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/12_1_ulip2_modelnetc_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/12_1_ulip2_modelnetc_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/12_1_ulip2_modelnetc_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
 12_2：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/12_2_ulip2_modelnetc_corruptions_all35_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/12_2_ulip2_modelnetc_corruptions_all35_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/12_2_ulip2_modelnetc_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/12_2_ulip2_modelnetc_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/12_2_ulip2_modelnetc_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/12_2_ulip2_modelnetc_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
 12_3：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/12_3_ulip2_modelnetc_corruptions_all35_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/12_3_ulip2_modelnetc_corruptions_all35_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/12_3_ulip2_modelnetc_corruptions_all35_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/12_3_ulip2_modelnetc_corruptions_all35_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/12_3_ulip2_modelnetc_corruptions_all35_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/12_3_ulip2_modelnetc_corruptions_all35_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l

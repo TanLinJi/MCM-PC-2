@@ -36,7 +36,7 @@
 | 方法脚本 | Point-Cache/scripts/baseline/22_1_openshape_modelnetc_corruptions_all35_zs_single_gpu.sh |
 | 公共脚本 | Point-Cache/scripts/baseline/22_run_openshape_modelnetc_corruptions_all35_common.sh |
 | 优化 Python runner | Point-Cache/runners/baseline/run_openshape_modelnetc_corruptions_all35.py |
-| 结果目录 | Point-Cache/results/baseline/22_1_openshape_modelnetc_corruptions_all35_zs/ |
+| 结果目录 | Point-Cache/results/E0_baseline/22_1_openshape_modelnetc_corruptions_all35_zs/ |
 
 本实验是 all35 实验，因此使用优化 runner：
 
@@ -110,7 +110,7 @@ data/modelnet_c/{corruption}_{severity}.h5
 
 输出目录：
 
-Point-Cache/results/baseline/22_1_openshape_modelnetc_corruptions_all35_zs/
+Point-Cache/results/E0_baseline/22_1_openshape_modelnetc_corruptions_all35_zs/
 
 输出内容：
 
@@ -409,12 +409,12 @@ bash scripts/baseline/22_1_openshape_modelnetc_corruptions_all35_zs_single_gpu.s
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/22_1_openshape_modelnetc_corruptions_all35_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/22_1_openshape_modelnetc_corruptions_all35_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/22_1_openshape_modelnetc_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/22_1_openshape_modelnetc_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/22_1_openshape_modelnetc_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/22_1_openshape_modelnetc_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
-tail -n +2 results/baseline/22_1_openshape_modelnetc_corruptions_all35_zs/summary.csv | cut -d',' -f13 | sort | uniq -c
+tail -n +2 results/E0_baseline/22_1_openshape_modelnetc_corruptions_all35_zs/summary.csv | cut -d',' -f13 | sort | uniq -c
 
-cat results/baseline/22_1_openshape_modelnetc_corruptions_all35_zs/summary.csv
+cat results/E0_baseline/22_1_openshape_modelnetc_corruptions_all35_zs/summary.csv

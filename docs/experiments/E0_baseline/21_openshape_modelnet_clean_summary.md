@@ -45,7 +45,7 @@
 | 项目 | 路径或名称 |
 |---|---|
 | 公共脚本 | Point-Cache/scripts/baseline/21_run_openshape_modelnet_clean_common.sh |
-| 结果根目录 | Point-Cache/results/baseline/ |
+| 结果根目录 | Point-Cache/results/E0_baseline/ |
 | 文档目录 | docs/experiments/baseline/ |
 | 数据文件 | Point-Cache/data/modelnet_c/clean.h5 |
 | OpenShape 权重 | Point-Cache/weights/openshape/openshape-pointbert-vitg14-rgb/model.pt |
@@ -300,28 +300,28 @@ bash scripts/baseline/21_3_openshape_modelnet_clean_zs_global_local_single_gpu.s
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/21_1_openshape_modelnet_clean_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/21_1_openshape_modelnet_clean_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/21_1_openshape_modelnet_clean_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/21_1_openshape_modelnet_clean_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/21_1_openshape_modelnet_clean_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/21_1_openshape_modelnet_clean_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
 21_2：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/21_2_openshape_modelnet_clean_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/21_2_openshape_modelnet_clean_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/21_2_openshape_modelnet_clean_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/21_2_openshape_modelnet_clean_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/21_2_openshape_modelnet_clean_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/21_2_openshape_modelnet_clean_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
 21_3：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/21_3_openshape_modelnet_clean_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/21_3_openshape_modelnet_clean_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/21_3_openshape_modelnet_clean_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/21_3_openshape_modelnet_clean_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/21_3_openshape_modelnet_clean_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/21_3_openshape_modelnet_clean_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l

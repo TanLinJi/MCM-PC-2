@@ -90,7 +90,7 @@ Global Cache 主要利用点云整体结构信息；Local Cache 进一步利用�
 
 输出目录：
 
-Point-Cache/results/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/
+Point-Cache/results/E0_baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/
 
 输出内容：
 
@@ -367,10 +367,10 @@ bash scripts/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local_single_
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
 
-cat results/baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv
+cat results/E0_baseline/13_3_ulip2_scanobjnn_clean_hardest_zs_global_local/summary.csv

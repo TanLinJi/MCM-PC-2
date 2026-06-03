@@ -17,7 +17,7 @@ PHYSICAL_GPU="${6:-0}"
 PROJECT_ROOT="/root/autodl-tmp/MCM-PC-2"
 PC_ROOT="${PROJECT_ROOT}/Point-Cache"
 
-RESULT_ROOT="${PC_ROOT}/results/baseline"
+RESULT_ROOT="${PC_ROOT}/results/E0_baseline"
 RUN_DIR="${RESULT_ROOT}/${EXP_ID}"
 LOG_DIR="${RUN_DIR}/logs"
 WANDB_DIR_LOCAL="${RUN_DIR}/wandb"

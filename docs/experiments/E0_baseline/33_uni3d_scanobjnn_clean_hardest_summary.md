@@ -49,7 +49,7 @@
 | 33_2 脚本 | Point-Cache/scripts/baseline/33_2_uni3d_scanobjnn_clean_hardest_zs_global_single_gpu.sh |
 | 33_3 脚本 | Point-Cache/scripts/baseline/33_3_uni3d_scanobjnn_clean_hardest_zs_global_local_single_gpu.sh |
 | checkpoint 下载脚本 | Point-Cache/scripts/data_download_scripts/download_uni3d_checkpoints.sh |
-| 结果根目录 | Point-Cache/results/baseline/ |
+| 结果根目录 | Point-Cache/results/E0_baseline/ |
 | 文档目录 | docs/experiments/baseline/ |
 
 33 组每个子实验只测试一个文件：
@@ -438,28 +438,28 @@ bash scripts/baseline/33_3_uni3d_scanobjnn_clean_hardest_zs_global_local_single_
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/33_1_uni3d_scanobjnn_clean_hardest_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/33_1_uni3d_scanobjnn_clean_hardest_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/33_1_uni3d_scanobjnn_clean_hardest_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/33_1_uni3d_scanobjnn_clean_hardest_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/33_1_uni3d_scanobjnn_clean_hardest_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/33_1_uni3d_scanobjnn_clean_hardest_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
 33_2：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/33_2_uni3d_scanobjnn_clean_hardest_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/33_2_uni3d_scanobjnn_clean_hardest_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/33_2_uni3d_scanobjnn_clean_hardest_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/33_2_uni3d_scanobjnn_clean_hardest_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/33_2_uni3d_scanobjnn_clean_hardest_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/33_2_uni3d_scanobjnn_clean_hardest_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
 33_3：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/33_3_uni3d_scanobjnn_clean_hardest_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/33_3_uni3d_scanobjnn_clean_hardest_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/33_3_uni3d_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/33_3_uni3d_scanobjnn_clean_hardest_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/33_3_uni3d_scanobjnn_clean_hardest_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/33_3_uni3d_scanobjnn_clean_hardest_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l

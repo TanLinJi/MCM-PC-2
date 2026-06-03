@@ -451,22 +451,22 @@ all35 实验正式归档前必须检查：
       echo "$exp"
 
       echo "summary 行数："
-      tail -n +2 "results/baseline/${exp}/summary.csv" | wc -l
+      tail -n +2 "results/E0_baseline/${exp}/summary.csv" | wc -l
 
       echo "唯一 cor_type 数："
-      tail -n +2 "results/baseline/${exp}/summary.csv" | cut -d',' -f6 | sort -u | wc -l
+      tail -n +2 "results/E0_baseline/${exp}/summary.csv" | cut -d',' -f6 | sort -u | wc -l
 
       echo "唯一 log_path 数："
-      tail -n +2 "results/baseline/${exp}/summary.csv" | cut -d',' -f15 | sort -u | wc -l
+      tail -n +2 "results/E0_baseline/${exp}/summary.csv" | cut -d',' -f15 | sort -u | wc -l
 
       echo "logs 文件数："
-      find "results/baseline/${exp}/logs" -maxdepth 1 -name '*.log' | wc -l
+      find "results/E0_baseline/${exp}/logs" -maxdepth 1 -name '*.log' | wc -l
 
       echo "status 统计："
-      tail -n +2 "results/baseline/${exp}/summary.csv" | cut -d',' -f13 | sort | uniq -c
+      tail -n +2 "results/E0_baseline/${exp}/summary.csv" | cut -d',' -f13 | sort | uniq -c
 
       echo "summary 前两行："
-      head -2 "results/baseline/${exp}/summary.csv"
+      head -2 "results/E0_baseline/${exp}/summary.csv"
     done
 
 正式归档标准：
@@ -504,15 +504,15 @@ all35 实验正式归档前必须检查：
       echo "============================================================"
       echo "$exp"
       echo "summary 修改时间："
-      stat -c "%y %n" "results/baseline/${exp}/summary.csv"
+      stat -c "%y %n" "results/E0_baseline/${exp}/summary.csv"
 
       echo "summary 前两行："
-      head -2 "results/baseline/${exp}/summary.csv"
+      head -2 "results/E0_baseline/${exp}/summary.csv"
     done
 
 如果需要再次上传，应明确从当前服务器路径复制：
 
-    results/baseline/<exp>/summary.csv
+    results/E0_baseline/<exp>/summary.csv
 
 不要上传旧下载文件。
 
@@ -717,7 +717,7 @@ all35 runner 必须加入 fail-fast 检查。
 
 跑完立刻检查：
 
-    head -2 results/baseline/<exp>/summary.csv
+    head -2 results/E0_baseline/<exp>/summary.csv
 
 确认 metadata 完全正确后，再跑后续方法。
 

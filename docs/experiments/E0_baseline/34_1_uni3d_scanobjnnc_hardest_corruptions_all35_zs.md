@@ -196,7 +196,7 @@ Point-Cache/scripts/data_download_scripts/download_uni3d_checkpoints.sh
 
 输出目录：
 
-Point-Cache/results/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/
+Point-Cache/results/E0_baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/
 
 输出内容：
 
@@ -517,16 +517,16 @@ bash scripts/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs_single_
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f6 | sort -u | wc -l
+tail -n +2 results/E0_baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f6 | sort -u | wc -l
 
-tail -n +2 results/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
-tail -n +2 results/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f13 | sort | uniq -c
+tail -n +2 results/E0_baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv | cut -d',' -f13 | sort | uniq -c
 
-head -2 results/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv
+head -2 results/E0_baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv
 
-cat results/baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv
+cat results/E0_baseline/34_1_uni3d_scanobjnnc_hardest_corruptions_all35_zs/summary.csv

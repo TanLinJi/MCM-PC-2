@@ -78,7 +78,7 @@ Global Cache 的基本作用是：在测试时动态缓存高置信度样本的�
 
 输出目录：
 
-Point-Cache/results/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/
+Point-Cache/results/E0_baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/
 
 输出内容：
 
@@ -285,10 +285,10 @@ bash scripts/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global_single_gpu.sh
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
-cat results/baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv
+cat results/E0_baseline/13_2_ulip2_scanobjnn_clean_hardest_zs_global/summary.csv

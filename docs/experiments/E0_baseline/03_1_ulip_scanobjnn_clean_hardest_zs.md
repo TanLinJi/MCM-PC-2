@@ -48,7 +48,7 @@ data/sonn_c/hardest/clean.h5
 
 输出目录：
 
-Point-Cache/results/baseline/03_1_ulip_scanobjnn_clean_hardest_zs/
+Point-Cache/results/E0_baseline/03_1_ulip_scanobjnn_clean_hardest_zs/
 
 输出内容：
 
@@ -189,10 +189,10 @@ bash scripts/baseline/03_1_ulip_scanobjnn_clean_hardest_zs_single_gpu.sh 1
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/03_1_ulip_scanobjnn_clean_hardest_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/03_1_ulip_scanobjnn_clean_hardest_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/03_1_ulip_scanobjnn_clean_hardest_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/03_1_ulip_scanobjnn_clean_hardest_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/03_1_ulip_scanobjnn_clean_hardest_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/03_1_ulip_scanobjnn_clean_hardest_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
-cat results/baseline/03_1_ulip_scanobjnn_clean_hardest_zs/summary.csv
+cat results/E0_baseline/03_1_ulip_scanobjnn_clean_hardest_zs/summary.csv

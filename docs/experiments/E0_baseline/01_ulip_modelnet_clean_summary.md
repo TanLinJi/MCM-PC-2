@@ -53,10 +53,10 @@ ULIP × ModelNet clean baseline 复现总结。
 
 | 实验编号 | 脚本 | 结果目录 |
 |---|---|---|
-| 01_1 | Point-Cache/scripts/baseline/01_1_ulip_modelnet_clean_zs_single_gpu.sh | Point-Cache/results/baseline/01_1_ulip_modelnet_clean_zs |
-| 01_2 | Point-Cache/scripts/baseline/01_2_ulip_modelnet_clean_zs_global_single_gpu.sh | Point-Cache/results/baseline/01_2_ulip_modelnet_clean_zs_global |
-| 01_3 | Point-Cache/scripts/baseline/01_3_ulip_modelnet_clean_zs_global_local_single_gpu.sh | Point-Cache/results/baseline/01_3_ulip_modelnet_clean_zs_global_local |
-| 汇总 | 无单独运行脚本 | Point-Cache/results/baseline/01_ulip_modelnet_clean_summary |
+| 01_1 | Point-Cache/scripts/baseline/01_1_ulip_modelnet_clean_zs_single_gpu.sh | Point-Cache/results/E0_baseline/01_1_ulip_modelnet_clean_zs |
+| 01_2 | Point-Cache/scripts/baseline/01_2_ulip_modelnet_clean_zs_global_single_gpu.sh | Point-Cache/results/E0_baseline/01_2_ulip_modelnet_clean_zs_global |
+| 01_3 | Point-Cache/scripts/baseline/01_3_ulip_modelnet_clean_zs_global_local_single_gpu.sh | Point-Cache/results/E0_baseline/01_3_ulip_modelnet_clean_zs_global_local |
+| 汇总 | 无单独运行脚本 | Point-Cache/results/E0_baseline/01_ulip_modelnet_clean_summary |
 
 ---
 

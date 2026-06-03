@@ -22,7 +22,7 @@ cd "${PC_ROOT}"
 export CUDA_VISIBLE_DEVICES="${PHYSICAL_GPU}"
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
 export WANDB_MODE=offline
-export WANDB_DIR="${PC_ROOT}/results/baseline/${EXP_ID}/wandb"
+export WANDB_DIR="${PC_ROOT}/results/E0_baseline/${EXP_ID}/wandb"
 export WANDB_SILENT=true
 export PYTHONUNBUFFERED=1
 
@@ -85,7 +85,7 @@ python runners/baseline/run_uni3d_scanobjnnc_hardest_corruptions_all35.py \
   --baseline-method "${METHOD}" \
   --baseline-method-full "${METHOD_FULL}" \
   --baseline-gpu "${PHYSICAL_GPU}" \
-  --baseline-result-root "results/baseline" \
+  --baseline-result-root "results/E0_baseline" \
   --config configs \
   --wandb-log \
   --lm3d uni3d \

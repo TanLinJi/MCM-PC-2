@@ -55,9 +55,9 @@ ULIP × ModelNet clean × Zero-shot + Global Cache + Local Cache。
 | 项目 | 路径 |
 |---|---|
 | 方法脚本 | Point-Cache/scripts/baseline/01_3_ulip_modelnet_clean_zs_global_local_single_gpu.sh |
-| 结果目录 | Point-Cache/results/baseline/01_3_ulip_modelnet_clean_zs_global_local |
-| 结果汇总 | Point-Cache/results/baseline/01_3_ulip_modelnet_clean_zs_global_local/summary.csv |
-| 日志目录 | Point-Cache/results/baseline/01_3_ulip_modelnet_clean_zs_global_local/logs |
+| 结果目录 | Point-Cache/results/E0_baseline/01_3_ulip_modelnet_clean_zs_global_local |
+| 结果汇总 | Point-Cache/results/E0_baseline/01_3_ulip_modelnet_clean_zs_global_local/summary.csv |
+| 日志目录 | Point-Cache/results/E0_baseline/01_3_ulip_modelnet_clean_zs_global_local/logs |
 
 ---
 

@@ -48,7 +48,7 @@
 | 31_2 脚本 | Point-Cache/scripts/baseline/31_2_uni3d_modelnet_clean_zs_global_single_gpu.sh |
 | 31_3 脚本 | Point-Cache/scripts/baseline/31_3_uni3d_modelnet_clean_zs_global_local_single_gpu.sh |
 | checkpoint 下载脚本 | Point-Cache/scripts/data_download_scripts/download_uni3d_checkpoints.sh |
-| 结果根目录 | Point-Cache/results/baseline/ |
+| 结果根目录 | Point-Cache/results/E0_baseline/ |
 | 文档目录 | docs/experiments/baseline/ |
 
 31 组每个子实验只测试一个文件：
@@ -427,28 +427,28 @@ bash scripts/baseline/31_3_uni3d_modelnet_clean_zs_global_local_single_gpu.sh 1
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/31_1_uni3d_modelnet_clean_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/31_1_uni3d_modelnet_clean_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/31_1_uni3d_modelnet_clean_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/31_1_uni3d_modelnet_clean_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/31_1_uni3d_modelnet_clean_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/31_1_uni3d_modelnet_clean_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
 31_2：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/31_2_uni3d_modelnet_clean_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/31_2_uni3d_modelnet_clean_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/31_2_uni3d_modelnet_clean_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/31_2_uni3d_modelnet_clean_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/31_2_uni3d_modelnet_clean_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/31_2_uni3d_modelnet_clean_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
 31_3：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/31_3_uni3d_modelnet_clean_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/31_3_uni3d_modelnet_clean_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/31_3_uni3d_modelnet_clean_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/31_3_uni3d_modelnet_clean_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/31_3_uni3d_modelnet_clean_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/31_3_uni3d_modelnet_clean_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l

@@ -36,7 +36,7 @@
 | 方法脚本 | Point-Cache/scripts/baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global_single_gpu.sh |
 | 公共脚本 | Point-Cache/scripts/baseline/02_run_ulip_modelnetc_corruptions_all35_common.sh |
 | 新增 Python runner | Point-Cache/runners/baseline/run_ulip_modelnetc_corruptions_all35.py |
-| 结果目录 | Point-Cache/results/baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/ |
+| 结果目录 | Point-Cache/results/E0_baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/ |
 
 重要变更：
 
@@ -111,7 +111,7 @@
 
 输出目录：
 
-Point-Cache/results/baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/
+Point-Cache/results/E0_baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/
 
 输出内容：
 
@@ -445,10 +445,10 @@ bash scripts/baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global_single_gpu
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
-tail -n +2 results/baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/summary.csv | cut -d',' -f13 | sort | uniq -c
+tail -n +2 results/E0_baseline/02_2_ulip_modelnetc_corruptions_all35_zs_global/summary.csv | cut -d',' -f13 | sort | uniq -c

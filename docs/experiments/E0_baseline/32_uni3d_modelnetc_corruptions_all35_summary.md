@@ -56,7 +56,7 @@
 |---|---|
 | 公共脚本 | Point-Cache/scripts/baseline/32_run_uni3d_modelnetc_corruptions_all35_common.sh |
 | 优化 runner | Point-Cache/runners/baseline/run_uni3d_modelnetc_corruptions_all35.py |
-| 结果根目录 | Point-Cache/results/baseline/ |
+| 结果根目录 | Point-Cache/results/E0_baseline/ |
 | 文档目录 | docs/experiments/baseline/ |
 | checkpoint 下载脚本 | Point-Cache/scripts/data_download_scripts/download_uni3d_checkpoints.sh |
 
@@ -573,28 +573,28 @@ bash scripts/baseline/32_3_uni3d_modelnetc_corruptions_all35_zs_global_local_sin
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/32_1_uni3d_modelnetc_corruptions_all35_zs/summary.csv | wc -l
+tail -n +2 results/E0_baseline/32_1_uni3d_modelnetc_corruptions_all35_zs/summary.csv | wc -l
 
-tail -n +2 results/baseline/32_1_uni3d_modelnetc_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/32_1_uni3d_modelnetc_corruptions_all35_zs/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/32_1_uni3d_modelnetc_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/32_1_uni3d_modelnetc_corruptions_all35_zs/logs -maxdepth 1 -name '*.log' | wc -l
 
 32_2：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/32_2_uni3d_modelnetc_corruptions_all35_zs_global/summary.csv | wc -l
+tail -n +2 results/E0_baseline/32_2_uni3d_modelnetc_corruptions_all35_zs_global/summary.csv | wc -l
 
-tail -n +2 results/baseline/32_2_uni3d_modelnetc_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/32_2_uni3d_modelnetc_corruptions_all35_zs_global/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/32_2_uni3d_modelnetc_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/32_2_uni3d_modelnetc_corruptions_all35_zs_global/logs -maxdepth 1 -name '*.log' | wc -l
 
 32_3：
 
 cd /root/autodl-tmp/MCM-PC-2/Point-Cache
 
-tail -n +2 results/baseline/32_3_uni3d_modelnetc_corruptions_all35_zs_global_local/summary.csv | wc -l
+tail -n +2 results/E0_baseline/32_3_uni3d_modelnetc_corruptions_all35_zs_global_local/summary.csv | wc -l
 
-tail -n +2 results/baseline/32_3_uni3d_modelnetc_corruptions_all35_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
+tail -n +2 results/E0_baseline/32_3_uni3d_modelnetc_corruptions_all35_zs_global_local/summary.csv | cut -d',' -f15 | sort -u | wc -l
 
-find results/baseline/32_3_uni3d_modelnetc_corruptions_all35_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l
+find results/E0_baseline/32_3_uni3d_modelnetc_corruptions_all35_zs_global_local/logs -maxdepth 1 -name '*.log' | wc -l

@@ -10,7 +10,7 @@ METHOD_FULL="Zero-shot + Global Cache"
 RUNNER="runners/model_with_global_cache.py"
 CACHE_TYPE="global"
 
-RESULT_ROOT="${PC_ROOT}/results/baseline"
+RESULT_ROOT="${PC_ROOT}/results/E0_baseline"
 RUN_DIR="${RESULT_ROOT}/${EXP_ID}"
 LOG_DIR="${RUN_DIR}/logs"
 WANDB_DIR_LOCAL="${RUN_DIR}/wandb"
