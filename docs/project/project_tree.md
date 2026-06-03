@@ -349,7 +349,7 @@ scripts/
 └── recur-pc/
 ```
 
-#### Point-Cache/scripts/baseline
+#### Point-Cache/scripts/E0_baseline
 
 ```text
 baseline/
