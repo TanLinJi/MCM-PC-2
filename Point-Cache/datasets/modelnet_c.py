@@ -17,8 +17,6 @@ class ModelNet_C(Dataset):
 
     def __init__(self, cfg):
         self.lm3d = cfg.lm3d
-        
-        self.template = get_prompt_template(cfg)
         self.dataset_dir = cfg.modelnet_c_root
 
         self.classnames = []
@@ -28,6 +26,8 @@ class ModelNet_C(Dataset):
             for line in lines:
                 classname = line.strip()
                 self.classnames.append(classname)
+
+        self.template = get_prompt_template(cfg, self.classnames, dataset_name="modelnet_c")
 
         cor_type = cfg.cor_type
         data_file = f'{cor_type}.h5'

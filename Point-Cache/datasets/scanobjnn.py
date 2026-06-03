@@ -29,14 +29,12 @@ def normalize_pc(pc):
 class ScanObjNN(Dataset):
     def __init__(self, config):
         self.lm3d = config.lm3d
-        
-        self.template = get_prompt_template(config)
-
         self.npoints = config.npoints
         self.data_path = config.scanobjnn_root
 
         self.classnames = ["bag", "bin", "box", "cabinet", "chair", "desk", "display", "door", 
                            "shelf", "table", "bed", "pillow", "sink", "sofa", "toilet"]
+        self.template = get_prompt_template(config, self.classnames, dataset_name="scanobjnn")
 
         self.openshape_data = np.load('%s/xyz_label.npy' % self.data_path, allow_pickle=True).item()
         

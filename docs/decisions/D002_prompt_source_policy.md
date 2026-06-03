@@ -204,3 +204,96 @@ E0 remains the Point-Cache baseline reproduction and analysis.
 `manual_full` is the E0-compatible text setting.
 
 E1 must not overwrite E0 results.
+
+
+## 2026-06-03 Direction Update: From 2D Filtering to Multi-View Prompt Enhancement
+
+Early E1 severity=2 results showed that `manual_3d` is much worse than `manual_full` on ULIP × ModelNet-C zero-shot evaluation.
+
+This means that directly removing 2D image-style prompts is not a good main direction for E1.
+
+Although many templates in `manual_full` look like 2D image prompts, they still provide useful CLIP-style visual semantic anchors for ULIP. Therefore, `manual_full` should not only be kept as an E0-compatible baseline, but also considered an important stable text prior.
+
+### Updated Decision
+
+E1 should no longer treat `manual_3d` as the main replacement for `manual_full`.
+
+Instead, E1 should follow this direction:
+
+- keep `manual_full` as the stable CLIP-style visual semantic anchor;
+- use LLM-generated descriptions as an additional semantic expansion branch;
+- make LLM descriptions multi-view, covering both 2D visual semantics and 3D point cloud geometry.
+
+### Updated Prompt Source Roles
+
+`manual_full`:
+
+- original full manual prompt set;
+- E0-compatible baseline;
+- stable CLIP-style visual semantic prior;
+- should be preserved.
+
+`manual_3d`:
+
+- filtered 3D-only manual prompt subset;
+- now treated as a diagnostic ablation, not the main method;
+- used to show that simply removing 2D image-style prompts is harmful.
+
+`llm_dynamic_init`:
+
+- should be revised from pure point-cloud geometry descriptions to multi-view class descriptions;
+- generated descriptions should include both common visual appearance and 3D geometric structure.
+
+`manual3d_llm_dynamic_init`:
+
+- kept as a diagnostic setting;
+- no longer treated as the main E1 candidate.
+
+`manualfull_llm_dynamic_init`:
+
+- new main E1 candidate;
+- fuses `manual_full` with multi-view LLM-generated class descriptions;
+- intended to preserve CLIP-style visual anchors while adding 3D geometric knowledge.
+
+### Updated LLM Generation Principle
+
+The LLM should generate descriptions that include both:
+
+1. visual semantic cues commonly useful for image-text models, such as common object appearance, recognizable parts, and category-level visual identity;
+2. 3D point cloud cues, such as shape, structure, part layout, symmetry, spatial arrangement, and geometric properties.
+
+The LLM should not generate pure photo templates only, and should not generate pure point-cloud geometry descriptions only.
+
+The preferred description format is a complete sentence combining visual identity and 3D structure.
+
+Example:
+
+    An airplane is visually recognized by its long body, wings, and tail, while its point cloud usually shows an elongated fuselage, bilateral wing structures, and rear stabilizers.
+
+### Updated Main Hypothesis
+
+The revised E1 hypothesis is:
+
+`manual_full` provides stable CLIP-style visual semantic anchors, while LLM-generated multi-view descriptions provide additional 3D geometric semantics. Their combination may produce stronger text prototypes than either 2D-style manual templates or pure 3D-only descriptions alone.
+
+
+## 2026-06-03 Update: Disable manual_3d Active Direction
+
+After the ULIP × ModelNet-C severity=2 zero-shot test, `manual_3d` was found to be clearly worse than `manual_full`.
+
+Decision:
+
+- `manual_3d` is no longer an active E1 prompt source.
+- `manual3d_llm_dynamic_init` is no longer an active E1 candidate.
+- Existing `manual_3d` results are kept only as negative diagnostic evidence.
+- Future E1 experiments should focus on:
+  - `manual_full`
+  - `llm_dynamic_init`
+  - `manualfull_llm_dynamic_init`
+
+The main E1 direction is now:
+
+    manual_full + multi-view LLM descriptions
+
+where `manual_full` preserves the CLIP-style visual semantic anchor, and the LLM branch adds multi-view descriptions containing both 2D visual semantics and 3D point cloud geometry.
+

@@ -31,12 +31,11 @@ def normalize_pc(pc):
 class ModelNet40(Dataset):
     def __init__(self, config):
         self.lm3d = config.lm3d
-        self.template = get_prompt_template(config)
-
         self.npoints = config.npoints
         self.data_path = config.modelnet40_root
         self.catfile = os.path.join(self.data_path, 'classnames.txt')
         self.classnames = [line.rstrip() for line in open(self.catfile)]
+        self.template = get_prompt_template(config, self.classnames, dataset_name="modelnet40")
         self.classes = dict(zip(self.classnames, range(len(self.classnames))))
 
         self.pcs = np.load('%s/test_pc.npy' % self.data_path, allow_pickle=True)

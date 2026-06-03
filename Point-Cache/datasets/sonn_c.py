@@ -15,8 +15,6 @@ class SONN_C(Dataset):
 
     def __init__(self, cfg):
         self.lm3d = cfg.lm3d
-                
-        self.template = get_prompt_template(cfg)
         self.dataset_dir = cfg.sonn_c_root
         self.dataset_variant = cfg.sonn_variant
 
@@ -27,6 +25,8 @@ class SONN_C(Dataset):
             for line in lines:
                 classname = line.strip()
                 self.classnames.append(classname)
+
+        self.template = get_prompt_template(cfg, self.classnames, dataset_name="sonn_c")
 
         cor_type = cfg.cor_type
         data_file = f'{cor_type}.h5'

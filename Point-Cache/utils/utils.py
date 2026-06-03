@@ -68,10 +68,9 @@ def get_arguments():
         default='manual_full',
         choices=[
             'manual_full',
-            'manual_3d',
             'llm_static',
             'llm_dynamic_init',
-            'manual3d_llm_dynamic_init',
+            'manualfull_llm_dynamic_init',
         ],
         help='Prompt source for text prototype construction.'
     )
@@ -96,7 +95,7 @@ def get_arguments():
     parser.add_argument(
         '--dynamic-prompt-count',
         type=int,
-        default=25,
+        default=10,
         help='Number of LLM-generated dynamic prompts per class.'
     )
     parser.add_argument(
@@ -130,10 +129,23 @@ def get_arguments():
         help='Sampling temperature for LLM prompt generation.'
     )
     parser.add_argument(
+        '--llm-prompt-mode',
+        type=str,
+        default='multiview_2d3d',
+        choices=['pointcloud_geometry', 'multiview_2d3d'],
+        help='LLM description style. multiview_2d3d includes both visual semantics and 3D geometry.'
+    )
+    parser.add_argument(
         '--force-regenerate-prompts',
         action='store_true',
         default=False,
         help='Regenerate LLM prompts even if cached prompt JSON exists.'
+    )
+    parser.add_argument(
+        '--llm-max-retries',
+        type=int,
+        default=3,
+        help='Maximum retry count when LLM returns invalid or empty prompts.'
     )
     
     # E1: text prototype enhancement :End
@@ -283,6 +295,61 @@ def clip_classifier_img_weights(args, dataset, clip_model):
 
 # 文本原型生成
 @torch.no_grad()
+
+def _lookup_class_prompts(classname, prompt_dict):
+    """按类别名称从 LLM 生成的提示词字典中查找该类别的描述。"""
+    raw_name = classname
+    clean_name = classname.replace('_', ' ')
+
+    candidate_keys = [
+        raw_name,
+        clean_name,
+        raw_name.lower(),
+        clean_name.lower(),
+        raw_name.replace('_', ' ').lower(),
+    ]
+
+    for key in candidate_keys:
+        if key in prompt_dict:
+            return prompt_dict[key]
+
+    raise KeyError(f"No prompts found for class '{classname}'.")
+
+
+def _build_prompt_texts(classname, template):
+    """根据提示词来源，为一个类别构造文本列表。
+
+    支持两种格式：
+
+    1. list[str]
+       所有类别共用的手工模板，例如 manual_full / manual_3d。
+
+    2. dict[str, list[str]]
+       按类别名称保存的 LLM 描述，例如 llm_dynamic_init。
+    """
+    clean_name = classname.replace('_', ' ')
+
+    if isinstance(template, list):
+        return [t.format(clean_name) for t in template]
+
+    if isinstance(template, tuple):
+        return [t.format(clean_name) for t in template]
+
+    if isinstance(template, dict):
+        return _lookup_class_prompts(classname, template)
+
+    raise TypeError(f"Unsupported prompt template type: {type(template)}")
+
+
+def _encode_texts_as_prototype(texts, clip_model):
+    """将多条提示词编码为一个归一化后的类别文本原型。"""
+    tokenized_texts = clip.tokenize(texts).cuda()
+    class_embeddings = clip_model.encode_text(tokenized_texts)
+    class_embeddings /= class_embeddings.norm(dim=-1, keepdim=True)
+    class_embedding = class_embeddings.mean(dim=0)
+    class_embedding /= class_embedding.norm()
+    return class_embedding
+
 
 def _is_weighted_prompt_fusion(template):
     """Check whether template represents weighted fusion of two text prototype branches."""

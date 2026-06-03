@@ -331,3 +331,65 @@ conflict 应作为负向证据，而不是直接的正向标签修正。
 - references。
 
 论文不应等所有实验完成后才开始写。
+
+
+## 10. E1 阶段性方向修正记录
+
+日期：2026-06-03
+
+E1 初始设想中包含 `manual_3d`，即从 Point-Cache 原始完整手工模板集合 `manual_full` 中删除明显 2D 图像风格模板，仅保留点云/3D 相关模板。
+
+ULIP × ModelNet-C severity=2 zero-shot 最小实验显示：
+
+- `manual_full` 与 E0 baseline 完全一致；
+- `manual_3d` 明显低于 `manual_full`。
+
+因此，E1 方向修正为：
+
+- 不再把“删除 2D 图像风格模板”作为主方法；
+- `manual_3d` 保留为诊断消融；
+- `manual_full` 作为稳定 CLIP-style 视觉语义锚点，需要保留；
+- 后续主线改为 `manual_full + multi-view LLM descriptions`；
+- LLM 描述应同时覆盖 2D 视觉语义和 3D 点云几何结构；
+- 新主候选方法为 `manualfull_llm_dynamic_init`。
+
+
+## 11. E1 manual_3d 方向终止记录
+
+日期：2026-06-03
+
+`manual_3d` 在 ULIP × ModelNet-C severity=2 zero-shot 测试中明显低于 `manual_full`。
+
+因此：
+
+- `manual_3d` 不再作为 active prompt source；
+- `manual3d_llm_dynamic_init` 不再作为 active method candidate；
+- 相关结果仅作为失败诊断保留；
+- 后续 E1 主线集中于 `manual_full + multi-view LLM descriptions`。
+
+
+## 12. E1 文本原型融合阶段性正结果
+
+日期：2026-06-03
+
+E1 在 ULIP × ModelNet-C severity=2 zero-shot 最小验证中取得阶段性正结果。
+
+关键结果：
+
+| 方法 | 平均准确率 |
+|---|---:|
+| manual_full | 47.68 |
+| manual_3d | 35.63 |
+| llm_dynamic_init | 39.30 |
+| manualfull_llm_dynamic_init | 48.88 |
+
+阶段性结论：
+
+- manual_full 是稳定的 CLIP-style 视觉语义锚点；
+- manual_3d 失败，说明简单删除 2D 图像风格模板不可行；
+- llm_dynamic_init 不能替代原始模板；
+- manualfull_llm_dynamic_init 首次超过原始 baseline，说明 LLM 描述适合作为补充语义分支。
+
+相关报告：
+
+    docs/experiments/E1_text_prototype_enhancement/e1_prompt_fusion_stage_report.md

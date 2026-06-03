@@ -223,3 +223,135 @@ E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 - `llm_generate_prompts.py` 是 Point-Cache 原始代码中的旧脚本，主要用于离线生成固定 GPT / PointLLM prompt JSON；
 - `e1_dynamic_prompt_generator.py` 是 E1 新增模块，用于实验初始化阶段根据候选类别名称动态生成类别级点云描述；
 - 两者用途不同，后续 E1 统一使用 `e1_dynamic_prompt_generator.py`。
+
+### 2026-06-03：新增 ULIP × ModelNet-C all35 zero-shot 的 manual_full 脚本
+
+本次新增 E1 第一组实际实验脚本：
+
+- `Point-Cache/scripts/E1_text_prototype_enhancement/01_run_ulip_modelnetc_all35_zs_prompt_common.sh`
+- `Point-Cache/scripts/E1_text_prototype_enhancement/01_1_ulip_modelnetc_all35_zs_manual_full_single_gpu.sh`
+
+该实验用于验证：
+
+- E1 的 `--prompt-source manual_full` 能够正常进入 runner；
+- `manual_full` 作为 Point-Cache 原始完整手工模板集合，能够作为 E1 的 E0-compatible 对照；
+- 结果保存到 `Point-Cache/results/E1_text_prototype_enhancement/01_1_ulip_modelnetc_all35_zs_manual_full/`。
+
+运行命令：
+
+    bash Point-Cache/scripts/E1_text_prototype_enhancement/01_1_ulip_modelnetc_all35_zs_manual_full_single_gpu.sh 0
+
+### 2026-06-03：修复 clip_classifier 缺失辅助函数问题
+
+问题：
+
+- 运行 `manual_full` zero-shot 脚本时，`clip_classifier()` 报错：
+  `NameError: name '_build_prompt_texts' is not defined`
+
+原因：
+
+- 前面重构 `clip_classifier()` 时，函数体已经切换到新的文本构造接口；
+- 但 `_build_prompt_texts()`、`_lookup_class_prompts()`、`_encode_texts_as_prototype()` 三个辅助函数没有成功写入 `utils.py`。
+
+修复：
+
+- 在 `Point-Cache/utils/utils.py` 中补充上述三个辅助函数；
+- `manual_full` 和 `manual_3d` 使用 list 模板；
+- `llm_dynamic_init` 使用按类别名称保存的提示词字典。
+
+
+### 2026-06-03：新增 ULIP × ModelNet-C severity=2 zero-shot 文本消融脚本
+
+本次新增 severity=2 最小测试 runner：
+
+- `Point-Cache/runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_ablation.py`
+
+该 runner 只跑 7 个 severity=2 损坏设置：
+
+- add_global_2
+- add_local_2
+- dropout_global_2
+- dropout_local_2
+- rotate_2
+- scale_2
+- jitter_2
+
+本次新增 4 个脚本，对应 E1 文本端的 4 个不同假设：
+
+- `01_0_ulip_modelnetc_s2_zs_baseline_manual_full_single_gpu.sh`
+  - 目的：验证 E1 新接口不破坏 Point-Cache 原始完整手工模板 baseline。
+- `01_1_ulip_modelnetc_s2_zs_filter_2d_manual_3d_single_gpu.sh`
+  - 目的：验证删除明显 2D 图像风格模板、只保留点云/3D相关手工模板是否有帮助。
+- `01_2_ulip_modelnetc_s2_zs_dynamic_llm_descriptions_single_gpu.sh`
+  - 目的：验证实验初始化阶段由 LLM 根据候选类别名称生成点云描述是否有帮助。
+- `01_3_ulip_modelnetc_s2_zs_fuse_manual3d_llm_single_gpu.sh`
+  - 目的：验证点云手工模板分支与 LLM 动态描述分支加权融合是否有帮助。
+
+
+### 2026-06-03：根据 manual_3d 结果修正 E1 实验方向
+
+已完成 `manual_full` 和 `manual_3d` 的 ULIP × ModelNet-C severity=2 zero-shot 最小测试。
+
+观察：
+
+- `manual_full` 与 E0 baseline 完全一致，说明 E1 新接口没有破坏原始文本原型路径；
+- `manual_3d` 明显低于 `manual_full`，说明简单删除 2D 图像风格模板不可行。
+
+方向修正：
+
+- 不再把 `manual_3d` 作为 E1 主方法；
+- `manual_3d` 改为诊断消融，用于说明简单过滤 2D 模板会损害 ULIP 文本原型；
+- 后续 E1 主线改为保留 `manual_full` 的 CLIP-style 视觉语义锚点，同时引入 LLM 生成的多视角类别描述；
+- LLM 描述应同时包含：
+  - 2D 视觉语义；
+  - 3D 点云几何结构；
+- 新增主候选方向：`manualfull_llm_dynamic_init`。
+
+下一步需要修改：
+
+- LLM 生成提示词，使其从纯 3D 几何描述调整为“视觉语义 + 点云几何”的多视角描述；
+- `prompt_utils.py` 和 `clip_classifier()`，支持 `manualfull_llm_dynamic_init`；
+- E1 severity=2 脚本，增加 `manualfull_llm_dynamic_init` 对照。
+
+
+### 2026-06-03：移除 manual_3d 主线
+
+根据 severity=2 最小实验结果，`manual_3d` 明显低于 `manual_full`。
+
+处理：
+
+- `manual_3d` 不再作为后续 active prompt source；
+- `manual3d_llm_dynamic_init` 不再作为后续 active candidate；
+- 已经得到的 `manual_3d` 结果保留为失败证据；
+- 后续 E1 只继续关注：
+  - `manual_full`
+  - `llm_dynamic_init`
+  - `manualfull_llm_dynamic_init`
+
+当前主线：
+
+    保留 manual_full 的 CLIP-style 视觉语义锚点，
+    同时引入 LLM 生成的 2D 视觉语义 + 3D 点云几何多视角描述。
+
+
+### 2026-06-03：E1 融合方案取得阶段性正结果
+
+完成 ULIP × ModelNet-C severity=2 zero-shot 下的关键文本方案对比。
+
+当前结果：
+
+- 原始完整手工模板 manual_full：47.68
+- 删除 2D 模板后的 manual_3d：35.63
+- 只用大模型多视角描述 llm_dynamic_init：39.30
+- 原始模板 + 大模型描述融合 manualfull_llm_dynamic_init：48.88
+
+关键结论：
+
+- 简单删除 2D 模板不可行；
+- 只用大模型描述不能替代原始模板；
+- 原始完整手工模板与大模型多视角描述融合后，平均准确率超过 baseline 1.20；
+- 这是 E1 当前第一个有效正结果。
+
+已新增阶段性报告：
+
+    docs/experiments/E1_text_prototype_enhancement/e1_prompt_fusion_stage_report.md
