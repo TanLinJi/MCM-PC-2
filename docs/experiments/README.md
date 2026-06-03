@@ -25,8 +25,7 @@ E0 includes the completed Point-Cache baseline reproduction and the correspondin
 
 Current E0 assets include:
 
-- `baseline/`: markdown summaries of baseline results.
-- `baseline.zip`: archived baseline result documents.
+- `E0_baseline/`: Point-Cache baseline 复现结果与分析文档。
 - `pointcache_repro/`: reproduction notes and commands.
 - `repro_log.md`: reproduction log.
 

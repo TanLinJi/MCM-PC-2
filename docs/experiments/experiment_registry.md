@@ -1,304 +1,308 @@
-# MCM-PC Experiment Registry
+# MCM-PC 总实验登记表
 
-Last updated: 2026-06-03
+最后更新：2026-06-03
 
-This document is the central registry for the formal MCM-PC experiment sequence.
+本文档是 MCM-PC 项目的正式实验总登记表，用于统一记录 E0、E1、E2 等实验的编号、名称、目标、状态、文档路径、脚本路径、结果路径和下一步工作。
 
-It records:
+本文档不替代每个实验自己的日志和分析文档。每个正式实验仍应维护独立的：
 
-- experiment ID;
-- experiment name;
-- experiment goal;
-- current status;
-- log and analysis document paths;
-- result paths;
-- related project documents;
-- next actions.
+- log.md：实验过程日志；
+- analysis.md：实验结果分析。
 
-This registry does not replace detailed experiment logs or analysis documents. Each formal experiment should still maintain its own `log.md` and `analysis.md`.
+旧探索实验已经归档到：
 
-## 1. Formal Experiment Sequence
+    docs/experiments/archive/legacy_pre_mcmpc_restart/
 
-| ID | Experiment Name | Goal | Status |
+旧实验不占用新的 E0-E5 编号。
+
+## 1. 正式实验序列
+
+| 编号 | 实验名称 | 目标 | 当前状态 |
 |---|---|---|---|
-| E0 | Point-Cache Baseline Reproduction and Analysis | Reproduce Point-Cache baselines and analyze baseline behavior | Reproduction completed; analysis in progress |
-| E1 | Text Prototype Enhancement | Study point-cloud-aware templates and dynamically generated DeepSeek prompts | Planning |
-| E2 | Reliability-Gated Local Cache | Dynamically control local cache contribution based on reliability | Planned |
-| E3 | Conflict-Aware Negative Suppression | Use global-local conflict as conservative negative evidence | Planned |
-| E4 | Reliability-Aware Multi-Cache Matrix | Build the full MCM-PC framework | Planned |
-| E5 | Ablation Studies and Visualization | Prepare ablations, case studies, and paper figures | Planned |
+| E0 | Point-Cache baseline 复现与分析 | 复现 Point-Cache baseline，并分析 baseline 行为 | 复现与结果分析已完成 |
+| E1 | 文本原型增强 | 研究点云语义模板与 DeepSeek 动态生成提示词对文本原型的影响 | 文档初始化完成，代码未开始 |
+| E2 | 局部缓存可靠性门控 | 根据可靠性动态控制 local cache 贡献 | 计划中 |
+| E3 | 冲突感知负向抑制 | 将 global-local 冲突作为保守负向证据 | 计划中 |
+| E4 | 可靠性感知多缓存矩阵 | 构建完整 MCM-PC 方法 | 计划中 |
+| E5 | 消融实验与可视化 | 完成消融、案例分析和论文图表 | 计划中 |
 
-## 2. E0: Point-Cache Baseline Reproduction and Analysis
+## 2. E0：Point-Cache baseline 复现与分析
 
-### Goal
+### 目标
 
-Reproduce the Point-Cache baseline results and use them as the foundation for all later MCM-PC experiments.
+复现 Point-Cache baseline 结果，并将其作为后续 MCM-PC 实验的比较基础。
 
-E0 includes both baseline reproduction and baseline result analysis.
+E0 包括 baseline 复现和 baseline 结果分析两部分。
 
-### Scope
+### 实验范围
 
-Backbones:
+Backbone：
 
 - ULIP
 - ULIP-2
 - OpenShape
 - Uni3D
 
-Datasets and settings:
+数据集与设置：
 
 - ModelNet clean
 - ModelNet-C all35
 - ScanObjNN clean hardest
 - ScanObjNN-C hardest all35
 
-Methods:
+方法：
 
 - zero-shot
 - zero-shot + global cache
 - zero-shot + global cache + local cache
 
-### Current Status
+### 当前状态
 
-Reproduction completed.
+baseline 复现已经完成。
 
-Baseline analysis is in progress.
+baseline 结果分析已经完成，相关结果文档已整理在 `docs/experiments/E0_baseline/`。
 
-Current high-level observations:
+当前高层观察：
 
-- Global cache is the main stable source of improvement.
-- Local cache provides auxiliary gains, but its contribution is not always stable.
-- Some backbone and corruption settings show weak or negative local-cache contribution.
-- These observations motivate later reliability-aware cache design.
+- global cache 是主要且相对稳定的增益来源；
+- local cache 提供辅助增益，但并不总是稳定；
+- 一些 backbone 和损坏类型下，local cache 的额外贡献较弱，甚至可能为负；
+- 这些观察为后续可靠性感知 cache 设计提供动机。
 
-### Documents
+### 文档路径
 
-Existing documents:
+已有资料：
 
-- docs/experiments/baseline/
-- docs/experiments/baseline.zip
+- docs/experiments/E0_baseline/
 - docs/experiments/pointcache_repro/
 - docs/experiments/repro_log.md
-- docs/experiments/experiment_summary.md
 
-Planned formal E0 documents:
+计划整理为：
 
 - docs/experiments/E0_baseline/log.md
 - docs/experiments/E0_baseline/analysis.md
 
-### Result Paths
+### 结果路径
 
 - Point-Cache/results/baseline/
 
-### Next Action
+### 下一步
 
-Create formal E0 baseline analysis documents based on existing baseline result markdown files.
+维护 E0 baseline 结果文档，并作为后续 E1-E5 实验的对照基准。
 
-## 3. E1: Text Prototype Enhancement
+## 3. E1：文本原型增强
 
-### Goal
+### 目标
 
-Study whether Point-Cache text prototypes can be improved by using point-cloud-aware manual templates and dynamically generated DeepSeek prompts.
+研究 Point-Cache 的文本原型是否可以通过点云语义相关模板和 DeepSeek 动态生成的类别级描述得到增强。
 
-### Motivation
+### 动机
 
-Point-Cache dynamically adapts the visual side through global and local caches, but its text prototypes are mainly constructed from fixed manual templates.
+Point-Cache 的视觉侧可以通过 global cache 和 local cache 动态适应测试数据流，但文本侧主要依赖固定模板。
 
-The original manual prompt ensemble contains many 2D image-style templates, such as photo-style, blurry-photo-style, cropped-photo-style, and painting-style prompts. These prompts may not be optimal for 3D point cloud recognition.
+原始完整手工模板集合中包含大量 2D 图像风格模板，例如 photo、blurry photo、painting、cropped photo 等。这些模板对 3D 点云识别未必最合适。
 
-E1 studies text-side enhancement before modifying the cache mechanism.
+E1 因此先研究文本端增强，再进入后续 cache 机制修改。
 
-### Planned Prompt Sources
+### 术语说明
 
-- manual_full: original Point-Cache manual prompt ensemble; E0-compatible baseline.
-- manual_3d: point-cloud-aware subset filtered from manual_full.
-- deepseek_static: pre-generated DeepSeek prompts saved as JSON.
-- deepseek_dynamic_init: DeepSeek prompts generated at experiment initialization based only on candidate class names.
-- manual3d_deepseek_dynamic_init: branch-level fusion of manual_3d and deepseek_dynamic_init.
+| 名称 | 中文含义 | 说明 |
+|---|---|---|
+| manual_full | 原始完整手工模板集合 | Point-Cache baseline 默认使用的完整固定模板集合，作为 E0 兼容对照 |
+| manual_3d | 点云/3D 相关手工模板子集 | 从 manual_full 中筛选出的点云语义相关模板集合 |
+| deepseek_static | DeepSeek 离线固定描述集合 | 提前生成并保存为 JSON，实验时只读取 |
+| deepseek_dynamic_init | DeepSeek 实验初始化动态描述集合 | 实验开始时根据候选类别名称生成，生成后冻结 |
+| manual3d_deepseek_dynamic_init | 点云手工模板与 DeepSeek 动态描述融合 | E1 的主要候选方法 |
 
-### Dynamic Prompt Rule
+### 动态提示词规则
 
-E1 uses dynamic-init prompt generation.
+E1 使用 dynamic-init，不使用 dynamic-online。
 
-Allowed:
+允许：
 
-- generate prompts before the test stream starts;
-- use only dataset candidate class names;
-- save generated prompts to the experiment result directory;
-- freeze generated prompts during inference.
+- 在测试流开始前，根据数据集候选类别名称生成提示词；
+- 保存生成结果；
+- 使用冻结后的文本原型进行推理。
 
-Not allowed in E1:
+不允许：
 
-- do not call LLM for each test sample;
-- do not use ground-truth labels;
-- do not expose test point cloud content to the LLM;
-- do not generate prompts based on individual sample predictions.
+- 对每个测试样本调用 LLM；
+- 使用测试样本真实标签；
+- 将测试点云内容暴露给 LLM；
+- 根据单个样本预测结果生成提示词；
+- 在测试流中持续更新提示词。
 
-### Main Candidate
+### 主要候选方法
 
-The main E1 method candidate is:
+E1 的主要候选方法是：
 
     manual3d_deepseek_dynamic_init
 
-Preferred formulation:
+推荐形式是分支级加权融合：
 
     text_prototype =
         static_weight * mean(manual_3d embeddings)
         + dynamic_weight * mean(dynamic DeepSeek embeddings)
 
-Default setting:
+默认设置：
 
-- static branch weight: 0.75
-- dynamic branch weight: 0.25
-- dynamic prompt count: 25 prompts per class
+- static branch weight：0.75
+- dynamic branch weight：0.25
+- dynamic prompt count：25 prompts per class
 
-### Planned Experimental Stages
+### 计划阶段
 
-Stage 1: zero-shot prompt comparison.
+阶段 1：zero-shot 文本原型对比。
 
-Compare:
+比较：
 
 - manual_full
 - manual_3d
 - deepseek_dynamic_init
 - manual3d_deepseek_dynamic_init
 
-Stage 2: Point-Cache prompt comparison.
+阶段 2：Point-Cache 文本原型对比。
 
-If Stage 1 shows a meaningful trend, extend to:
+如果阶段 1 出现有意义趋势，再扩展到：
 
 - zero-shot
 - zero-shot + global cache
 - zero-shot + global cache + local cache
 
-### Priority Settings
-
-Initial candidates:
+### 第一批优先实验设置
 
 - ULIP × ModelNet-C all35
 - ULIP-2 × ModelNet-C all35
 - Uni3D × ScanObjNN-C hardest all35
 
-### Documents
+其中 all35 表示 7 类基础损坏类型 × 5 个损坏强度。
 
-Planned:
+### 文档路径
 
 - docs/decisions/D002_prompt_source_policy.md
-- docs/experiments/E1_tpe/log.md
-- docs/experiments/E1_tpe/analysis.md
+- docs/experiments/E1_text_prototype_enhancement/log.md
+- docs/experiments/E1_text_prototype_enhancement/analysis.md
 
-### Result Paths
+### 脚本路径
 
-Planned:
+- Point-Cache/scripts/E1_text_prototype_enhancement/
 
-- Point-Cache/results/mcmpc/E1_tpe/
+### 结果路径
 
-### Next Action
+- Point-Cache/results/E1_text_prototype_enhancement/
 
-Write D002 prompt-source policy before modifying code.
+### 当前状态
 
-## 4. E2: Reliability-Gated Local Cache
+E1 决策文档与中文实验文档已经初始化。
 
-### Goal
+尚未修改代码。
 
-Dynamically control local cache contribution according to reliability.
+### 下一步
 
-### Motivation
+在进入代码修改前，检查并更新 .gitignore，确保 DeepSeek API key 本地文件不会被提交。
 
-E0 shows that local cache is useful in some settings but weak or unstable in others. Therefore, local cache should not always be fused with a fixed weight.
+## 4. E2：局部缓存可靠性门控
 
-### Initial Idea
+### 目标
 
-Replace fixed local cache fusion with a sample-wise reliability weight:
+根据可靠性动态控制 local cache 的贡献。
+
+### 动机
+
+E0 表明 local cache 在部分设置中有用，但在部分设置中贡献较弱或不稳定。因此 local cache 不应始终以固定权重融合。
+
+### 初始想法
+
+将固定 local cache 融合改为样本级可靠性权重：
 
     final = zs + alpha_g * global + r_l(x) * alpha_l * local
 
-where `r_l(x)` is determined by reliability signals such as agreement, margin, entropy, and possibly prototype distance.
+其中 r_l(x) 可以由 agreement、margin、entropy、prototype distance 等可靠性信号决定。
 
-### Status
+### 状态
 
-Planned.
+计划中。
 
-### Next Action
+### 下一步
 
-Start after E1 text-side experiments are completed or clearly bounded.
+在 E1 文本端实验完成或边界清晰后再启动。
 
-## 5. E3: Conflict-Aware Negative Suppression
+## 5. E3：冲突感知负向抑制
 
-### Goal
+### 目标
 
-Use global-local conflict as a signal of unreliable positive evidence and suppress suspicious classes conservatively.
+将 global-local conflict 作为不可靠正向证据的信号，对可疑类别进行保守抑制。
 
-### Motivation
+### 动机
 
-Earlier exploratory experiments suggested that global-local conflict may indicate failure, but local top-1 should not be blindly trusted as a corrected pseudo-label.
+早期探索实验表明，global-local conflict 可能提示错误，但 local top-1 不应被直接当作修正后的伪标签。
 
-### Initial Idea
+### 初始想法
 
-Conflict should be used as negative evidence, not direct positive correction.
+conflict 应作为负向证据，而不是直接的正向标签修正。
 
-### Status
+### 状态
 
-Planned.
+计划中。
 
-## 6. E4: Reliability-Aware Multi-Cache Matrix
+## 6. E4：可靠性感知多缓存矩阵
 
-### Goal
+### 目标
 
-Build the full MCM-PC framework by dynamically calibrating multiple evidence sources.
+构建完整 MCM-PC 框架，动态校准多个证据源。
 
-### Candidate Evidence Sources
+### 候选证据源
 
-- text prototype branch;
-- zero-shot logits;
-- global cache;
-- local cache;
-- conflict or negative suppression branch.
+- text prototype branch
+- zero-shot logits
+- global cache
+- local cache
+- conflict 或 negative suppression branch
 
-### Status
+### 状态
 
-Planned.
+计划中。
 
-## 7. E5: Ablation Studies and Visualization
+## 7. E5：消融实验与可视化
 
-### Goal
+### 目标
 
-Prepare final ablations, case studies, and paper figures.
+准备最终消融实验、案例分析和论文图表。
 
-### Candidate Analyses
+### 候选分析
 
-- prompt source ablation;
-- static vs dynamic prompt ablation;
-- local reliability ablation;
-- conflict suppression ablation;
-- full matrix fusion ablation;
-- per-corruption analysis;
-- cache reliability visualization;
-- failure case visualization.
+- prompt source 消融；
+- static vs dynamic prompt 消融；
+- local reliability 消融；
+- conflict suppression 消融；
+- full matrix fusion 消融；
+- 按损坏类型分析；
+- cache reliability 可视化；
+- failure case 可视化。
 
-### Status
+### 状态
 
-Planned.
+计划中。
 
-## 8. Related Existing Documents
+## 8. 相关已有文档
 
-The following existing documents are project-level references and should not be overwritten by this registry.
+以下文档属于项目级资料，不由本文档替代。
 
-Project rules and status:
+项目规则与状态：
 
 - docs/project/user_preferences.md
 - docs/project/progress_log.md
 - docs/project/glossary.md
 - docs/project/project_tree.md
 
-Early proposals and ideas:
+早期方案与想法：
 
 - docs/proposals/core_innovations.md
 - docs/proposals/ideas_log.md
 - docs/proposals/matrix_idea_v0.md
 - docs/proposals/auxiliary_innovation_3.md
 
-Old paper notes:
+旧论文笔记：
 
 - docs/paper/0_outline.md
 - docs/paper/abstract.md
@@ -306,28 +310,24 @@ Old paper notes:
 - docs/paper/2_related_work.md
 - docs/paper/3_method.md
 
-Reports:
-
-- docs/reports/
-
-Archived legacy experiments:
+归档旧探索实验：
 
 - docs/experiments/archive/legacy_pre_mcmpc_restart/
 
-## 9. Paper Draft Connection
+## 9. 论文草稿关联
 
-The complete ICASSP paper draft should be maintained under:
+完整 ICASSP 论文草稿维护在：
 
     paper/ICASSP/
 
-Each experiment should gradually contribute to the paper draft:
+每个实验应逐步贡献到论文草稿：
 
-- motivation;
-- method design;
-- experiment tables;
-- ablations;
-- visualizations;
-- limitations;
-- references.
+- motivation；
+- method design；
+- experiment tables；
+- ablations；
+- visualizations；
+- limitations；
+- references。
 
-The paper should not be written only after all experiments are finished.
+论文不应等所有实验完成后才开始写。
