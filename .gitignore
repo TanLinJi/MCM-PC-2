@@ -203,3 +203,9 @@ runs/
 
 # Point-Cache 实验结果与日志，不纳入 Git
 Point-Cache/results/
+
+# Local API keys and secrets for E1 dynamic prompt generation
+Point-Cache/llm/secrets/*
+!Point-Cache/llm/secrets/.gitkeep
+.env
+*.key
