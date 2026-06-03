@@ -129,13 +129,19 @@ This avoids forcing `manual_3d` to contain a fixed number of templates.
 
 ## API Key Policy
 
-DeepSeek API keys must never be committed to the repository.
+DeepSeek API key must never be committed to the repository.
 
-For convenience, the project may use a fixed local key file:
+For convenience, the project uses a fixed local key file:
 
     Point-Cache/llm/secrets/deepseek_api_key.txt
 
 This file is local-only and must be ignored by git.
+
+The file format is a single line containing the real API key, for example:
+
+    sk-xxxxxxxxxxxxxxxx
+
+The implementation should read the file with `strip()` to remove leading and trailing whitespace.
 
 The implementation should read the API key in the following order:
 
@@ -143,11 +149,7 @@ The implementation should read the API key in the following order:
 2. otherwise read from the environment variable `DEEPSEEK_API_KEY`;
 3. if neither exists and dynamic prompts are enabled, raise an error.
 
-A tracked template file may be provided later, for example:
-
-    Point-Cache/llm/secrets/deepseek_api_key.example.txt
-
-The example file must not contain a real API key.
+No example key file is used in this project.
 
 ## Reproducibility Rules
 
