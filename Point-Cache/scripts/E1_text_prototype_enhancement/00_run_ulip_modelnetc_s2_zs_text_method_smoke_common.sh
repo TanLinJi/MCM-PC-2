@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ "$#" -lt 4 ]]; then
-  echo "Usage: bash 01_run_ulip_modelnetc_s2_zs_prompt_ablation_common.sh EXP_ID PROMPT_SOURCE METHOD_FULL PURPOSE [GPU]"
+  echo "Usage: bash 00_run_ulip_modelnetc_s2_zs_text_method_smoke_common.sh EXP_ID PROMPT_SOURCE METHOD_FULL PURPOSE [GPU]"
   exit 1
 fi
 
@@ -27,7 +27,7 @@ export PYTHONUNBUFFERED=1
 mkdir -p "${WANDB_DIR}"
 
 echo "============================================================"
-echo "E1 Text Prototype Enhancement"
+echo "E1 Text Prototype Enhancement Smoke Test"
 echo "Setting: ULIP x ModelNet-C severity=2 x zero-shot"
 echo "EXP_ID: ${EXP_ID}"
 echo "PROMPT_SOURCE: ${PROMPT_SOURCE}"
@@ -54,7 +54,7 @@ python runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_
   --llm-model "${LLM_MODEL:-deepseek-v4-pro}" \
   --llm-api-key-file "${LLM_API_KEY_FILE:-llm/secrets/llm_api_key.txt}" \
   --llm-api-base-url "${LLM_API_BASE_URL:-https://api.deepseek.com/chat/completions}" \
-  --llm-temperature "${LLM_TEMPERATURE:-0.7}" \
+  --llm-temperature "${LLM_TEMPERATURE:-0.3}" \
   --llm-prompt-mode "${LLM_PROMPT_MODE:-multiview_2d3d}" \
   --dynamic-prompt-count "${DYNAMIC_PROMPT_COUNT:-10}" \
   --prompt-static-weight "${PROMPT_STATIC_WEIGHT:-0.75}" \

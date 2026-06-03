@@ -103,3 +103,51 @@ with open('llm/objaverse_lvis-gpt3.5-turbo.json') as fin:
     
 o_lvis_gpt4_prompts = []
 o_lvis_pointllm_prompts = []
+
+# E1 smoke-test diagnostic prompt subset.
+#
+# manual_3d_prompts removes clearly 2D image-style prompts from the original
+# Point-Cache manual templates and keeps templates that are more related to
+# 3D objects, geometry, shapes, structures, models, and point-cloud semantics.
+#
+# This prompt source is retained only as a diagnostic smoke-test method.
+# It is not the main E1 direction because its accuracy is much lower than
+# manual_full in the current ULIP × ModelNet-C severity=2 zero-shot test.
+_IMAGE_STYLE_PROMPT_KEYWORDS = (
+    "photo",
+    "image",
+    "picture",
+    "painting",
+    "sketch",
+    "cartoon",
+    "drawing",
+    "rendering",
+    "screenshot",
+    "view",
+    "camera",
+)
+
+_3D_STYLE_PROMPT_KEYWORDS = (
+    "3d",
+    "point cloud",
+    "object",
+    "shape",
+    "geometry",
+    "geometric",
+    "structure",
+    "model",
+    "mesh",
+    "surface",
+    "solid",
+    "scene",
+)
+
+manual_3d_prompts = [
+    prompt for prompt in text_prompts
+    if any(keyword in prompt.lower() for keyword in _3D_STYLE_PROMPT_KEYWORDS)
+    and not any(keyword in prompt.lower() for keyword in _IMAGE_STYLE_PROMPT_KEYWORDS)
+]
+
+if len(manual_3d_prompts) == 0:
+    manual_3d_prompts = text_prompts
+

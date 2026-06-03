@@ -1,6 +1,6 @@
 """Prompt-source utilities for E1 text prototype enhancement."""
 
-from .templates import text_prompts
+from .templates import text_prompts, manual_3d_prompts
 from llm.e1_dynamic_prompt_generator import generate_llm_prompts
 
 
@@ -23,6 +23,9 @@ def get_prompt_template(cfg, classnames=None, dataset_name=None):
 
     if prompt_source == "manual_full":
         return text_prompts
+
+    if prompt_source == "manual_3d":
+        return manual_3d_prompts
 
 
     if prompt_source == "llm_static":

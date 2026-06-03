@@ -393,3 +393,25 @@ E1 在 ULIP × ModelNet-C severity=2 zero-shot 最小验证中取得阶段性正
 相关报告：
 
     docs/experiments/E1_text_prototype_enhancement/e1_prompt_fusion_stage_report.md
+
+## 13. E1 smoke test 命名规范化
+
+日期：2026-06-03
+
+E1 smoke test 已统一采用 00 编号，并将公开方法名规范为：
+
+| 编号 | 方法名 | 内部 prompt source | 说明 |
+|---|---|---|---|
+| 00_1 | manual_full | manual_full | 原始完整手工模板，作为 baseline |
+| 00_2 | manual_3d | manual_3d | 删除 2D 模板后的 3D 手工模板，作为失败消融 |
+| 00_3 | llm_only | llm_dynamic_init | 只使用 LLM 生成的类别级多视角描述 |
+| 00_4 | manual_full_llm_fusion | manualfull_llm_dynamic_init | 原始手工模板文本原型与 LLM 描述文本原型加权融合 |
+
+规范化后的结果目录：
+
+| 编号 | 结果目录 |
+|---|---|
+| 00_1 | Point-Cache/results/E1_text_prototype_enhancement/00_1_ulip_modelnetc_s2_zs_manual_full_smoke/ |
+| 00_2 | Point-Cache/results/E1_text_prototype_enhancement/00_2_ulip_modelnetc_s2_zs_manual_3d_smoke/ |
+| 00_3 | Point-Cache/results/E1_text_prototype_enhancement/00_3_ulip_modelnetc_s2_zs_llm_only_smoke/ |
+| 00_4 | Point-Cache/results/E1_text_prototype_enhancement/00_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_smoke/ |

@@ -106,7 +106,7 @@ Point-Cache 原始完整手工模板集合，即 E0 baseline 默认使用的文�
 
 含义：
 
-将原始完整手工模板分支与大模型多视角描述分支分别编码为文本原型，然后进行加权融合。
+将原始完整手工模板分支与LLM 生成的类别级多视角描述分支分别编码为文本原型，然后进行加权融合。
 
 当前默认权重：
 
@@ -123,8 +123,8 @@ Point-Cache 原始完整手工模板集合，即 E0 baseline 默认使用的文�
 |---|---|---:|
 | manual_full | 原始完整手工模板 | 47.68 |
 | manual_3d | 删除 2D 模板后的 3D 手工模板 | 35.63 |
-| llm_dynamic_init | 只用大模型多视角描述 | 39.30 |
-| manualfull_llm_dynamic_init | 原始模板 + 大模型描述融合 | 48.88 |
+| llm_dynamic_init | 只使用 LLM 生成的类别级多视角描述 | 39.30 |
+| manualfull_llm_dynamic_init | 原始完整手工模板与 LLM 描述融合 | 48.88 |
 
 相对 manual_full：
 
@@ -296,39 +296,39 @@ static_weight * manual_full_text_prototype
 
 关键脚本：
 
-- 00_smoke_test_llm_dynamic_prompt.sh
+- 00_0_llm_prompt_generation_smoke.sh
   - 最小 API 测试，不跑模型，只验证 API key、LLM 调用、缓存保存逻辑。
 
-- 01_run_ulip_modelnetc_s2_zs_prompt_ablation_common.sh
+- 00_run_ulip_modelnetc_s2_zs_text_method_smoke_common.sh
   - ULIP × ModelNet-C severity=2 zero-shot 文本消融公共脚本。
 
-- 01_0_ulip_modelnetc_s2_zs_baseline_manual_full_single_gpu.sh
+- 00_1_ulip_modelnetc_s2_zs_manual_full_smoke.sh
   - 验证 E1 新接口不破坏原始完整手工模板 baseline。
 
-- 01_2_ulip_modelnetc_s2_zs_dynamic_multiview_llm_descriptions_single_gpu.sh
+- 00_3_ulip_modelnetc_s2_zs_llm_only_smoke.sh
   - 只使用大模型多视角类别描述。
 
-- 01_4_ulip_modelnetc_s2_zs_fuse_manualfull_multiview_llm_single_gpu.sh
-  - 原始完整手工模板与大模型多视角描述融合，是当前 E1 主候选方法。
+- 00_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_smoke.sh
+  - 原始完整手工模板与LLM 生成的类别级多视角描述融合，是当前 E1 主候选方法。
 
 ## 9. 当前结果文件位置
 
 原始完整手工模板结果：
 
-- Point-Cache/results/E1_text_prototype_enhancement/01_0_ulip_modelnetc_s2_zs_baseline_manual_full/
+- Point-Cache/results/E1_text_prototype_enhancement/00_1_ulip_modelnetc_s2_zs_manual_full_smoke/
 
-只用大模型多视角描述结果：
+只使用 LLM 生成的类别级多视角描述结果：
 
-- Point-Cache/results/E1_text_prototype_enhancement/01_2_ulip_modelnetc_s2_zs_dynamic_multiview_llm_descriptions/
+- Point-Cache/results/E1_text_prototype_enhancement/01_2_ulip_modelnetc_s2_zs_llm_only/
 
-原始模板 + 大模型描述融合结果：
+原始完整手工模板与 LLM 描述融合结果：
 
-- Point-Cache/results/E1_text_prototype_enhancement/01_4_ulip_modelnetc_s2_zs_fuse_manualfull_multiview_llm/
+- Point-Cache/results/E1_text_prototype_enhancement/01_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion/
 
 大模型生成描述缓存：
 
-- Point-Cache/results/E1_text_prototype_enhancement/01_2_ulip_modelnetc_s2_zs_dynamic_multiview_llm_descriptions/prompts/
-- Point-Cache/results/E1_text_prototype_enhancement/01_4_ulip_modelnetc_s2_zs_fuse_manualfull_multiview_llm/prompts/
+- Point-Cache/results/E1_text_prototype_enhancement/01_2_ulip_modelnetc_s2_zs_llm_only/prompts/
+- Point-Cache/results/E1_text_prototype_enhancement/01_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion/prompts/
 
 这些结果目录被 .gitignore 忽略，不进入 Git。
 

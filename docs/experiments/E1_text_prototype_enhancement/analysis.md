@@ -249,3 +249,20 @@ E1 后续主线调整为：
 - `llm_dynamic_init`：多视角 LLM 类别描述；
 - `manualfull_llm_dynamic_init`：manual_full 与多视角 LLM 描述融合。
 
+
+## 2026-06-03：E1 smoke test 命名规范化说明
+
+为提高实验可复现性和可读性，E1 smoke test 的公开方法名称统一为四类：
+
+| 公开方法名 | 内部 prompt source | 中文含义 | 当前角色 |
+|---|---|---|---|
+| manual_full | manual_full | 原始完整手工模板 | baseline |
+| manual_3d | manual_3d | 删除 2D 图像风格模板后的 3D 手工模板 | 失败消融 |
+| llm_only | llm_dynamic_init | 只使用 LLM 生成的类别级多视角描述 | 对照实验 |
+| manual_full_llm_fusion | manualfull_llm_dynamic_init | 原始完整手工模板文本原型与 LLM 描述文本原型加权融合 | 当前主方法 |
+
+说明：
+
+- 公开方法名用于脚本、结果目录、文档和论文表述；
+- 内部 prompt source 是代码参数名称，暂时保留以减少代码改动风险；
+- `manual_full_llm_fusion` 强调该方法是文本原型级加权融合，而不是简单拼接或追加 LLM 文本。

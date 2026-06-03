@@ -278,9 +278,9 @@ E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 
 本次新增 4 个脚本，对应 E1 文本端的 4 个不同假设：
 
-- `01_0_ulip_modelnetc_s2_zs_baseline_manual_full_single_gpu.sh`
+- `00_1_ulip_modelnetc_s2_zs_manual_full_smoke.sh`
   - 目的：验证 E1 新接口不破坏 Point-Cache 原始完整手工模板 baseline。
-- `01_1_ulip_modelnetc_s2_zs_filter_2d_manual_3d_single_gpu.sh`
+- `00_2_ulip_modelnetc_s2_zs_manual_3d_smoke.sh`
   - 目的：验证删除明显 2D 图像风格模板、只保留点云/3D相关手工模板是否有帮助。
 - `01_2_ulip_modelnetc_s2_zs_dynamic_llm_descriptions_single_gpu.sh`
   - 目的：验证实验初始化阶段由 LLM 根据候选类别名称生成点云描述是否有帮助。
@@ -342,16 +342,79 @@ E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 
 - 原始完整手工模板 manual_full：47.68
 - 删除 2D 模板后的 manual_3d：35.63
-- 只用大模型多视角描述 llm_dynamic_init：39.30
-- 原始模板 + 大模型描述融合 manualfull_llm_dynamic_init：48.88
+- 只使用 LLM 生成的类别级多视角描述 llm_dynamic_init：39.30
+- 原始完整手工模板与 LLM 描述融合 manualfull_llm_dynamic_init：48.88
 
 关键结论：
 
 - 简单删除 2D 模板不可行；
 - 只用大模型描述不能替代原始模板；
-- 原始完整手工模板与大模型多视角描述融合后，平均准确率超过 baseline 1.20；
+- 原始完整手工模板与LLM 生成的类别级多视角描述融合后，平均准确率超过 baseline 1.20；
 - 这是 E1 当前第一个有效正结果。
 
 已新增阶段性报告：
 
     docs/experiments/E1_text_prototype_enhancement/e1_prompt_fusion_stage_report.md
+
+### 2026-06-03：完成 E1 smoke test 脚本命名规范化
+
+本次调整：
+
+- smoke test 脚本统一改为 `00_*` 编号；
+- 文件名不再包含 `single_gpu`；
+- 默认单卡运行，但用户仍可通过脚本最后一个参数选择物理 GPU；
+- 四种核心方法统一为：
+  - `manual_full`
+  - `manual_3d`
+  - `llm_only`
+  - `manual_full_llm_fusion`
+- 新增/保留 `manual_3d` smoke test 脚本，用于复现失败消融；
+- 脚本 README 已同步更新。
+
+当前规范化后的核心脚本：
+
+- `00_0_llm_prompt_generation_smoke.sh`
+- `00_run_ulip_modelnetc_s2_zs_text_method_smoke_common.sh`
+- `00_1_ulip_modelnetc_s2_zs_manual_full_smoke.sh`
+- `00_2_ulip_modelnetc_s2_zs_manual_3d_smoke.sh`
+- `00_3_ulip_modelnetc_s2_zs_llm_only_smoke.sh`
+- `00_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_smoke.sh`
+
+### 2026-06-03：补充 E1 smoke test 独立分析文档
+
+本次新增 smoke test 分析目录：
+
+    docs/experiments/E1_text_prototype_enhancement/smoke_tests/
+
+新增文档：
+
+- `00_1_manual_full_smoke_analysis.md`
+- `00_2_manual_3d_smoke_analysis.md`
+- `00_3_llm_only_smoke_analysis.md`
+- `00_4_manual_full_llm_fusion_smoke_analysis.md`
+- `00_smoke_test_summary.md`
+
+这些文档分别对应当前四个 E1 smoke test 方法，并记录每个方法的实验目的、结果、对比和结论。
+
+### 2026-06-03：更新 E1 总文档中的旧命名
+
+本次同步更新了 E1 相关总文档中的旧脚本名、旧结果目录名和旧公开方法名。
+
+统一后的公开方法名：
+
+- `manual_full`
+- `manual_3d`
+- `llm_only`
+- `manual_full_llm_fusion`
+
+其中 `manual_full_llm_fusion` 用于强调该方法是原始完整手工模板文本原型与 LLM 描述文本原型的加权融合，而不是简单追加 LLM 文本。
+
+更新范围：
+
+- `docs/decisions/D002_prompt_source_policy.md`
+- `docs/experiments/E1_text_prototype_enhancement/log.md`
+- `docs/experiments/E1_text_prototype_enhancement/analysis.md`
+- `docs/experiments/E1_text_prototype_enhancement/e1_prompt_fusion_stage_report.md`
+- `docs/experiments/E1_text_prototype_enhancement/e1_experiment_standardization_plan.md`
+- `docs/experiments/experiment_registry.md`
+- `Point-Cache/scripts/E1_text_prototype_enhancement/README.md`

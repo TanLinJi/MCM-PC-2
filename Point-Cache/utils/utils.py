@@ -68,6 +68,7 @@ def get_arguments():
         default='manual_full',
         choices=[
             'manual_full',
+            'manual_3d',
             'llm_static',
             'llm_dynamic_init',
             'manualfull_llm_dynamic_init',
