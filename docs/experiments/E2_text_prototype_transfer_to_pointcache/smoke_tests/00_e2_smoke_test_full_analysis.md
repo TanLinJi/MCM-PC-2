@@ -60,7 +60,7 @@ E2 不是继续做横向文本消融，而是进行纵向流程验证。
 1. 验证 `manual_full_llm_fusion` 在 `zs_global` 设置下是否仍然优于 `manual_full`；
 2. 验证 `manual_full_llm_fusion` 在 `zs_global_local` 设置下是否仍然优于 `manual_full`；
 3. 分析文本原型融合收益在 zero-shot、global cache、full Point-Cache 三个阶段中的变化；
-4. 判断是否值得进入后续 ModelNet-C all35 的完整纵向验证。
+4. 判断是否值得进入后续 ModelNet-C all35 的横向完整验证。
 
 ## 4. 实验设置
 
@@ -355,7 +355,7 @@ E2 smoke test 当前可以得到以下结论：
 6. 随着 global cache 和 local cache 引入，cache 分支成为主要增益来源，文本融合的边际贡献变小；
 7. 当前最优结果为 `manual_full_llm_fusion + zs_global_local`，平均准确率为 54.21；
 8. `add_global` 是特殊现象，应记录但不作为当前重点；
-9. 当前结果支持进入 ModelNet-C all35 的进一步纵向验证。
+9. 当前结果支持进入 ModelNet-C all35 的进一步横向完整验证。
 
 ## 16. 下一步建议
 
@@ -364,7 +364,7 @@ E2 smoke test 当前可以得到以下结论：
 下一步建议：
 
 1. 先将 E2 当前文档、脚本和结果分析提交到 Git；
-2. 然后进入更完整的纵向验证；
+2. 然后进入横向完整验证；
 3. 优先验证 full Point-Cache 设置，而不是立即扩展所有横向组合。
 
 建议下一阶段实验为：

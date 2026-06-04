@@ -67,4 +67,14 @@ E2 当前四组 smoke test 已完成：
 - cache 分支越强，文本融合的边际贡献越小；
 - 当前最优为 `manual_full_llm_fusion + zs_global_local`，平均准确率 54.21；
 - `add_global` 是特殊现象，当前只记录，不作为 E2 主结论重点；
-- 后续建议进入 ModelNet-C all35 的 full Point-Cache 纵向验证。
+- 后续建议进入 ModelNet-C all35 的 full Point-Cache 横向完整验证。
+
+## 术语修正：纵向实验与横向实验
+
+为避免后续实验管理混乱，当前项目中统一采用以下定义：
+
+- 纵向实验：只围绕所提方法做最小验证，目的是把方法链路跑通，证明方向成立；
+- 横向实验：完整验证或大规模验证，包括 all35、多个数据集、多个 cache 设置、多个 backbone、多个方法对比等。
+
+因此，E2 当前 smoke test 属于纵向最小验证；后续 ModelNet-C all35、跨数据集、跨 backbone 和完整方法矩阵属于横向完整验证。
+
