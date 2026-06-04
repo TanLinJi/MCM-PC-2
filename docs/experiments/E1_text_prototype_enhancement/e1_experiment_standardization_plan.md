@@ -425,3 +425,30 @@ E1 脚本目录下的 `README.md` 必须明确说明每个脚本的用途和运�
 
 该 README 是 E1 smoke test 的主要复现实验入口说明。
 
+
+## 15. E1 共享 LLM prompt 缓存
+
+为避免后续权重消融和完整实验重复调用 LLM API，E1 采用共享 prompt 缓存机制。
+
+当前共享缓存目录：
+
+    Point-Cache/results/E1_text_prototype_enhancement/shared_prompts/
+
+当前共享 prompt 文件：
+
+    Point-Cache/results/E1_text_prototype_enhancement/shared_prompts/modelnet_c_deepseek_deepseek-v4-pro_multiview_2d3d_10_prompts.json
+
+说明：
+
+- 该文件由 smoke test 中已生成的 LLM prompt 复制而来；
+- 后续权重消融应统一读取该共享 prompt；
+- 不同权重实验不应重新生成 LLM prompt；
+- 共享 prompt 仍位于 results 目录下，因此不会进入 Git；
+- 等 E1 方法稳定后，再讨论是否将最终 prompt bank 归档到 `Point-Cache/llm/e1_prompt_bank/`；
+- 长期归档时，当前 DeepSeek V4 Pro 可命名为 `ds_v4pro`，例如 `modelnet_c_ds_v4pro_mixed_2d3d_10_prompts.json`。
+
+当前阶段为了兼容代码自动读取逻辑，共享缓存文件仍保留生成器默认文件名：
+
+    modelnet_c_deepseek_deepseek-v4-pro_multiview_2d3d_10_prompts.json
+
+后续如果改成 `ds_v4pro` 命名，需要同步修改 prompt 读取逻辑或增加显式 prompt 文件参数。

@@ -333,3 +333,31 @@ LLM 生成的类别描述会保存为 JSON 缓存。
 | 0.50 | 0.50 |
 
 权重消融完成后，再选择最佳权重运行 ModelNet-C all35 zero-shot 完整验证。
+
+## 9. E1-S1：融合权重消融脚本
+
+E1-S1 用于寻找 `manual_full_llm_fusion` 的更优融合比例。
+
+公共脚本：
+
+    01_run_ulip_modelnetc_s2_zs_fusion_weight_ablation_common.sh
+
+权重消融脚本：
+
+| 脚本 | manual_full 权重 | LLM 权重 | 作用 |
+|---|---:|---:|---|
+| `01_1_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w090_010.sh` | 0.90 | 0.10 | 更保守地引入 LLM 描述 |
+| `01_2_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w085_015.sh` | 0.85 | 0.15 | 中等保守融合 |
+| `01_3_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w075_025.sh` | 0.75 | 0.25 | smoke test 中已取得正结果的默认权重 |
+| `01_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w050_050.sh` | 0.50 | 0.50 | 检查较高 LLM 权重是否导致文本原型偏移 |
+
+运行示例：
+
+    bash Point-Cache/scripts/E1_text_prototype_enhancement/01_1_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w090_010.sh 0
+
+说明：
+
+- 权重消融统一读取共享 prompt 缓存；
+- 不应重新生成 LLM prompt；
+- 共享 prompt 缓存路径为：
+  `Point-Cache/results/E1_text_prototype_enhancement/shared_prompts/`

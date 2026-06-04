@@ -418,3 +418,85 @@ E1 只处理文本端，不先修改 global cache 或 local cache 机制。
 - `docs/experiments/E1_text_prototype_enhancement/e1_experiment_standardization_plan.md`
 - `docs/experiments/experiment_registry.md`
 - `Point-Cache/scripts/E1_text_prototype_enhancement/README.md`
+
+### 2026-06-03：建立 E1 共享 LLM prompt 缓存
+
+为避免后续权重消融重复调用 LLM API，将 smoke test 中已经生成完成的 ModelNet-C LLM prompt 复制到共享缓存目录：
+
+    Point-Cache/results/E1_text_prototype_enhancement/shared_prompts/
+
+当前共享 prompt 文件：
+
+    modelnet_c_deepseek_deepseek-v4-pro_multiview_2d3d_10_prompts.json
+
+后续权重消融脚本应统一使用该共享 prompt 缓存目录作为 `--prompt-cache-dir`，确保不同融合权重使用完全相同的 LLM 描述。
+
+### 2026-06-03：新增 E1-S1 融合权重消融计划与脚本
+
+本次新增 E1-S1 融合权重消融计划：
+
+    docs/experiments/E1_text_prototype_enhancement/weight_ablation/01_fusion_weight_ablation_plan.md
+
+新增脚本：
+
+- `01_run_ulip_modelnetc_s2_zs_fusion_weight_ablation_common.sh`
+- `01_1_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w090_010.sh`
+- `01_2_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w085_015.sh`
+- `01_3_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w075_025.sh`
+- `01_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w050_050.sh`
+
+这些脚本统一读取共享 LLM prompt 缓存：
+
+    Point-Cache/results/E1_text_prototype_enhancement/shared_prompts/
+
+目的：
+
+- 不重复调用 LLM API；
+- 保证所有权重实验使用相同 LLM 描述；
+- 只考察融合权重对结果的影响。
+
+### 2026-06-03：完成 E1-S1 融合权重消融分析
+
+完成 `manual_full_llm_fusion` 在 ULIP × ModelNet-C severity=2 zero-shot 设置下的四组融合权重对比：
+
+- 0.90:0.10：48.41
+- 0.85:0.15：48.62
+- 0.75:0.25：48.88
+- 0.50:0.50：48.37
+
+baseline zero-shot `manual_full` 为 47.68。
+
+主要结论：
+
+- 四种融合权重全部超过 baseline；
+- 0.75:0.25 平均准确率最高；
+- 0.85:0.15 更稳健；
+- 0.50:0.50 说明 LLM 权重过高会在部分噪声类损坏上带来下降；
+- 后续 all35 完整验证建议优先比较 0.75:0.25 和 0.85:0.15。
+
+新增分析文档：
+
+    docs/experiments/E1_text_prototype_enhancement/weight_ablation/01_fusion_weight_ablation_analysis.md
+
+### 2026-06-03：完成 E1-S1 融合权重消融分析
+
+完成 `manual_full_llm_fusion` 在 ULIP × ModelNet-C severity=2 zero-shot 设置下的四组融合权重对比：
+
+- 0.90:0.10：48.41
+- 0.85:0.15：48.62
+- 0.75:0.25：48.88
+- 0.50:0.50：48.37
+
+baseline zero-shot `manual_full` 为 47.68。
+
+主要结论：
+
+- 四种融合权重全部超过 baseline；
+- 0.75:0.25 平均准确率最高；
+- 0.85:0.15 更稳健；
+- 0.50:0.50 说明 LLM 权重过高会在部分噪声类损坏上带来下降；
+- 后续 all35 完整验证建议优先比较 0.75:0.25 和 0.85:0.15。
+
+新增分析文档：
+
+    docs/experiments/E1_text_prototype_enhancement/weight_ablation/01_fusion_weight_ablation_analysis.md

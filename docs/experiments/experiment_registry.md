@@ -415,3 +415,69 @@ E1 smoke test 已统一采用 00 编号，并将公开方法名规范为：
 | 00_2 | Point-Cache/results/E1_text_prototype_enhancement/00_2_ulip_modelnetc_s2_zs_manual_3d_smoke/ |
 | 00_3 | Point-Cache/results/E1_text_prototype_enhancement/00_3_ulip_modelnetc_s2_zs_llm_only_smoke/ |
 | 00_4 | Point-Cache/results/E1_text_prototype_enhancement/00_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_smoke/ |
+
+## 14. E1-S1 融合权重消融结果
+
+日期：2026-06-03
+
+在 ULIP × ModelNet-C severity=2 zero-shot 设置下，对 `manual_full_llm_fusion` 进行了四组融合权重消融。
+
+baseline zero-shot：
+
+| 方法 | 平均准确率 |
+|---|---:|
+| manual_full | 47.68 |
+
+权重消融结果：
+
+| manual_full 权重 | LLM 权重 | 平均准确率 | 相对 baseline |
+|---:|---:|---:|---:|
+| 0.90 | 0.10 | 48.41 | +0.73 |
+| 0.85 | 0.15 | 48.62 | +0.94 |
+| 0.75 | 0.25 | 48.88 | +1.20 |
+| 0.50 | 0.50 | 48.37 | +0.69 |
+
+结论：
+
+- 四种融合权重均超过 baseline；
+- 0.75:0.25 取得最高平均准确率；
+- 0.85:0.15 是更稳健的候选权重；
+- 0.50:0.50 表明 LLM 权重过高会在部分损坏类型上造成下降；
+- 后续 ModelNet-C all35 zero-shot 完整验证优先比较 0.75:0.25 和 0.85:0.15。
+
+分析文档：
+
+    docs/experiments/E1_text_prototype_enhancement/weight_ablation/01_fusion_weight_ablation_analysis.md
+
+## 14. E1-S1 融合权重消融结果
+
+日期：2026-06-03
+
+在 ULIP × ModelNet-C severity=2 zero-shot 设置下，对 `manual_full_llm_fusion` 进行了四组融合权重消融。
+
+baseline zero-shot：
+
+| 方法 | 平均准确率 |
+|---|---:|
+| manual_full | 47.68 |
+
+权重消融结果：
+
+| manual_full 权重 | LLM 权重 | 平均准确率 | 相对 baseline |
+|---:|---:|---:|---:|
+| 0.90 | 0.10 | 48.41 | +0.73 |
+| 0.85 | 0.15 | 48.62 | +0.94 |
+| 0.75 | 0.25 | 48.88 | +1.20 |
+| 0.50 | 0.50 | 48.37 | +0.69 |
+
+结论：
+
+- 四种融合权重均超过 baseline；
+- 0.75:0.25 取得最高平均准确率；
+- 0.85:0.15 是更稳健的候选权重；
+- 0.50:0.50 表明 LLM 权重过高会在部分损坏类型上造成下降；
+- 后续 ModelNet-C all35 zero-shot 完整验证优先比较 0.75:0.25 和 0.85:0.15。
+
+分析文档：
+
+    docs/experiments/E1_text_prototype_enhancement/weight_ablation/01_fusion_weight_ablation_analysis.md
