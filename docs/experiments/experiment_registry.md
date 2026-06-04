@@ -481,3 +481,83 @@ baseline zero-shot：
 分析文档：
 
     docs/experiments/E1_text_prototype_enhancement/weight_ablation/01_fusion_weight_ablation_analysis.md
+
+## 15. E2 文本原型增强向 Point-Cache 缓存流程的传递验证
+
+日期：2026-06-04
+
+实验目录：
+
+    docs/experiments/E2_text_prototype_transfer_to_pointcache/
+
+实验名称：
+
+    E2_text_prototype_transfer_to_pointcache
+
+中文名称：
+
+    E2：文本原型增强向 Point-Cache 缓存流程的传递验证
+
+实验目标：
+
+    验证 E1 中 manual_full_llm_fusion 的文本原型收益，
+    是否能够传递到 Point-Cache 的 global cache 和 full Point-Cache 流程中。
+
+当前 smoke test 设置：
+
+| 项目 | 设置 |
+|---|---|
+| Backbone | ULIP |
+| 数据集 | ModelNet-C |
+| 损坏强度 | severity=2 |
+| 文本方法 | manual_full、manual_full_llm_fusion |
+| 缓存设置 | zs_global、zs_global_local |
+
+当前计划实验：
+
+| 编号 | 设置 | 文本方法 |
+|---|---|---|
+| 00_1 | zs_global | manual_full |
+| 00_2 | zs_global | manual_full_llm_fusion |
+| 00_3 | zs_global_local | manual_full |
+| 00_4 | zs_global_local | manual_full_llm_fusion |
+
+E2 当前不重新生成 LLM prompt，统一复用 E1 shared prompt 缓存。
+
+## 16. E2 smoke test 完整结果
+
+日期：2026-06-04
+
+实验名称：
+
+    E2_text_prototype_transfer_to_pointcache
+
+当前 E2 smoke test 已完成四组实验：
+
+| 编号 | 设置 | 文本方法 | 平均准确率 |
+|---|---|---|---:|
+| 00_1 | zs_global | manual_full | 52.66 |
+| 00_2 | zs_global | manual_full_llm_fusion | 53.18 |
+| 00_3 | zs_global_local | manual_full | 54.00 |
+| 00_4 | zs_global_local | manual_full_llm_fusion | 54.21 |
+
+结合 E1 zero-shot 结果：
+
+| 阶段 | manual_full | manual_full_llm_fusion | 提升 |
+|---|---:|---:|---:|
+| zero-shot | 47.68 | 48.88 | +1.20 |
+| global cache | 52.66 | 53.18 | +0.52 |
+| full Point-Cache | 54.00 | 54.21 | +0.21 |
+
+结论：
+
+    E1 的文本原型融合收益能够传递到 Point-Cache 的 global cache 和 full Point-Cache 流程中。
+    随着 cache 分支增强，文本融合的边际贡献被压缩，但整体平均准确率仍保持正向提升。
+
+当前最佳结果：
+
+    manual_full_llm_fusion + zs_global_local = 54.21
+
+分析文档：
+
+    docs/experiments/E2_text_prototype_transfer_to_pointcache/smoke_tests/00_e2_smoke_test_full_analysis.md
