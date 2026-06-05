@@ -41,9 +41,6 @@ def _clone_item(item):
     return list(item)
 
 
-def _get_gpa_min_center_size():
-    return int(os.environ.get("GPA_MIN_CENTER_SIZE", "2"))
-
 
 def _get_gpa_stats_enabled():
     return os.environ.get("GPA_SAVE_STATS", "1") != "0"
@@ -141,6 +138,7 @@ def _update_negative_cache(cache, pred, item, shot_capacity, stats, phase):
     return True
 
 
+
 def _update_gpa_cache(gpa_cache, gpa_local_cache, pred, global_item, local_item, shot_capacity, stats, phase):
     """
     更新 Global Prototype-Alignment Cache，并同步控制 local cache。
@@ -148,51 +146,47 @@ def _update_gpa_cache(gpa_cache, gpa_local_cache, pred, global_item, local_item,
     global_item = [pc_feats, loss]
     local_item  = [patch_centers, loss]
 
-    规则：
-    1. 如果 GPA Cache 未形成中心，先按低熵准入积累初始样本；
-    2. 如果 GPA Cache 已形成中心但未满，满足低熵准入的样本继续加入；
-    3. 如果 GPA Cache 已满：
-       - 找到 GPA Cache 中当前最高熵样本；
-       - 新样本熵必须更低；
-       - 新样本到 GPA 原型中心的距离必须小于这个最高熵样本到中心的距离；
-       - 才替换该最高熵样本。
-    """
-    min_center_size = _get_gpa_min_center_size()
+    当前 E3-V1-A 规则：
 
+    1. GPA Cache 未满时：
+       - 只要样本已经通过 Global Entropy Cache 准入，
+         就直接进入 GPA Cache；
+       - 此时不启用距离约束。
+
+    2. GPA Cache 已满时：
+       - 找到 GPA Cache 中当前最高熵样本；
+       - 如果新样本熵更低；
+       - 并且新样本到 GPA 原型中心的距离
+         小于这个最高熵样本到 GPA 原型中心的距离；
+       - 则替换该最高熵样本。
+
+    说明：
+    当前版本保留该规则用于记录初版负结果。
+    后续 Center-B / Center-C 或并列式方案需要重新设计未满阶段的距离准入。
+    """
     if pred not in gpa_cache:
         gpa_cache[pred] = []
         gpa_local_cache[pred] = []
 
     curr_ent = _loss_value(global_item[1])
 
-    # 启动阶段：GPA Cache 中样本不足以形成中心时，先积累初始样本。
-    if len(gpa_cache[pred]) < min_center_size:
-        if len(gpa_cache[pred]) < shot_capacity:
-            gpa_cache[pred].append(global_item)
-            gpa_local_cache[pred].append(local_item)
-            _sort_cache_by_entropy(gpa_cache, pred)
-            _sort_local_cache_by_entropy(gpa_local_cache, pred)
-            stats[f"{phase}_gpa_bootstrap_add"] += 1
-            return True
-
-    center = _compute_gpa_center(gpa_cache, pred)
-
-    # 理论上只要 len >= min_center_size 就应该有 center；
-    # 如果某些异常情况下没有 center，则不写入 GPA/local，避免不稳定距离判断。
-    if center is None:
-        stats[f"{phase}_gpa_no_center_reject"] += 1
-        return False
-
-    # GPA Cache 未满：满足全局低熵准入后，可以加入。
+    # GPA Cache 未满：直接加入。
+    # 注意：该函数只会在样本已经通过 Global Entropy Cache 准入后被调用。
     if len(gpa_cache[pred]) < shot_capacity:
         gpa_cache[pred].append(global_item)
         gpa_local_cache[pred].append(local_item)
         _sort_cache_by_entropy(gpa_cache, pred)
         _sort_local_cache_by_entropy(gpa_local_cache, pred)
-        stats[f"{phase}_gpa_add"] += 1
+        stats[f"{phase}_gpa_add_not_full"] += 1
         return True
 
-    # GPA Cache 已满：参考 MCP-style 的“熵优先 + 最高熵样本距离校验”。
+    # GPA Cache 已满：启用 GPA-only center 的距离约束。
+    center = _compute_gpa_center(gpa_cache, pred)
+
+    if center is None:
+        stats[f"{phase}_gpa_no_center_reject"] += 1
+        return False
+
     worst_global_item = gpa_cache[pred][-1]
     worst_ent = _loss_value(worst_global_item[1])
 
@@ -238,7 +232,6 @@ def _save_gpa_stats(args, stats, entropy_cache, gpa_cache, gpa_local_cache, acc=
         "cor_type": getattr(args, "cor_type", None),
         "gpa_variant": "E3-V1-sequential-gpa-cache",
         "center_source": "GPA-only center",
-        "min_center_size": _get_gpa_min_center_size(),
         "final_acc": acc,
         "stats": dict(stats),
         "entropy_cache_class_counts": _summarize_cache(entropy_cache),
@@ -396,13 +389,15 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
     Negative cache:
         保持原始 Point-Cache 逻辑。
     """
-    entropy_cache, runtime_gpa_cache, gpa_local_cache, build_stats = build_cache_in_advance(
+    entropy_cache, gpa_cache, gpa_local_cache, build_stats = build_cache_in_advance(
         args, test_loader, lm3d_model, clip_weights, pos_cfg["shot_capacity"]
     )
 
     print("[E3-GPA] len(entropy_cache):", len(entropy_cache))
+    print("[E3-GPA] len(gpa_cache):", len(gpa_cache))
     print("[E3-GPA] len(gpa_local_cache):", len(gpa_local_cache))
     print("[E3-GPA] entropy cache total:", sum(len(v) for v in entropy_cache.values()))
+    print("[E3-GPA] gpa cache total:", sum(len(v) for v in gpa_cache.values()))
     print("[E3-GPA] gpa local cache total:", sum(len(v) for v in gpa_local_cache.values()))
 
     neg_cache = {}
@@ -415,7 +410,7 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
     # 这样测试阶段的 GPA 原型中心由预构建阶段已有 GPA 样本继续维护，
     # 而不是从空缓存重新开始。
     for k in gpa_local_cache.keys():
-        runtime_gpa_cache.setdefault(k, [])
+        gpa_cache.setdefault(k, [])
 
     accuracies = []
 
@@ -442,10 +437,10 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
             )
 
             if accepted_entropy:
-                # runtime_gpa_cache 是在线阶段的 GPA 状态；
+                # gpa_cache 是在线阶段的 GPA 状态；
                 # gpa_local_cache 则是实际参与 local logits 的 local cache。
                 _update_gpa_cache(
-                    runtime_gpa_cache,
+                    gpa_cache,
                     gpa_local_cache,
                     pred,
                     global_item,
@@ -507,6 +502,6 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
     final_acc = sum(accuracies) / len(accuracies)
     print("---- ***Final*** E3-GPA test accuracy: {:.2f}. ----\n".format(final_acc))
 
-    _save_gpa_stats(args, gpa_cache_stats, entropy_cache, runtime_gpa_cache, gpa_local_cache, final_acc)
+    _save_gpa_stats(args, gpa_cache_stats, entropy_cache, gpa_cache, gpa_local_cache, final_acc)
 
     return final_acc

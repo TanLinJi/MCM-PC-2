@@ -87,3 +87,19 @@ E3-V1 00_1 已完成：
 3. 实现 Center-B：Entropy-only center；
 4. 实现 Center-C：Entropy+GPA union center；
 5. 两张卡分别运行 Center-B 和 Center-C。
+
+## 2026-06-05：修正 E3-V1-A 诊断与 GPA Cache 状态命名
+
+本次确认：
+
+- 当前顺序式 GPA Cache 在未满阶段没有形成更严格筛选；
+- 只要样本进入 Global Entropy Cache，且 GPA Cache 未满，就会进入 GPA Cache；
+- 因此 min_center_size 在当前逻辑中没有实际作用，已从代码和脚本中删除；
+- 当前 E3-V1-A 平均准确率为 53.44，低于 E2 原始 full Point-Cache 的 54.00；
+- 代码中曾存在 runtime_gpa_cache 命名遗留，容易误导为预构建 GPA Cache 与正式测试 GPA Cache 分离；
+- 当前已统一为 gpa_cache，确保预构建阶段形成的 GPA Cache 在正式测试阶段继续沿用并更新；
+- 后续需要新增 `gpa_replacement_events_<cor_type>.jsonl`，记录替换或拒绝时新旧样本的熵和距离。
+
+详细诊断文档：
+
+    docs/experiments/E3_global_prototype_alignment_cache/smoke_tests/00_1_e3_v1_gpa_only_manual_full_diagnosis.md

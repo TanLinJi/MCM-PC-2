@@ -40,7 +40,6 @@ export WANDB_SILENT=true
 export PYTHONUNBUFFERED=1
 
 # E3-V1 GPA 设置
-export GPA_MIN_CENTER_SIZE="${GPA_MIN_CENTER_SIZE:-2}"
 export GPA_SAVE_STATS="${GPA_SAVE_STATS:-1}"
 
 mkdir -p "${WANDB_DIR}"
@@ -55,7 +54,6 @@ echo "PURPOSE: ${PURPOSE}"
 echo "PHYSICAL_GPU: ${PHYSICAL_GPU}"
 echo "CACHE_METHOD: zs_global_local"
 echo "CACHE_TYPE: hierarchical"
-echo "GPA_MIN_CENTER_SIZE: ${GPA_MIN_CENTER_SIZE}"
 echo "Runner: runners/E3_global_prototype_alignment_cache/run_e3_ulip_modelnetc_s2_gpa.py"
 echo "Result root: results/E3_global_prototype_alignment_cache"
 echo "Shared prompt dir: ${SHARED_PROMPT_DIR}"

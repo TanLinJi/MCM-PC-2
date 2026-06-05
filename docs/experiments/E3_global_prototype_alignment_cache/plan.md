@@ -486,3 +486,36 @@ E3-V1 初版采用：
     Global Entropy Cache 和 Global Prototype-Alignment Cache 并列更新，
     二者互不替换，
     再进一步设计它们如何参与 local cache 或最终预测。
+
+## 20. E3-V1-A 诊断后的规则修正
+
+E3-V1-A 结果显示：
+
+    顺序式 GPA Cache + GPA-only center
+    在 manual_full + zs_global_local 下平均准确率为 53.44，
+    低于 E2 原始 full Point-Cache 的 54.00。
+
+诊断发现：
+
+    在 GPA Cache 未满时，
+    已经通过 Global Entropy Cache 准入的样本会直接进入 GPA Cache。
+
+因此，当前 GPA Cache 未满阶段与 Global Entropy Cache 的准入规则本质上几乎一致。
+
+此前设置的 min_center_size 在当前逻辑中没有实际作用，因此删除。
+
+同时，代码中曾出现 runtime_gpa_cache 命名遗留，当前已统一为 gpa_cache，确保：
+
+    build_cache_in_advance 返回 gpa_cache；
+    run_test_tda 接收 gpa_cache；
+    正式测试阶段继续更新同一个 gpa_cache；
+    _save_gpa_stats 保存真实的 gpa_cache。
+
+后续修正方向：
+
+1. 保留 E3-V1-A 作为负结果记录；
+2. 增加 replacement event 日志；
+3. 固定顺序式关系，测试：
+   - Center-B：Entropy-only center；
+   - Center-C：Entropy+GPA union center；
+4. 若仍不理想，进入 E3-V2 并列式 GPA Cache。
