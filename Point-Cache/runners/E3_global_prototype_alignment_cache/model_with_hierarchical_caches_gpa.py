@@ -139,7 +139,7 @@ def _update_negative_cache(cache, pred, item, shot_capacity, stats, phase):
 
 
 
-def _update_gpa_cache(gpa_cache, gpa_local_cache, pred, global_item, local_item, shot_capacity, stats, phase):
+def _update_gpa_cache(gpa_cache, gpa_local_cache, pred, global_item, local_item, shot_capacity, stats, phase, event_records=None):
     """
     更新 Global Prototype-Alignment Cache，并同步控制 local cache。
 
@@ -170,6 +170,19 @@ def _update_gpa_cache(gpa_cache, gpa_local_cache, pred, global_item, local_item,
 
     curr_ent = _loss_value(global_item[1])
 
+    def record_event(decision, old_entropy=None, new_distance=None, old_distance=None):
+        if event_records is None:
+            return
+        event_records.append({
+            "phase": phase,
+            "class_index": int(pred),
+            "decision": decision,
+            "new_entropy": float(curr_ent),
+            "old_entropy": None if old_entropy is None else float(old_entropy),
+            "new_distance": None if new_distance is None else float(new_distance),
+            "old_distance": None if old_distance is None else float(old_distance),
+        })
+
     # GPA Cache 未满：直接加入。
     # 注意：该函数只会在样本已经通过 Global Entropy Cache 准入后被调用。
     if len(gpa_cache[pred]) < shot_capacity:
@@ -190,12 +203,18 @@ def _update_gpa_cache(gpa_cache, gpa_local_cache, pred, global_item, local_item,
     worst_global_item = gpa_cache[pred][-1]
     worst_ent = _loss_value(worst_global_item[1])
 
-    if curr_ent >= worst_ent:
-        stats[f"{phase}_gpa_reject_entropy"] += 1
-        return False
-
     curr_dist = _feature_distance_to_center(global_item[0], center)
     worst_dist = _feature_distance_to_center(worst_global_item[0], center)
+
+    if curr_ent >= worst_ent:
+        stats[f"{phase}_gpa_reject_entropy"] += 1
+        record_event(
+            decision="reject_entropy",
+            old_entropy=worst_ent,
+            new_distance=curr_dist,
+            old_distance=worst_dist,
+        )
+        return False
 
     if curr_dist < worst_dist:
         gpa_cache[pred][-1] = global_item
@@ -203,9 +222,21 @@ def _update_gpa_cache(gpa_cache, gpa_local_cache, pred, global_item, local_item,
         _sort_cache_by_entropy(gpa_cache, pred)
         _sort_local_cache_by_entropy(gpa_local_cache, pred)
         stats[f"{phase}_gpa_replace"] += 1
+        record_event(
+            decision="replace",
+            old_entropy=worst_ent,
+            new_distance=curr_dist,
+            old_distance=worst_dist,
+        )
         return True
 
     stats[f"{phase}_gpa_reject_distance"] += 1
+    record_event(
+        decision="reject_distance",
+        old_entropy=worst_ent,
+        new_distance=curr_dist,
+        old_distance=worst_dist,
+    )
     return False
 
 
@@ -213,7 +244,7 @@ def _summarize_cache(cache):
     return {str(k): len(v) for k, v in sorted(cache.items(), key=lambda kv: kv[0])}
 
 
-def _save_gpa_stats(args, stats, entropy_cache, gpa_cache, gpa_local_cache, acc=None):
+def _save_gpa_stats(args, stats, entropy_cache, gpa_cache, gpa_local_cache, acc=None, event_records=None):
     if not _get_gpa_stats_enabled():
         return
 
@@ -245,6 +276,14 @@ def _save_gpa_stats(args, stats, entropy_cache, gpa_cache, gpa_local_cache, acc=
     filename = f"{getattr(args, 'cor_type', 'unknown')}_gpa_stats.json"
     with (out_dir / filename).open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
+
+    if event_records is not None:
+        event_filename = f"gpa_replacement_events_{getattr(args, 'cor_type', 'unknown')}.jsonl"
+        event_path = out_dir / event_filename
+        with event_path.open("w", encoding="utf-8") as f:
+            for event in event_records:
+                f.write(json.dumps(event, ensure_ascii=False) + "\n")
+        print(f"[E3-GPA] Saved GPA replacement events to {event_path}")
 
     print(f"[E3-GPA] Saved GPA stats to {out_dir / filename}")
 
@@ -288,6 +327,7 @@ def build_cache_in_advance(args, test_loader, lm3d_model, clip_weights, shot_cap
     entropy_cache = {}
     gpa_cache = {}
     gpa_local_cache = {}
+    gpa_event_records = []
 
     for pc, _, _, rgb in test_loader:
         feature = torch.cat([pc, rgb], dim=-1).half()
@@ -299,7 +339,17 @@ def build_cache_in_advance(args, test_loader, lm3d_model, clip_weights, shot_cap
         accepted_entropy = _update_entropy_cache(entropy_cache, pred, global_item, shot_capacity, stats, "build")
 
         if accepted_entropy:
-            _update_gpa_cache(gpa_cache, gpa_local_cache, pred, global_item, local_item, shot_capacity, stats, "build")
+            _update_gpa_cache(
+                gpa_cache,
+                gpa_local_cache,
+                pred,
+                global_item,
+                local_item,
+                shot_capacity,
+                stats,
+                "build",
+                gpa_event_records,
+            )
         else:
             stats["build_gpa_not_eligible_by_entropy"] += 1
 
@@ -311,7 +361,7 @@ def build_cache_in_advance(args, test_loader, lm3d_model, clip_weights, shot_cap
             print("*" * 10, "Building [global entropy] cache is full.", "*" * 10, "\n")
             break
 
-    return entropy_cache, gpa_cache, gpa_local_cache, stats
+    return entropy_cache, gpa_cache, gpa_local_cache, stats, gpa_event_records
 
 
 @torch.no_grad()
@@ -389,7 +439,7 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
     Negative cache:
         保持原始 Point-Cache 逻辑。
     """
-    entropy_cache, gpa_cache, gpa_local_cache, build_stats = build_cache_in_advance(
+    entropy_cache, gpa_cache, gpa_local_cache, build_stats, gpa_event_records = build_cache_in_advance(
         args, test_loader, lm3d_model, clip_weights, pos_cfg["shot_capacity"]
     )
 
@@ -447,7 +497,8 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
                     local_item,
                     pos_params["shot_capacity"],
                     gpa_cache_stats,
-                    "test"
+                    "test",
+                    gpa_event_records,
                 )
             else:
                 gpa_cache_stats["test_gpa_not_eligible_by_entropy"] += 1
@@ -502,6 +553,6 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
     final_acc = sum(accuracies) / len(accuracies)
     print("---- ***Final*** E3-GPA test accuracy: {:.2f}. ----\n".format(final_acc))
 
-    _save_gpa_stats(args, gpa_cache_stats, entropy_cache, gpa_cache, gpa_local_cache, final_acc)
+    _save_gpa_stats(args, gpa_cache_stats, entropy_cache, gpa_cache, gpa_local_cache, final_acc, gpa_event_records)
 
     return final_acc
