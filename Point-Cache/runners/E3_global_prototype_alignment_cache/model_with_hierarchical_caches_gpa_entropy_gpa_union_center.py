@@ -538,6 +538,7 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights):
                 # gpa_cache 是在线阶段的 GPA 状态；
                 # gpa_local_cache 则是实际参与 local logits 的 local cache。
                 _update_gpa_cache(
+                    entropy_cache,
                     gpa_cache,
                     gpa_local_cache,
                     pred,

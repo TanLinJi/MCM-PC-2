@@ -574,3 +574,94 @@ E3-V1-A 结果显示：
 | E3-V1-A GPA-only center | 53.44 |
 | E3 Center-B Entropy-only center | 待实验 |
 | E3 Center-C Entropy+GPA union center | 待实验 |
+
+## 22. E3-V2：并列式 Global Prototype-Alignment Cache
+
+E3-V1 的三种中心来源均未超过 E2 原始 full Point-Cache baseline，因此 E3 下一阶段进入 E3-V2。
+
+### 22.1 E3-V2 核心思想
+
+E3-V2 将 Global Entropy Cache 与 Global Prototype-Alignment Cache 改为并列更新。
+
+即：
+
+    Global Entropy Cache
+        与
+    Global Prototype-Alignment Cache
+
+同步更新、互不依赖、互不替换。
+
+新样本到来后：
+
+    一路尝试更新 Global Entropy Cache；
+    另一路尝试更新 GPA Cache。
+
+与 E3-V1 的区别：
+
+| 项目 | E3-V1 顺序式 | E3-V2 并列式 |
+|---|---|---|
+| Entropy Cache 与 GPA Cache 关系 | 先 Entropy 后 GPA | 两者并列更新 |
+| GPA 是否依赖 Entropy 准入 | 是 | 否 |
+| GPA 是否可以形成独立候选集合 | 较弱 | 更强 |
+| local cache 来源 | GPA Cache | GPA Cache |
+| global cache logits | Global Entropy Cache | 第一阶段仍使用 Global Entropy Cache |
+| 最终加权公式 | 不改 | 第一阶段仍不改 |
+
+### 22.2 E3-V2 第一阶段控制变量
+
+为避免变量过多，E3-V2 第一阶段仍然保持：
+
+- 文本方法：manual_full；
+- cache 设置：zs_global_local；
+- global cache logits：仍使用 Global Entropy Cache；
+- local cache：仍由 GPA Cache 控制；
+- 最终预测加权公式：暂不修改。
+
+唯一核心变化：
+
+    Global Entropy Cache 和 GPA Cache 由顺序式改为并列式。
+
+### 22.3 E3-V2 中心来源消融
+
+E3-V2 保留三种中心来源：
+
+| 名称 | 中心来源 | 说明 |
+|---|---|---|
+| E3-V2-A | GPA-only center | 只使用 GPA Cache 计算中心 |
+| E3-V2-B | Entropy-only center | 只使用 Global Entropy Cache 计算中心 |
+| E3-V2-C | Entropy+GPA union center | 使用两个缓存并集计算中心 |
+
+需要判断：
+
+    在并列式 GPA Cache 下，
+    是否 Entropy+GPA union center 更稳定。
+
+### 22.4 E3-V2 计划实验矩阵
+
+| 编号 | 方法 | 关系 | 中心来源 | 文本方法 | 对比对象 |
+|---|---|---|---|---|---|
+| 02_1 | E3-V2-A | 并列式 | GPA-only center | manual_full | E2 baseline / E3-V1-A |
+| 02_2 | E3-V2-B | 并列式 | Entropy-only center | manual_full | E2 baseline / E3-V1-B |
+| 02_3 | E3-V2-C | 并列式 | Entropy+GPA union center | manual_full | E2 baseline / E3-V1-C |
+
+### 22.5 E3-V2 判断标准
+
+如果 E3-V2 任一中心来源超过 E2 baseline：
+
+    说明并列式 GPA Cache 比顺序式更适合 Point-Cache。
+
+如果 E3-V2-C 最好：
+
+    说明同时利用 Global Entropy Cache 与 GPA Cache 构造中心更稳定。
+
+如果 E3-V2 全部仍低于 E2 baseline：
+
+    说明问题可能不只是缓存关系，
+    还需要进入准入规则消融或最终加权公式改进。
+
+后续可能方向：
+
+1. distance-priority 准入规则；
+2. GPA Cache 单独参与 global logits；
+3. Global Entropy Cache / GPA Cache / Local Cache 分支独立加权；
+4. 引入文本原型中心。

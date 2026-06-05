@@ -147,3 +147,59 @@ Runner：
 目标：
 
     判断 E3-V1-A 下降是否主要来自 GPA-only center 不稳定。
+
+## 2026-06-05：完成 E3-V1 归总并进入 E3-V2 计划
+
+E3-V1 顺序式 GPA Cache 已完成三种中心来源消融：
+
+- GPA-only center：53.44
+- Entropy-only center：52.43
+- Entropy+GPA union center：53.01
+
+对比 E2 原始 full Point-Cache：
+
+- E2 baseline：54.00
+
+结论：
+
+    E3-V1 三种中心来源均未超过 baseline。
+    继续在顺序式关系下更换中心来源意义不大。
+
+新增归总文档：
+
+    docs/experiments/E3_global_prototype_alignment_cache/smoke_tests/01_e3_v1_sequential_gpa_center_source_summary.md
+
+下一步进入 E3-V2：
+
+    并列式 Global Prototype-Alignment Cache
+
+E3-V2 仍保留三种中心来源消融：
+
+- GPA-only center
+- Entropy-only center
+- Entropy+GPA union center
+
+## 2026-06-05：实现 E3-V2 并列式 GPA Cache 三种中心来源
+
+新增 E3-V2 三个模型文件：
+
+- `model_with_hierarchical_caches_parallel_gpa_gpa_only_center.py`
+- `model_with_hierarchical_caches_parallel_gpa_entropy_only_center.py`
+- `model_with_hierarchical_caches_parallel_gpa_entropy_gpa_union_center.py`
+
+新增 E3-V2 三个 runner：
+
+- `run_e3_ulip_modelnetc_s2_parallel_gpa_gpa_only_center.py`
+- `run_e3_ulip_modelnetc_s2_parallel_gpa_entropy_only_center.py`
+- `run_e3_ulip_modelnetc_s2_parallel_gpa_entropy_gpa_union_center.py`
+
+新增 E3-V2 脚本：
+
+- `02_1_ulip_modelnetc_s2_zs_global_local_parallel_gpa_gpa_only_center_manual_full.sh`
+- `02_2_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_only_center_manual_full.sh`
+- `02_3_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_manual_full.sh`
+
+E3-V2 核心变化：
+
+    Global Entropy Cache 和 GPA Cache 并列更新，
+    GPA Cache 不再依赖 Global Entropy Cache 准入。

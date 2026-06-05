@@ -86,3 +86,27 @@ E3 当前重点验证：
 2. 在顺序式关系不变的条件下测试 Center-B：Entropy-only center；
 3. 在顺序式关系不变的条件下测试 Center-C：Entropy+GPA union center；
 4. 后续再实现并列式 GPA Cache。
+
+## 2026-06-05：E3-V1 顺序式 GPA Cache 归总
+
+归总文档：
+
+    docs/experiments/E3_global_prototype_alignment_cache/smoke_tests/01_e3_v1_sequential_gpa_center_source_summary.md
+
+E3-V1 已完成三种中心来源消融：
+
+| 方法 | 中心来源 | 平均准确率 | 相对 E2 baseline |
+|---|---|---:|---:|
+| E2 原始 full Point-Cache | 无 GPA | 54.00 | 0.00 |
+| E3-V1-A | GPA-only center | 53.44 | -0.56 |
+| E3-V1-B | Entropy-only center | 52.43 | -1.57 |
+| E3-V1-C | Entropy+GPA union center | 53.01 | -0.99 |
+
+结论：
+
+    E3-V1 三种中心来源均未超过 E2 baseline。
+    因此问题不主要来自中心来源，而更可能来自顺序式 GPA Cache 的结构和准入机制。
+
+下一阶段进入：
+
+    E3-V2：并列式 Global Prototype-Alignment Cache。
