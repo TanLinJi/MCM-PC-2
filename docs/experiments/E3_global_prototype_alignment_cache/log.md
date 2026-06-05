@@ -1,0 +1,89 @@
+# E3 实验日志：全局原型对齐缓存
+
+## 2026-06-04：建立 E3 实验计划
+
+E3 实验名称：
+
+    E3_global_prototype_alignment_cache
+
+中文名称：
+
+    E3：全局原型对齐缓存
+
+当前 E3-V1 采用顺序式 GPA Cache 方案：
+
+- 先按原始 Point-Cache 低熵规则更新 Global Entropy Cache；
+- 再尝试进入 Global Prototype-Alignment Cache；
+- GPA Cache 自己维护类别原型中心；
+- GPA Cache 未形成中心前，先按低熵准入积累初始样本；
+- GPA Cache 形成中心后，启用低熵 + 原型距离约束；
+- 只有进入 GPA Cache 的样本，其 local patch centers 才写入 Local Cache；
+- 当前最小验证阶段暂不修改最终预测加权公式。
+
+当前计划先跑两组：
+
+| 编号 | 文本方法 | cache 设置 |
+|---|---|---|
+| 00_1 | manual_full | zs_global_local |
+| 00_2 | manual_full_llm_fusion | zs_global_local |
+
+## 2026-06-04：实现 E3-V1 顺序式 GPA Cache runner 和脚本
+
+新增 E3 专用 runner：
+
+    Point-Cache/runners/E3_global_prototype_alignment_cache/model_with_hierarchical_caches_gpa.py
+    Point-Cache/runners/E3_global_prototype_alignment_cache/run_e3_ulip_modelnetc_s2_gpa.py
+
+新增 E3 脚本目录：
+
+    Point-Cache/scripts/E3_global_prototype_alignment_cache/
+
+新增脚本：
+
+- `00_run_ulip_modelnetc_s2_gpa_common.sh`
+- `00_1_ulip_modelnetc_s2_zs_global_local_gpa_manual_full_smoke.sh`
+- `00_2_ulip_modelnetc_s2_zs_global_local_gpa_manual_full_llm_fusion_smoke.sh`
+
+当前实现：
+
+- Global Entropy Cache 保留原始 Point-Cache 低熵逻辑；
+- GPA Cache 采用 GPA-only center；
+- GPA Cache 未形成中心前先按低熵准入积累；
+- GPA Cache 形成中心后使用低熵 + 距离约束；
+- 只有进入 GPA Cache 的样本写入 local cache；
+- 当前最小验证阶段不修改最终预测加权公式。
+
+## 2026-06-05：记录 E3-V1 GPA-only center 初版负结果
+
+E3-V1 00_1 已完成：
+
+    manual_full + zs_global_local + 顺序式 GPA Cache + GPA-only center
+
+平均准确率：
+
+    53.44
+
+对比 E2 原始 full Point-Cache：
+
+    manual_full + zs_global_local = 54.00
+
+下降：
+
+    -0.56
+
+该结果说明当前顺序式 GPA-only center 不是最佳方案。
+
+同时发现：
+
+- 预构建阶段 GPA-controlled Local Cache 数量与 Global Entropy Cache 数量几乎一致；
+- 当前规则在 GPA Cache 未满阶段过于宽松；
+- 结果目录中未找到 gpa_stats，需要检查统计保存逻辑；
+- 后续必须记录 GPA 替换事件，包括新旧样本的熵和距离。
+
+下一步计划：
+
+1. 修复 GPA 统计保存；
+2. 增加 `gpa_replacement_events_<cor_type>.jsonl`；
+3. 实现 Center-B：Entropy-only center；
+4. 实现 Center-C：Entropy+GPA union center；
+5. 两张卡分别运行 Center-B 和 Center-C。

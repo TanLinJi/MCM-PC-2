@@ -561,3 +561,48 @@ E2 当前不重新生成 LLM prompt，统一复用 E1 shared prompt 缓存。
 分析文档：
 
     docs/experiments/E2_text_prototype_transfer_to_pointcache/smoke_tests/00_e2_smoke_test_full_analysis.md
+
+## 17. E3 全局原型对齐缓存
+
+日期：2026-06-04
+
+实验名称：
+
+    E3_global_prototype_alignment_cache
+
+中文名称：
+
+    E3：全局原型对齐缓存
+
+实验目标：
+
+    在完整 Point-Cache 设置中，引入 Global Prototype-Alignment Cache，
+    通过更严格的全局样本筛选提高 Local Cache 的样本质量，
+    从而提升整体分类准确率。
+
+当前 E3-V1 采用顺序式方案：
+
+    Global Entropy Cache
+        -> Global Prototype-Alignment Cache
+        -> Local Cache
+
+当前 E3-V1 原型中心来源：
+
+    Center-A：GPA-only center
+
+即每个类别的原型中心由该类别 Global Prototype-Alignment Cache 中样本的全局特征均值得到。
+
+当前计划新增两组 smoke test：
+
+| 编号 | 文本方法 | cache 设置 | 对比对象 |
+|---|---|---|---|
+| 00_1 | manual_full | zs_global_local | E2 00_3 |
+| 00_2 | manual_full_llm_fusion | zs_global_local | E2 00_4 |
+
+后续计划包括：
+
+- E3-V2：MCP-style 并列更新方案；
+- 原型中心来源消融；
+- GPA Cache 准入规则消融；
+- 引入文本原型中心；
+- 修改最终预测加权公式。
