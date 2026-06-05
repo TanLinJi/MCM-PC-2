@@ -81,3 +81,27 @@ E3-01 固定顺序式 GPA Cache 关系不变，只改变 GPA 原型中心来源�
 - 仍然使用 manual_full；
 - 仍然运行 zs_global_local；
 - 结果用于和 E2 00_3 以及 E3-V1-A GPA-only center 对比。
+
+## 7. E3-02：并列式 GPA Cache 中心来源消融脚本
+
+E3-02 将 Global Entropy Cache 与 GPA Cache 改为并列更新。
+
+公共脚本：
+
+    02_run_ulip_modelnetc_s2_parallel_gpa_center_source_ablation_common.sh
+
+实验脚本：
+
+| 脚本 | 关系 | 中心来源 | 文本方法 |
+|---|---|---|---|
+| `02_1_ulip_modelnetc_s2_zs_global_local_parallel_gpa_gpa_only_center_manual_full.sh` | 并列式 | GPA-only center | manual_full |
+| `02_2_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_only_center_manual_full.sh` | 并列式 | Entropy-only center | manual_full |
+| `02_3_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_manual_full.sh` | 并列式 | Entropy+GPA union center | manual_full |
+
+运行方式：
+
+    bash Point-Cache/scripts/E3_global_prototype_alignment_cache/02_1_ulip_modelnetc_s2_zs_global_local_parallel_gpa_gpa_only_center_manual_full.sh 0
+
+    bash Point-Cache/scripts/E3_global_prototype_alignment_cache/02_2_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_only_center_manual_full.sh 1
+
+    bash Point-Cache/scripts/E3_global_prototype_alignment_cache/02_3_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_manual_full.sh 0
