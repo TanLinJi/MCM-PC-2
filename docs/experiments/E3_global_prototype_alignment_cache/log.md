@@ -103,3 +103,47 @@ E3-V1 00_1 已完成：
 详细诊断文档：
 
     docs/experiments/E3_global_prototype_alignment_cache/smoke_tests/00_1_e3_v1_gpa_only_manual_full_diagnosis.md
+
+## 2026-06-05：新增 E3 中心来源消融代码
+
+新增两个 E3 中心来源变体：
+
+### Center-B：Entropy-only center
+
+模型文件：
+
+    Point-Cache/runners/E3_global_prototype_alignment_cache/model_with_hierarchical_caches_gpa_entropy_only_center.py
+
+Runner：
+
+    Point-Cache/runners/E3_global_prototype_alignment_cache/run_e3_ulip_modelnetc_s2_gpa_entropy_only_center.py
+
+脚本：
+
+    Point-Cache/scripts/E3_global_prototype_alignment_cache/01_1_ulip_modelnetc_s2_zs_global_local_gpa_entropy_only_center_manual_full.sh
+
+### Center-C：Entropy+GPA union center
+
+模型文件：
+
+    Point-Cache/runners/E3_global_prototype_alignment_cache/model_with_hierarchical_caches_gpa_entropy_gpa_union_center.py
+
+Runner：
+
+    Point-Cache/runners/E3_global_prototype_alignment_cache/run_e3_ulip_modelnetc_s2_gpa_entropy_gpa_union_center.py
+
+脚本：
+
+    Point-Cache/scripts/E3_global_prototype_alignment_cache/01_2_ulip_modelnetc_s2_zs_global_local_gpa_entropy_gpa_union_center_manual_full.sh
+
+本次中心来源消融固定以下变量不变：
+
+- 仍然采用顺序式 GPA Cache；
+- 仍然采用 manual_full；
+- 仍然运行 zs_global_local；
+- 仍然暂不修改最终预测加权公式；
+- 只改变 GPA 原型中心来源。
+
+目标：
+
+    判断 E3-V1-A 下降是否主要来自 GPA-only center 不稳定。

@@ -52,3 +52,32 @@ GPU 1 运行 manual_full_llm_fusion：
 - GPA-controlled Local Cache 每类数量；
 - GPA 启动、加入、替换、拒绝次数；
 - 最终准确率。
+
+## 6. E3-01：中心来源消融脚本
+
+E3-01 固定顺序式 GPA Cache 关系不变，只改变 GPA 原型中心来源。
+
+公共脚本：
+
+    01_run_ulip_modelnetc_s2_gpa_center_source_ablation_common.sh
+
+实验脚本：
+
+| 脚本 | 中心来源 | 文本方法 | 作用 |
+|---|---|---|---|
+| `01_1_ulip_modelnetc_s2_zs_global_local_gpa_entropy_only_center_manual_full.sh` | Entropy-only center | manual_full | 使用 Global Entropy Cache 计算 GPA 原型中心 |
+| `01_2_ulip_modelnetc_s2_zs_global_local_gpa_entropy_gpa_union_center_manual_full.sh` | Entropy+GPA union center | manual_full | 使用 Global Entropy Cache 与 GPA Cache 并集计算 GPA 原型中心 |
+
+运行方式：
+
+    bash Point-Cache/scripts/E3_global_prototype_alignment_cache/01_1_ulip_modelnetc_s2_zs_global_local_gpa_entropy_only_center_manual_full.sh 0
+
+    bash Point-Cache/scripts/E3_global_prototype_alignment_cache/01_2_ulip_modelnetc_s2_zs_global_local_gpa_entropy_gpa_union_center_manual_full.sh 1
+
+说明：
+
+- 这两组实验只改变中心来源；
+- 仍然采用顺序式 GPA Cache；
+- 仍然使用 manual_full；
+- 仍然运行 zs_global_local；
+- 结果用于和 E2 00_3 以及 E3-V1-A GPA-only center 对比。

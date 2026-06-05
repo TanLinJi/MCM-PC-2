@@ -519,3 +519,58 @@ E3-V1-A 结果显示：
    - Center-B：Entropy-only center；
    - Center-C：Entropy+GPA union center；
 4. 若仍不理想，进入 E3-V2 并列式 GPA Cache。
+
+## 21. E3-01 中心来源消融实现
+
+为诊断 E3-V1-A 中 GPA-only center 不稳定的问题，新增两种中心来源变体。
+
+### 21.1 Center-B：Entropy-only center
+
+原型中心来源：
+
+    Global Entropy Cache
+
+含义：
+
+    GPA Cache 的准入和替换仍然存在，
+    但计算类别原型中心时不使用 GPA Cache 自身，
+    而使用原始 Global Entropy Cache 中该类样本的全局特征均值。
+
+目的：
+
+    验证更稳定的低熵全局缓存中心是否优于 GPA-only center。
+
+### 21.2 Center-C：Entropy+GPA union center
+
+原型中心来源：
+
+    Global Entropy Cache
+    +
+    Global Prototype-Alignment Cache
+
+含义：
+
+    将两个缓存中的全局特征合并后计算类别中心。
+    若同一样本同时存在于两个缓存中，代码会尽量通过 tensor data_ptr 去重。
+
+目的：
+
+    验证同时利用低熵缓存和 GPA 缓存是否能得到更稳定中心。
+
+### 21.3 固定变量
+
+这两组实验只改变中心来源，其他变量保持一致：
+
+- Relation-A：顺序式；
+- 文本方法：manual_full；
+- cache 设置：zs_global_local；
+- 最终预测加权公式：暂不修改。
+
+### 21.4 对比对象
+
+| 方法 | 平均准确率 |
+|---|---:|
+| E2 原始 full Point-Cache manual_full | 54.00 |
+| E3-V1-A GPA-only center | 53.44 |
+| E3 Center-B Entropy-only center | 待实验 |
+| E3 Center-C Entropy+GPA union center | 待实验 |
