@@ -13,10 +13,10 @@
 ```
 docs/
 ├── README.md                      ← 本文件，目录索引
-├── project/                       ← 项目管理：偏好规则、术语、进度
+├── project/                       ← 项目管理：偏好规则、术语、进度、长期协作规范
 ├── proposals/                     ← 创新点、研究方案、路线规划
 ├── paper/                         ← 论文章节草稿
-├── experiments/                   ← 实验设计、结果、阶段总结
+├── experiments/                   ← 实验设计、结果、阶段总结、长期实验叙事
 ├── reports/                       ← 自包含 HTML 报告
 ├── context/windsurf/              ← AI 对话归档、上下文恢复
 ├── archive/                       ← 旧版本方案、参考代码副本
@@ -30,6 +30,7 @@ docs/
 | 文件 | 用途 |
 |---|---|
 | `user_preferences.md` | 用户工作偏好与项目规则（commit 规则、命名规则、跑分规则） |
+| `conventions/` | 长期协作规范、用户偏好、路径命名、实验推进和 Git 工作流归档 |
 | `glossary.md` | 术语表（D/P/F/G/W 编号、anchor pollution、EMR/GLC/CANC 等中英文对照） |
 | `progress_log.md` | 关键里程碑数字日志 |
 | `project_tree.md` | 项目目录树（根目录与关键子树） |
@@ -61,6 +62,7 @@ docs/
 
 | 子目录/文件 | 内容 |
 |---|---|
+| `narrative/` | E0 起始的长期实验路线叙事、研究判断和后续补实验计划 |
 | `stages/` | stage0~4 实验阶段 .md 归档（按 baseline → EMR → GLC → CANC 顺序） |
 | `e0_tpe/` | 文本原型增强（zero-shot 阶段） |
 | `e2_emr/` | Entropy-Margin Reliability cache admission |
@@ -77,6 +79,8 @@ docs/
 | `2026-05-15_top_conference_progress.html` | 顶会论文阶段进展报告（浅色主题） |
 | `2026-05-17_global_roadmap_v2.html` | 全局路线图 v2（39 KB，最详细） |
 | `2026-05-17_task_specification.html` | 任务说明书 v1.0（暗黑主题，含 6 周路线 / 风险 / 立即行动） |
+
+后续所有说明类 HTML 文档默认沿用 `2026-05-17_task_specification.html` 的暗色侧边栏风格，除非用户明确要求更换风格。
 
 ## 六、`context/windsurf/`
 
@@ -112,18 +116,22 @@ docs/
 
 新读者按下面顺序读，30 分钟摸清项目：
 
-1. `project/user_preferences.md` — 工作规则
-2. `project/glossary.md` — 术语和实验编号
-3. `reports/2026-05-17_task_specification.html` — 当前局势 + 6 周路线
-4. `proposals/core_innovations.md` — 核心创新点
-5. `experiments/stages/` 全部（按编号顺序）
-6. `reports/2026-05-17_global_roadmap_v2.html` — 全局路线图
-7. `paper/0_outline.md` — 论文大纲和写作进度
+1. `project/conventions/user_preferences_workflow_conventions.md` — 最新协作规范与用户偏好
+2. `project/user_preferences.md` — 旧版工作规则摘要
+3. `project/glossary.md` — 术语和实验编号
+4. `experiments/narrative/e0_e3_research_narrative.md` — E0-E3 研究路线完整叙事
+5. `reports/2026-05-17_task_specification.html` — 当前局势 + 6 周路线
+6. `proposals/core_innovations.md` — 核心创新点
+7. `experiments/stages/` 全部（按编号顺序）
+8. `reports/2026-05-17_global_roadmap_v2.html` — 全局路线图
+9. `paper/0_outline.md` — 论文大纲和写作进度
 
 ## 新增文档怎么放
 
 - 新论文章节 / 摘要 / 段落：`paper/`
 - 新实验数据汇总（不是原始日志）：`experiments/<eN_topic>/`；原始 .log/.csv/.json 留在 `Point-Cache/logs/`
+- 新长期实验路线叙事：`experiments/narrative/`
+- 新协作规范、用户偏好、工作流规则：`project/conventions/`
 - 新创新点或方法草稿：`proposals/`
 - 新 HTML 自包含报告：`reports/`，加日期前缀
 - 新对话归档：`context/windsurf/`
@@ -134,12 +142,15 @@ docs/
 
 - 文件命名变更必须用 `git mv` 保留 history
 - 重复或失效文件移到 `archive/` 而非直接删除（除非确认是空文件或日志副本）
+- 关键实验进展、会改变结论的 bug 修复、用户新增偏好和文档风格要求，要同步更新 `experiments/narrative/` 或 `project/conventions/`
+- 结构调整和关键文档更新后，及时更新 qmd 索引，保证后续检索能命中新路径和新内容
 - 每次结构调整在本文件 changelog 末尾追加一行
 
 ---
 
 ## Changelog
 
+- **2026-06-06** v1.3：新增 `experiments/narrative/` 和 `project/conventions/` 两个长期维护目录，归档 E0-E3 实验叙事与项目协作规范；补充 HTML 报告风格和 qmd 更新要求。
 - **2026-06-02** v1.2：将 `project/project_tree.md` 扩展为叶子样例版，补充 Point-Cache、docs/experiments、weights 等深层结构。
 - **2026-06-02** v1.1：新增 `project/project_tree.md`，整理当前仓库的目录树。
 - **2026-05-17** v1.0：初始结构落盘。归档了 `docs/new/` 中所有用户上传的资料，按 8 大类目录重新分类，统一英文命名。同时合并 E2-EMR 三份重复、两份代号说明，删除日志副本（原版在 `Point-Cache/logs/recur-pc/`）。
