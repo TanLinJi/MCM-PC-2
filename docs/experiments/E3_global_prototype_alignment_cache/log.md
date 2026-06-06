@@ -203,3 +203,109 @@ E3-V2 核心变化：
 
     Global Entropy Cache 和 GPA Cache 并列更新，
     GPA Cache 不再依赖 Global Entropy Cache 准入。
+
+## 2026-06-05：记录 E3-V3 GPA Cache 初始化改进方案
+
+为解决 E3-V2-C 中仍然存在的 GPA Cache 初始化不稳定问题，记录三类初始化改进方案：
+
+- Init-A：先用 Global Entropy Cache 初始化中心；
+- Init-B：延迟 local cache 写入；
+- Init-C：候选池初始化。
+
+当前建议优先实现 Init-C：
+
+    每类先收集 2K 或 3K 个候选样本；
+    使用 Global Entropy Cache + GPA candidate pool 构造联合中心；
+    根据熵和距离筛出 K 个样本进入 GPA Cache；
+    只有最终选中的 K 个样本的局部特征进入 local cache。
+
+详细文档：
+
+    docs/experiments/E3_global_prototype_alignment_cache/initialization_strategies/e3_v3_gpa_cache_initialization_strategies.md
+
+## 2026-06-05：实现 E3-V3-A 候选池初始化
+
+新增模型文件：
+
+    Point-Cache/runners/E3_global_prototype_alignment_cache/model_with_hierarchical_caches_parallel_gpa_candidate_pool_init.py
+
+新增 runner：
+
+    Point-Cache/runners/E3_global_prototype_alignment_cache/run_e3_ulip_modelnetc_s2_parallel_gpa_candidate_pool_init.py
+
+新增脚本：
+
+    Point-Cache/scripts/E3_global_prototype_alignment_cache/03_1_ulip_modelnetc_s2_zs_global_local_parallel_gpa_candidate_pool_init_manual_full.sh
+
+方法设定：
+
+    parallel GPA
+    + candidate pool initialization
+    + Entropy Cache and GPA candidate pool union center
+    + candidate pool size = 2K
+    + final GPA size = K
+    + local cache 只写入最终筛出的 K 个样本
+
+## 2026-06-06：暂停 Init-C 第一版候选池初始化
+
+E3-V3-A Init-C 第一版在 add_global_2 上出现异常下降。
+
+预构建阶段显示候选池机制生效：
+
+- entropy cache total = 89
+- gpa cache total = 87
+- gpa local cache total = 87
+- gpa candidate pool total = 2
+
+但正式测试阶段累计准确率明显偏低，实验被手动停止。
+
+当前判断：
+
+    不能直接说明 Init-C 思路失败，
+    但第一版实现或筛选策略过于激进，需要暂停并诊断。
+
+详细记录：
+
+    docs/experiments/E3_global_prototype_alignment_cache/initialization_strategies/03_1_init_c_candidate_pool_failed_attempt_analysis.md
+
+下一步转向更保守的 Init-A：
+
+    Entropy-bootstrap initialization with Entropy+GPA union center。
+
+## 2026-06-06：新增 E3-V3-C 候选池距离初始化 GPA-Cache 消融说明
+
+新增文档：
+
+`docs/experiments/E3_global_prototype_alignment_cache/initialization_strategies/E3-V3-C_candidate_pool_distance_initialization_ablation.md`
+
+当前首跑版本：
+
+`E3-V3-C1-Ub = Candidate-only center + Distance-only update`
+
+该版本使用每类 2K 候选池构造临时中心，选择距离中心最近的 K 个样本进入 GPA-Cache。GPA-Cache 满后，不使用熵，只根据新样本是否比当前缓存中离中心最远样本更近来决定是否替换。每次替换后必须同步更新 local cache，并立即重算 GPA-Center。
+
+最终预测公式和 local cache 权重暂时不改。
+
+## 2026-06-06：E3-V3-C1-Ub 结果分析完成
+
+新增结果分析文档：
+
+`docs/experiments/E3_global_prototype_alignment_cache/initialization_strategies/E3-V3-C1-Ub_result_analysis.md`
+
+E3-V3-C1-Ub，即“候选池中心 + 无熵距离更新方法”，在 ULIP × ModelNet-C severity=2 × 7 corruption smoke test 上取得 53.39 平均准确率。该结果高于 E3-V3-B Entropy-bootstrap 初始化方法的 53.25，但低于 E2 原始 full Point-Cache baseline 的 54.00，也低于 E3-V2-C 的 54.04。
+
+结论：候选池初始化方向没有被完全否定，但无熵纯距离更新规则不够稳定。下一步同时进行 E3-V3-C1-Ua2 和 E3-V3-C1-Ua1。
+
+## 2026-06-06：记录 E3-V3-C1 系列“去噪有效、几何变化失效”分析
+
+新增分析文档：
+
+`docs/experiments/E3_global_prototype_alignment_cache/analysis/E3-V3-C1_series_result_analysis_noise_vs_geometry.md`
+
+核心结论：
+
+E3-V3-C1 系列方法的正收益主要集中在 add_global 和 add_local。该现象说明候选池单中心 GPA-Cache 更像是一种外点噪声过滤机制：add_global 和 add_local 会向点云中加入离群点，但原始物体主体结构仍然存在，因此距离类别中心最近的样本更可能是噪声影响较小的样本，进入 GPA-local-cache 后能够提升 additive corruption 下的鲁棒性。
+
+但该机制对 dropout、rotate、scale、jitter 等 corruption 不稳定。原因是这些 corruption 改变的是结构完整性、整体几何分布或局部 patch 稳定性，而不是简单加入外点噪声。单中心 GPA 追求类内紧凑性，可能牺牲 local cache 的覆盖度和多样性，因此对几何结构变化失效。
+
+当前 C1 系列最优版本为 E3-V3-C1-Ua1，平均准确率 54.02，基本追平 E2 baseline，但仍略低于 E3-V2-C 的 54.04。下一步查看 C2-Ua1，即中心来源改为 candidate pool + Entropy Cache，更新规则保留 Ua1。

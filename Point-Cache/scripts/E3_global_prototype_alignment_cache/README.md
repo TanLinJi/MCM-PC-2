@@ -105,3 +105,26 @@ E3-02 将 Global Entropy Cache 与 GPA Cache 改为并列更新。
     bash Point-Cache/scripts/E3_global_prototype_alignment_cache/02_2_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_only_center_manual_full.sh 1
 
     bash Point-Cache/scripts/E3_global_prototype_alignment_cache/02_3_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_manual_full.sh 0
+
+## 8. E3-03：GPA Cache 候选池初始化脚本
+
+E3-03 用于验证 GPA Cache 初始化机制改进。
+
+当前脚本：
+
+| 脚本 | 方法 | 作用 |
+|---|---|---|
+| `03_1_ulip_modelnetc_s2_zs_global_local_parallel_gpa_candidate_pool_init_manual_full.sh` | E3-V3-A | 并列式 GPA Cache + 候选池初始化 |
+
+运行方式：
+
+    bash Point-Cache/scripts/E3_global_prototype_alignment_cache/03_1_ulip_modelnetc_s2_zs_global_local_parallel_gpa_candidate_pool_init_manual_full.sh 0
+
+默认候选池倍率：
+
+    GPA_CANDIDATE_MULTIPLIER=2
+
+即：
+
+    每类先收集 2K 个候选样本，
+    再根据 Entropy Cache 与 GPA candidate pool 联合中心筛出 K 个进入 GPA Cache。

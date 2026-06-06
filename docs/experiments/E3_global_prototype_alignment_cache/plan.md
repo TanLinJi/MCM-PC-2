@@ -665,3 +665,54 @@ E3-V2 保留三种中心来源：
 2. GPA Cache 单独参与 global logits；
 3. Global Entropy Cache / GPA Cache / Local Cache 分支独立加权；
 4. 引入文本原型中心。
+
+## 24. E3-V3：GPA Cache 初始化机制改进方案
+
+E3-V3 将重点解决 GPA Cache 初始化问题。
+
+当前总结三类方案：
+
+| 方案 | 名称 | 核心思想 | 优先级 |
+|---|---|---|---|
+| Init-A | Global Entropy Center Initialization | 先用 Global Entropy Cache 初始化中心 | 中 |
+| Init-B | Delayed Local Cache Writing | 先筛 GPA，再写 local cache | 中 |
+| Init-C | Candidate Pool Initialization | 先收集 2K/3K 候选，再筛 K 个进入 GPA | 高 |
+
+详细记录文档：
+
+    docs/experiments/E3_global_prototype_alignment_cache/initialization_strategies/e3_v3_gpa_cache_initialization_strategies.md
+
+当前建议优先实现：
+
+    Init-C：候选池初始化
+
+第一版 E3-V3 计划：
+
+    parallel GPA
+    + candidate pool initialization
+    + Entropy Cache and GPA candidate pool union center
+    + candidate pool size = 2K
+    + final GPA size = K
+    + local cache 只写入最终筛出的 K 个样本
+
+## 25. Init-C 第一版暂停与 Init-A 试验计划
+
+Init-C 第一版候选池初始化在 add_global_2 上出现异常下降，暂时暂停。
+
+当前不将其视为 Init-C 思路失败，而记录为：
+
+    第一版实现或筛选策略过于激进，需要进一步诊断。
+
+下一步优先尝试更保守的 Init-A：
+
+    Entropy-bootstrap initialization with Entropy+GPA union center
+
+Init-A 的设定：
+
+    初始化阶段：
+        使用 Global Entropy Cache 启动 GPA Cache；
+
+    初始化完成后：
+        使用 Entropy Cache + GPA Cache union center 进行后续更新。
+
+该方案比 Init-C 更保守，不引入 candidate pool 状态机。
