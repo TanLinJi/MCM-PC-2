@@ -309,3 +309,19 @@ E3-V3-C1 系列方法的正收益主要集中在 add_global 和 add_local。该�
 但该机制对 dropout、rotate、scale、jitter 等 corruption 不稳定。原因是这些 corruption 改变的是结构完整性、整体几何分布或局部 patch 稳定性，而不是简单加入外点噪声。单中心 GPA 追求类内紧凑性，可能牺牲 local cache 的覆盖度和多样性，因此对几何结构变化失效。
 
 当前 C1 系列最优版本为 E3-V3-C1-Ua1，平均准确率 54.02，基本追平 E2 baseline，但仍略低于 E3-V2-C 的 54.04。下一步查看 C2-Ua1，即中心来源改为 candidate pool + Entropy Cache，更新规则保留 Ua1。
+
+## 2026-06-07：补充 E3 单中心原型方法的适用边界分析
+
+更新文档：
+
+`docs/experiments/E3_global_prototype_alignment_cache/analysis/E3_overall_result_analysis_and_E4_motivation.md`
+
+补充重要发现：
+
+E3 阶段的多种改进，包括 GPA-only center、Entropy-only center、Entropy/GPA union center、Entropy-bootstrap initialization、Candidate-only center、Candidate+Entropy center、替换最高熵样本、替换最远样本，本质上大多仍然属于“改进单中心原型”的方法。
+
+这类方法对 add_global 和 add_local 这类添加型外点噪声有效，因为原始物体主体结构仍然存在，外点会把受污染严重的样本特征拉离类别主体中心，因此选择更靠近原型中心的样本可以起到过滤外点噪声、净化 cache 的作用。
+
+但面对 dropout、rotate、scale、jitter 等几何结构变化时，单中心原型方法会失效或收益不稳定。原因是这些损坏改变的是结构完整性、整体几何分布、局部 patch 稳定性或类内结构模式。此时样本远离中心不一定代表它是错误样本或脏样本，也可能代表该类别在几何变化下的正常模式。
+
+该发现可以作为后续论文中的一个重要分析点：单中心原型对齐方法适合处理添加型噪声，但难以覆盖几何结构变化。E4 将据此引入类别概率分布，用“是否符合类别分布”替代“是否靠近单一中心”作为 cache 更新判断标准。
