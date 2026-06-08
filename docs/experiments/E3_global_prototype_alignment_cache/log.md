@@ -325,3 +325,65 @@ E3 阶段的多种改进，包括 GPA-only center、Entropy-only center、Entrop
 但面对 dropout、rotate、scale、jitter 等几何结构变化时，单中心原型方法会失效或收益不稳定。原因是这些损坏改变的是结构完整性、整体几何分布、局部 patch 稳定性或类内结构模式。此时样本远离中心不一定代表它是错误样本或脏样本，也可能代表该类别在几何变化下的正常模式。
 
 该发现可以作为后续论文中的一个重要分析点：单中心原型对齐方法适合处理添加型噪声，但难以覆盖几何结构变化。E4 将据此引入类别概率分布，用“是否符合类别分布”替代“是否靠近单一中心”作为 cache 更新判断标准。
+
+## 2026-06-07：提出 E3-V2-TextProto-C 文本原型增强中心实验
+
+新增说明文档：
+
+`docs/experiments/E3_global_prototype_alignment_cache/text_prototype_center/E3-V2-TextProto-C_text_visual_prototype_center_plan.md`
+
+核心思想：
+
+回到当前 E3 阶段最优的 E3-V2-C 框架，在原有 Entropy Cache + GPA-Cache 构造的视觉联合中心基础上，引入类别 Text Prototype 作为语义锚点，构造文本-视觉联合中心。
+
+第一版建议命名：
+
+    E3-V2-TextProto-C-w0.7v0.3t
+
+第一版设置：
+
+    visual_center = mean(EntropyCache[c] ∪ GPACache[c])
+    text_center = Text Prototype[c]
+    final_center = normalize(0.7 * visual_center + 0.3 * text_center)
+
+GPA-Cache 初始化、低熵门控、替换最高熵样本、local cache 同步和最终预测公式均暂时沿用 E3-V2-C。
+
+需要特别说明：0.7 visual + 0.3 text 不是原文固定权重，而是第一版保守启发式初值。原因是 E3-V2-C 的视觉中心已经验证有效，应保持视觉主导；Text Prototype 只作为语义锚点参与。后续需要通过不同文本权重进行消融验证。
+
+## 2026-06-08：补充 E3-V2-TextProto-Guard-C 实验计划
+
+新增说明文档：
+
+`docs/experiments/E3_global_prototype_alignment_cache/text_prototype_center/E3-V2-TextProto-Guard-C_plan.md`
+
+当前结论：
+
+E4-A 的小样本类别分布方法不稳定；E3-V2-TextProto-C 的文本-视觉向量融合虽然在 dropout_global、dropout_local 等结构缺失场景中有帮助，但会拉偏视觉中心，伤害 add_local、rotate、scale、jitter 等依赖视觉去噪的场景。因此，下一步不再把 Text Prototype 与 visual center 直接融合成一个中心，而是提出 E3-V2-TextProto-Guard-C。
+
+E3-V2-TextProto-Guard-C 的核心规则：
+
+    entropy_new < entropy_high
+    and
+    (
+        d_visual_new < d_visual_high
+        or
+        (
+            d_visual_new <= d_visual_high * (1 + rho_visual)
+            and
+            d_text_new < d_text_high
+        )
+    )
+
+第一版设置：
+
+    rho_visual = 0.05
+
+该方法保留 E3-V2-C 的视觉去噪分支，同时增加 Text Prototype 语义保护分支，目标是同时保留 add_global/add_local/jitter 的视觉去噪能力，并继承 Text Prototype 在 dropout/scale 上的结构缺失收益。
+
+实现代码时需要注意：
+
+    不再直接复制旧 runner 后字符串替换；
+    应新写干净版本或显式重构公共逻辑；
+    必须检查 build 后 gpa_cache 不被清空；
+    必须检查 GPA-Cache 和 GPA-local-cache 同步；
+    必须记录 visual branch 与 text guard branch 的替换事件。

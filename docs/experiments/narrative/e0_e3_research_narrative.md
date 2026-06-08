@@ -1,10 +1,10 @@
 # MCM-PC 实验路线完整归档：E0 到 E3 的研究思路、实验过程、问题背景、解决方案与后续补实验计划
 
-更新时间：2026-06-06  
+更新时间：2026-06-07  
 项目根目录：`/root/autodl-tmp/MCM-PC-2`  
 核心代码库：`/root/autodl-tmp/MCM-PC-2/Point-Cache`  
 当前主线：基于 Point-Cache 的三维点云视觉-语言模型测试时泛化方法研究  
-当前阶段：E3，Global Prototype-Alignment Cache 方向仍在调试与收敛中  
+当前阶段：E3 smoke 系列已经形成阶段性结论，当前应从单中心 GPA Cache 转向更能表达类内几何变化的后续方案  
 
 ---
 
@@ -533,7 +533,17 @@ gpa candidate pool total: 2
 
 ### 9.4 E3-V3 当前状态
 
-截至当前对话：Init-C 第一版已暂停；Init-A 正在实现和调试；Init-A 文件已经检查到标识正确；最新运行出现 `_loss_value` 取值 bug，修复点明确；修复后应重新跑 `03_2`。
+截至 2026-06-07，E3-V3 初始化系列已经从早期 Init-A/Init-C 调试推进到候选池距离初始化消融。已经完成的关键结果包括：
+
+| 方法 | 初始化/更新规则 | 平均准确率 | 相对 E2 baseline 54.00 |
+|---|---|---:|---:|
+| E3-V3-B | Entropy-bootstrap initialization | 53.25 | -0.75 |
+| E3-V3-C1-Ub | Candidate-only center + distance-only update | 53.39 | -0.61 |
+| E3-V3-C1-Ua2 | Candidate-only center + low-entropy gate + replace farthest | 53.68 | -0.32 |
+| E3-V3-C1-Ua1 | Candidate-only center + low-entropy gate + replace highest-entropy | 54.02 | +0.02 |
+| E3-V3-C2-Ua1 | Candidate+Entropy center + low-entropy gate + replace highest-entropy | 54.00 | 0.00 |
+
+最新判断是：candidate pool 初始化可以缓解部分前 K 个样本直接进入的问题，但没有超过 E3-V2-C 的 54.04；纯距离更新不稳定，低熵门控仍然必要；替换最高熵样本比替换最远样本更稳。E3-V3-C1-Ua1 基本追平 E2 baseline，但仍略低于 E3-V2-C。
 
 ---
 
@@ -566,7 +576,7 @@ gpa candidate pool total: 2
 | manual_full | zs_global_local | 54.00 |
 | manual_full_llm_fusion | zs_global_local | 54.21 |
 
-### 10.4 E3 V1/V2
+### 10.4 E3 V1/V2/V3
 
 | 方法 | 关系 | 中心来源 | 平均准确率 |
 |---|---|---|---:|
@@ -577,6 +587,11 @@ gpa candidate pool total: 2
 | E3-V2-A | 并列式 | GPA-only | 53.70 |
 | E3-V2-B | 并列式 | Entropy-only | 53.15 |
 | E3-V2-C | 并列式 | Entropy+GPA union | 54.04 |
+| E3-V3-B | 并列式 + 初始化改进 | Entropy-bootstrap | 53.25 |
+| E3-V3-C1-Ub | 候选池初始化 | Candidate-only + distance-only | 53.39 |
+| E3-V3-C1-Ua2 | 候选池初始化 | Candidate-only + 低熵门控 + 替换最远样本 | 53.68 |
+| E3-V3-C1-Ua1 | 候选池初始化 | Candidate-only + 低熵门控 + 替换最高熵样本 | 54.02 |
+| E3-V3-C2-Ua1 | 候选池初始化 | Candidate+Entropy + 低熵门控 + 替换最高熵样本 | 54.00 |
 
 ---
 
@@ -585,13 +600,15 @@ gpa candidate pool total: 2
 1. E1 的文本增强方向成立，但 LLM 只能补充人工模板，不能替代人工模板。
 2. E2 说明文本增强收益能迁移到 Point-Cache，但提升较小，后续要完整验证。
 3. E3 的顺序式 GPA 不理想，并列式更合理。
-4. E3 当前最佳是 V2-C：并列式 + Entropy+GPA union center，但提升仅 +0.04，不足以作为最终方法。
-5. GPA Cache 的主要问题转向初始化：前 K 个样本无筛选进入 GPA/local。
-6. Init-C 第一版太激进或实现复杂，已经暂停。
-7. 当前应优先完成 Init-A 的调试，作为更保守的初始化方案。
-8. 未来更有潜力的方向包括：多中心/聚类覆盖、local cache 多样性、文本原型中心、熵-能量联合可靠性。
+4. E3 当前最佳仍是 V2-C：并列式 + Entropy+GPA union center，平均 54.04，相对 E2 baseline 只有 +0.04，不足以作为最终方法。
+5. E3-V3 证明 candidate pool 初始化不是当前主要突破口：C1-Ua1 达到 54.02，C2-Ua1 达到 54.00，但都没有超过 V2-C。
+6. 纯距离更新不稳定，低熵门控仍然必要；替换最高熵样本比替换最远样本更稳。
+7. E3 的正收益主要集中在 add_global / add_local，说明单中心原型对齐更擅长过滤添加型外点噪声。
+8. E3 在 dropout、rotate、scale、jitter 上不稳定，说明单中心原型会损失类内几何变化和 local cache 覆盖。
+9. 当前瓶颈不再是单纯的中心来源或初始化方式，而是单中心原型无法表达类别内部几何变化范围。
+10. 未来更有潜力的方向包括：多中心/聚类覆盖、类别概率分布、local cache 多样性、文本原型中心、熵-能量联合可靠性。
 
-纵向主线下一步：修复 Init-A `_loss_value` bug；跑 `03_2` Init-A smoke test；如果不崩，跑完整 7 corruption；对比 E2 baseline、E3-V2-C；判断是否继续 Init-B；若 Init-A/Init-B 都无明显收益，再考虑文本原型 Center-D 或多中心聚类。
+纵向主线下一步：不要继续围绕 E3 单中心初始化做小修小补。应以 E3-V2-C 作为 E3 阶段最优参考，进入能表达类内多模式或类别概率分布的下一阶段；如果继续保留 E3 线索，优先做多中心/分布式原型和 local cache 多样性，而不是继续单中心 candidate pool 变体。
 
 回补横向实验包括：E1 完整文本消融；E2 完整文本迁移；E3 V1/V2/V3 完整消融；GPA relation 消融；center source 消融；initialization 消融；final logits 权重调参；negative cache ablation；local cache 覆盖度分析。
 
@@ -607,9 +624,9 @@ gpa candidate pool total: 2
 
 因为当前项目主线是基于 Point-Cache 的渐进式改造，先验证文本和 cache 机制。如果直接跳到分布建模或聚类原型，会打断当前从 E0 到 E3 的逻辑链。BayesMM/Uni-Adapter 作为后续方向保留。
 
-### 12.3 为什么 E3 只提升 +0.04 还继续？
+### 12.3 为什么 E3 只提升 +0.04 还继续分析？
 
-因为 +0.04 本身不是目标，重要的是它揭示了并列式 + union center 比顺序式更合理。当前真正的问题已转向初始化和 local cache 覆盖。
+因为 +0.04 本身不是目标，重要的是 E3 揭示了两个边界：并列式 + union center 比顺序式更合理；单中心原型对 add_global/add_local 这类添加型噪声有效，但对 dropout、rotate、scale、jitter 等几何变化不稳定。这个发现直接支持后续从单中心 GPA 转向多中心或类别概率分布。
 
 ### 12.4 为什么 Init-C 暂停而不是放弃？
 
@@ -617,7 +634,7 @@ gpa candidate pool total: 2
 
 ### 12.5 后续最先该做什么？
 
-先修 Init-A 的 `_loss_value(entropy_cache[pred][-1][1])`，跑通 `03_2`，形成一个保守初始化 baseline。之后再考虑 Init-B 或改进 Init-C。
+以 E3-V2-C 作为 E3 阶段最优参考，优先设计下一阶段：从“样本是否更靠近单一类别中心”转向“样本是否符合类别内部多模式/概率分布”。如果继续补 E3，应补 local cache 覆盖度、多中心原型、候选池多样性和 final logits 权重，而不是继续单中心初始化细枝末节。
 
 ---
 
