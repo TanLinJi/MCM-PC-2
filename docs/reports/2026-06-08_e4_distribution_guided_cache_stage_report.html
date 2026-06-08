@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCM-PC E4 分布引导 Cache 阶段性实验说明</title>
+<style>
+  :root {
+    --c-text: #e2e8f0;
+    --c-muted: #94a3b8;
+    --c-heading: #f1f5f9;
+    --c-accent: #60a5fa;
+    --c-bg: #0b1220;
+    --c-bg-soft: #111827;
+    --c-bg-card: #131c2e;
+    --c-border: #1f2937;
+    --c-border-strong: #334155;
+    --c-code-bg: #0f172a;
+    --c-row-stripe: #0e1626;
+    --c-green: #6ee7b7;
+    --c-green-bg: #0b3a2c;
+    --c-green-border: #10b981;
+    --c-red: #fca5a5;
+    --c-red-bg: #3a1414;
+    --c-red-border: #ef4444;
+    --c-amber: #fcd34d;
+    --c-amber-bg: #3b2a08;
+    --c-amber-border: #f59e0b;
+    --c-purple: #d8b4fe;
+    --c-purple-bg: #2a1a3d;
+    --c-purple-border: #a855f7;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
+  body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif; font-size: 15.5px; line-height: 1.72; color: var(--c-text); background: var(--c-bg); }
+  .container { display: grid; grid-template-columns: 280px 1fr; gap: 2rem; max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
+  nav.toc { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem); overflow-y: auto; padding: 1rem 0.85rem; background: var(--c-bg-soft); border: 1px solid var(--c-border); border-radius: 10px; font-size: 0.86rem; }
+  nav.toc .toc-title { font-weight: 700; color: var(--c-heading); font-size: 0.95rem; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--c-border); }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; }
+  nav.toc li { margin: 0.2rem 0; }
+  nav.toc a { display: block; padding: 0.25rem 0.5rem; color: var(--c-muted); text-decoration: none; border-left: 2px solid transparent; border-radius: 3px; }
+  nav.toc a:hover { color: var(--c-accent); background: rgba(96,165,250,0.1); border-left-color: var(--c-accent); }
+  nav.toc li.toc-sub { margin-left: 0.75rem; font-size: 0.82rem; }
+  main { min-width: 0; }
+  h1, h2, h3, h4 { color: var(--c-heading); line-height: 1.3; }
+  h1 { font-size: 2rem; margin: 0 0 0.5rem 0; border-bottom: 3px solid var(--c-accent); padding-bottom: 0.5rem; display: inline-block; }
+  h2 { font-size: 1.45rem; margin: 2.5rem 0 1rem 0; padding: 0.4rem 0 0.4rem 0.75rem; border-left: 4px solid var(--c-accent); background: linear-gradient(90deg, rgba(96,165,250,0.08), transparent); }
+  h3 { font-size: 1.15rem; margin: 1.5rem 0 0.5rem 0; }
+  p { margin: 0.55rem 0; }
+  strong { color: #f8fafc; }
+  ul, ol { padding-left: 1.4rem; }
+  li { margin: 0.18rem 0; }
+  header.doc-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--c-border); }
+  .doc-meta { font-size: 0.85rem; color: var(--c-muted); margin: 0 0 0.5rem 0; }
+  .doc-meta .badge { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 999px; background: var(--c-bg-soft); border: 1px solid var(--c-border-strong); color: var(--c-heading); margin-right: 0.4rem; font-size: 0.78rem; }
+  .tldr { margin: 1.5rem 0; padding: 1.25rem 1.5rem; background: linear-gradient(135deg, rgba(96,165,250,0.08), rgba(168,85,247,0.05)); border: 1px solid var(--c-accent); border-radius: 10px; font-size: 1.02rem; }
+  .tldr h3 { margin-top: 0; color: #93c5fd; font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; }
+  .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.8rem; margin: 1.25rem 0 2rem 0; }
+  .card { padding: 0.9rem 1rem; background: var(--c-bg-card); border: 1px solid var(--c-border-strong); border-radius: 8px; }
+  .card .label { font-size: 0.78rem; color: var(--c-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+  .card .value { font-size: 1.45rem; font-weight: 700; color: var(--c-heading); line-height: 1.1; }
+  .card .sub { font-size: 0.78rem; color: var(--c-muted); margin-top: 0.25rem; }
+  .card.good { border-left: 3px solid var(--c-green-border); }
+  .card.bad { border-left: 3px solid var(--c-red-border); }
+  .card.warn { border-left: 3px solid var(--c-amber-border); }
+  .card.info { border-left: 3px solid var(--c-accent); }
+  code, pre, .mono { font-family: "SF Mono", Monaco, Menlo, Consolas, monospace; font-size: 0.875rem; }
+  code { background: var(--c-code-bg); color: var(--c-text); padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid var(--c-border); }
+  pre { background: var(--c-code-bg); color: var(--c-text); padding: 0.9rem 1rem; border-radius: 6px; border: 1px solid var(--c-border); overflow-x: auto; line-height: 1.55; margin: 0.6rem 0; }
+  table { width: 100%; border-collapse: collapse; margin: 0.85rem 0 1.25rem 0; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 0.55rem 0.75rem; border: 1px solid var(--c-border); vertical-align: top; }
+  th { background: var(--c-bg-soft); font-weight: 600; color: var(--c-heading); }
+  tr:nth-child(even) td { background: var(--c-row-stripe); }
+  tr.highlight td { background: rgba(16,185,129,0.08); }
+  tr.summary td { background: rgba(96,165,250,0.08); }
+  td.num-cell { text-align: right; font-family: "SF Mono", monospace; }
+  .pos { color: var(--c-green); }
+  .neg { color: var(--c-red); }
+  .zero { color: var(--c-muted); }
+  .pill { display: inline-block; font-size: 0.74rem; padding: 0.1rem 0.55rem; border-radius: 999px; font-weight: 600; line-height: 1.5; }
+  .pill.done { background: var(--c-green-bg); color: var(--c-green); border: 1px solid var(--c-green-border); }
+  .pill.warn { background: var(--c-amber-bg); color: var(--c-amber); border: 1px solid var(--c-amber-border); }
+  .pill.plan { background: #16243d; color: #93c5fd; border: 1px solid #2563eb; }
+  .pill.todo { background: #1e293b; color: #cbd5e1; border: 1px solid #64748b; }
+  .pill.new { background: var(--c-purple-bg); color: var(--c-purple); border: 1px solid var(--c-purple-border); }
+  .callout { margin: 1rem 0; padding: 0.85rem 1.1rem; border-radius: 8px; border-left: 4px solid; }
+  .callout .label { font-weight: 700; margin-right: 0.5rem; letter-spacing: 0.02em; }
+  .callout.info { background: var(--c-bg-soft); border-color: var(--c-accent); }
+  .callout.success { background: var(--c-green-bg); border-color: var(--c-green-border); }
+  .callout.warn { background: var(--c-amber-bg); border-color: var(--c-amber-border); }
+  .callout.danger { background: var(--c-red-bg); border-color: var(--c-red-border); }
+  .callout.info .label { color: var(--c-accent); }
+  .callout.success .label { color: var(--c-green); }
+  .callout.warn .label { color: var(--c-amber); }
+  .callout.danger .label { color: var(--c-red); }
+  .math-block { margin: 0.9rem 0; padding: 0.9rem 1rem; background: var(--c-code-bg); border: 1px solid var(--c-border); border-radius: 6px; overflow-x: auto; }
+  .math-block .formula { font-family: "SF Mono", Monaco, Menlo, Consolas, monospace; color: var(--c-heading); white-space: nowrap; margin: 0.25rem 0; }
+  .math-block .caption { color: var(--c-muted); font-size: 0.86rem; margin-top: 0.45rem; }
+  .file-ref { display: block; font-size: 0.82rem; color: var(--c-muted); margin-top: 0.2rem; padding-left: 0.5rem; border-left: 3px solid var(--c-border-strong); }
+  .section-note { color: var(--c-muted); font-size: 0.92rem; }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--c-border); color: var(--c-muted); font-size: 0.85rem; }
+  @media (max-width: 900px) { .container { display: block; padding: 1rem; } nav.toc { position: static; max-height: none; margin-bottom: 1.5rem; } table { font-size: 0.82rem; } }
+</style>
+</head>
+<body>
+<div class="container">
+<nav class="toc">
+  <div class="toc-title">目录</div>
+  <ol>
+    <li><a href="#summary">阶段结论</a></li>
+    <li><a href="#setup">实验设置</a></li>
+    <li><a href="#workflow">方法流程</a></li>
+    <li><a href="#variants">E4-A/B/C 版本边界</a></li>
+    <li><a href="#results">结果对比</a></li>
+    <li><a href="#diagnosis">机制诊断</a></li>
+    <li><a href="#expert-review">专家审查</a></li>
+    <li><a href="#next">下一步计划</a></li>
+    <li><a href="#sources">文件索引</a></li>
+  </ol>
+</nav>
+<main>
+<header class="doc-header">
+  <h1>MCM-PC E4 分布引导 Cache 阶段性实验说明</h1>
+  <div class="doc-meta">
+    <span class="badge">项目：MCM-PC-2 / Point-Cache</span>
+    <span class="badge">日期：2026-06-08</span>
+    <span class="badge">对象：ULIP × ModelNet-C severity=2</span>
+    <span class="badge">报告：E4-A/B/C 阶段结论</span>
+  </div>
+  <p class="section-note">本文整理 E4 分布引导 GPA-Cache 的实验设定、流程、代码边界、结果对比、机制解释与专家审查补充。数值来自本地 <code>summary.csv</code> 与 <code>gpa_stats/*.json</code>。</p>
+</header>
+
+<section id="summary">
+<h2>1. 阶段结论</h2>
+<div class="tldr">
+  <h3>TL;DR</h3>
+  <p><strong>E4-C 可以作为当前阶段性正结论。</strong>它将视觉分布从 E4-B 的“当前缓存截面”修正为“被正缓存接受过的可信历史样本累计分布”，在 7 个 ModelNet-C severity=2 corruption 上达到 <strong>54.50</strong> 平均准确率，超过 E2 / Point-Cache 的 <strong>54.00</strong>，也超过 E3-V2-C union center 的 <strong>54.04</strong>。</p>
+</div>
+<div class="dashboard">
+  <div class="card good"><div class="label">E4-C Avg</div><div class="value">54.50</div><div class="sub">7/7 corruptions 完成</div></div>
+  <div class="card good"><div class="label">vs E2</div><div class="value">+0.50</div><div class="sub">超过 full Point-Cache baseline</div></div>
+  <div class="card good"><div class="label">vs E3-V2-C</div><div class="value">+0.46</div><div class="sub">7 项中 6 项优于 E3-V2-C</div></div>
+  <div class="card warn"><div class="label">主要短板</div><div class="value">rotate</div><div class="sub">仍低于 E2/E3-V2-C</div></div>
+</div>
+<div class="callout success"><span class="label">核心发现</span>类别分布不是不能做，关键在于分布来源。E4-B 的当前缓存截面分布过窄；E4-C 的 accepted-history 分布保留了可信样本多样性，显著修复了这一问题。</div>
+</section>
+
+<section id="setup">
+<h2>2. 实验设置</h2>
+<table>
+<tr><th>项目</th><th>设置</th></tr>
+<tr><td>代码根目录</td><td><code>/root/autodl-tmp/MCM-PC-2/Point-Cache</code></td></tr>
+<tr><td>数据集</td><td><code>modelnet_c</code></td></tr>
+<tr><td>数据路径</td><td><code>data/modelnet_c</code></td></tr>
+<tr><td>Backbone</td><td>ULIP / <code>ulip1</code></td></tr>
+<tr><td>Checkpoint</td><td><code>weights/ulip/pointbert_ulip1.pt</code>，<code>weights/ulip/slip_base_100ep.pt</code></td></tr>
+<tr><td>评估 corruption</td><td><code>add_global, add_local, dropout_global, dropout_local, rotate, scale, jitter</code></td></tr>
+<tr><td>Severity</td><td><code>2</code></td></tr>
+<tr><td>方法</td><td><code>zs_global_local</code>，即 zero-shot + global cache + local cache</td></tr>
+<tr><td>Prompt source</td><td><code>manual_full</code>，每类 64 条手工 prompt</td></tr>
+<tr><td>Positive cache</td><td><code>shot_capacity=3</code>，<code>alpha=2.0</code>，<code>beta=3.0</code>，来自 <code>configs/modelnet_c.yaml</code></td></tr>
+<tr><td>Negative cache</td><td><code>shot_capacity=2</code>，<code>alpha=0.117</code>，<code>beta=1.0</code>，entropy 区间 <code>0.2~0.5</code></td></tr>
+<tr><td>E4 分布参数</td><td><code>E4_DIST_EPS=1e-4</code>，<code>E4_DIST_MIN_VAR=1e-4</code>，<code>E4_TEXT_SCORE_WEIGHT=0.1</code></td></tr>
+<tr><td>运行与统计</td><td><code>WANDB_MODE=offline</code>，<code>GPA_SAVE_STATS=1</code>，每个 corruption 保存 <code>summary.csv</code>、<code>gpa_stats/*.json</code> 与 <code>gpa_replacement_events_*.jsonl</code></td></tr>
+</table>
+<pre><code>bash /root/autodl-tmp/MCM-PC-2/Point-Cache/scripts/E4_distribution_guided_cache/02_1_ulip_modelnetc_s2_zs_global_local_e4_c_accepted_history_text_visual_distribution_guided_gpa_manual_full.sh 0</code></pre>
+<div class="callout warn"><span class="label">实验范围</span>本报告只覆盖当前已完成的 <code>ULIP × ModelNet-C severity=2</code> 七类 corruption 单次运行结果，不等价于 all35 全 severity 或多 seed 结论。</div>
+</section>
+
+<section id="workflow">
+<h2>3. 方法流程</h2>
+<h3>3.0 从“原型中心”到“分布裁判”</h3>
+<p>E3 / E3-V2-C 的核心判断是“新样本是否更接近类别原型中心”。其中视觉中心来自当前可信视觉缓存，文本中心来自同一类别多条 prompt embeddings 的平均；若做文本-视觉联合中心，则应先得到固定文本中心和在线视觉中心，再做加权融合。这个路线的问题是：一个中心点很难表达类内多样性，尤其在几何变化、局部缺失和尺度变化下容易把正常样本推离中心。</p>
+<p>E4-C 不再把文本中心直接拉入欧氏原型中心，而是把文本端和视觉端都表示为类别分布。视觉端保留 <code>visual_mean</code> 与 <code>visual_var</code>，文本端保留 <code>text_mean</code> 与 <code>text_var</code>。替换判断从“离中心更近”改为“在该类视觉历史分布下更合理，并且与文本 prompt 分布不过分冲突”。因此 E4-C 的所谓“中心”只是分布参数的一部分，不再是唯一决策依据。</p>
+<h3>3.1 原始 Point-Cache 组件</h3>
+<ul>
+  <li><strong>Global Entropy Cache</strong>：按预测类别维护低熵全局特征，用于 global cache logits。</li>
+  <li><strong>Local Cache</strong>：维护 patch-level local features，用于 local cache logits。</li>
+  <li><strong>Negative Cache</strong>：按原 Point-Cache 逻辑维护负缓存；本次 E4-C runner 中在 test loop 内按 entropy 区间在线更新，最终从 logits 中减去。</li>
+</ul>
+<h3>3.2 GPA-Cache 组件</h3>
+<p>GPA-Cache 的目标不是直接替代 Global Entropy Cache，而是控制哪些样本的 local patch features 可以进入 <code>GPA-local-cache</code>。也就是说，局部缓存由全局样本的可信程度来控制。</p>
+<pre><code>如果样本进入 GPA-Cache:
+    对应 patch_centers 进入 GPA-local-cache
+否则:
+    patch_centers 不进入 GPA-local-cache</code></pre>
+<h3>3.3 E4-C 的文本-视觉分布</h3>
+<p>E4-C 同时维护两个类别分布：</p>
+<ul>
+  <li><strong>text_dist[c]</strong>：固定分布，由类别 <code>c</code> 的 prompt-level embeddings 构成；测试期间不更新。</li>
+  <li><strong>visual_dist[c]</strong>：在线分布，只累计曾被 Global Entropy Cache 或 GPA-Cache 接受过的可信视觉样本。</li>
+</ul>
+<p>当前实现中，这两个分布都采用<strong>单峰对角高斯近似</strong>。对类别 <code>c</code>，视觉分布和文本分布分别写作：</p>
+<div class="math-block">
+  <div class="formula">p_v(x | c) ≈ N(x | μ_c^v, diag((σ_c^v)^2))</div>
+  <div class="formula">p_t(x | c) ≈ N(x | μ_c^t, diag((σ_c^t)^2))</div>
+  <div class="caption">这里的单峰对角高斯只建模每类一个均值和一组逐维方差；它不是多峰分布，也没有建模特征维度之间的协方差。</div>
+</div>
+<p>其中：</p>
+<ul>
+  <li><code>x</code>：当前测试样本的全局特征向量。</li>
+  <li><code>c</code>：当前样本被 zero-shot / cache 流程预测到的类别。</li>
+  <li><code>μ_c^v</code>：类别 <code>c</code> 的视觉历史分布均值，由被正缓存接受过的视觉特征在线累计得到。</li>
+  <li><code>(σ_c^v)^2</code>：类别 <code>c</code> 的视觉历史分布逐维方差。</li>
+  <li><code>μ_c^t</code>：类别 <code>c</code> 的文本 prompt 分布均值，由该类 64 条 prompt embeddings 计算得到。</li>
+  <li><code>(σ_c^t)^2</code>：类别 <code>c</code> 的文本 prompt 分布逐维方差。</li>
+</ul>
+<p>视觉和文本分布得分采用负的、按维度平均的、方差归一化平方距离：</p>
+<div class="math-block">
+  <div class="formula">s_v(x,c) = - (1 / d) Σ_{i=1}^{d} ((x_i - μ_{c,i}^v)^2 / ((σ_{c,i}^v)^2 + ε_v))</div>
+  <div class="formula">s_t(x,c) = - (1 / d) Σ_{i=1}^{d} ((x_i - μ_{c,i}^t)^2 / ((σ_{c,i}^t)^2 + ε_t))</div>
+  <div class="formula">s_joint(x,c) = s_v(x,c) + λ_t · s_t(x,c)</div>
+  <div class="caption">得分越高表示越符合该类别分布；当前 <code>ε_v=ε_t=1e-4</code>，<code>λ_t=E4_TEXT_SCORE_WEIGHT=0.1</code>。</div>
+</div>
+<p>其中：</p>
+<ul>
+  <li><code>d</code>：特征维度。</li>
+  <li><code>x_i</code>：测试样本特征第 <code>i</code> 维。</li>
+  <li><code>μ_{c,i}^v / μ_{c,i}^t</code>：类别 <code>c</code> 的视觉/文本均值第 <code>i</code> 维。</li>
+  <li><code>(σ_{c,i}^v)^2 / (σ_{c,i}^t)^2</code>：类别 <code>c</code> 的视觉/文本方差第 <code>i</code> 维。</li>
+  <li><code>ε_v / ε_t</code>：数值稳定项，防止方差过小导致除零或异常放大。</li>
+  <li><code>λ_t</code>：文本分布得分权重，控制文本 prompt 分布对 GPA-Cache 替换判断的影响强度。</li>
+</ul>
+<pre><code>visual_score(x, c) = -mean((x - visual_mean_c)^2 / (visual_var_c + eps_v))
+text_score(x, c)   = -mean((x - text_mean_c)^2 / (text_var_c + eps_t))
+joint_score(x, c)  = visual_score(x, c) + lambda_text * text_score(x, c)</code></pre>
+<p>这里的文本端不是把文本均值直接混入视觉中心，也不是把 64 条 prompt 先压成一个单点原型后参与欧氏中心平均。实现中每类文本 prompt embeddings 构成固定 <code>text_dist[c]</code>，保存该类文本均值和对角方差；测试期间只通过 <code>text_score</code> 以 <code>E4_TEXT_SCORE_WEIGHT=0.1</code> 参与 GPA-Cache 替换判断。文本分布不更新，也不直接改变最终 logits。</p>
+<h3>3.4 GPA-Cache 替换规则</h3>
+<p>满缓存时，E4-C 的替换判据可以写成：</p>
+<div class="math-block">
+  <div class="formula">replace(x_new, x_old, c) = 1</div>
+  <div class="formula">iff H(x_new) &lt; H(x_old) and s_joint(x_new,c) &gt; s_joint(x_old,c)</div>
+  <div class="caption"><code>x_old</code> 是当前 <code>GPA-Cache[c]</code> 中熵最高的旧样本；<code>H(·)</code> 是预测熵。也就是说，新样本必须更低熵，并且在文本-视觉联合分布下得分更高，才允许替换。</div>
+</div>
+<pre><code>如果 GPA-Cache[c] 未满:
+    直接加入 GPA-Cache[c]
+    同步加入 GPA-local-cache[c]
+    更新 visual_dist[c]
+
+如果 GPA-Cache[c] 已满:
+    x_old = GPA-Cache[c] 中最高熵样本
+    如果 entropy(x_new) &lt; entropy(x_old)
+       且 joint_score(x_new, c) &gt; joint_score(x_old, c):
+           用 x_new 替换 x_old
+           同步替换 GPA-local-cache[c]
+           更新 visual_dist[c]
+    否则拒绝</code></pre>
+<div class="callout info"><span class="label">重要边界</span>E4-C 中，被正缓存接受过但后来被容量机制淘汰的样本仍保留在历史分布中；但从未进入 Global Entropy Cache 或 GPA-Cache 的候选样本不会参与分布。</div>
+<h3>3.5 实现核对</h3>
+<table>
+<thead><tr><th>检查项</th><th>当前实现</th><th>解释</th></tr></thead>
+<tbody>
+<tr><td>文本分布构建</td><td><code>build_text_distribution_once()</code> 为 40 类分别构建 prompt-level 分布，每类 64 个 prompt embeddings。</td><td>文本分布固定，不参与在线更新；保存均值和方差，不只是一个单一文本中心。</td></tr>
+<tr><td>视觉分布更新来源</td><td><code>_update_visual_distribution()</code> 只在 GPA add、GPA replace、Entropy add/replace 成功后调用。</td><td>未被正缓存接受的候选样本不会污染分布。</td></tr>
+<tr><td>重复计数处理</td><td>通过 <code>_feature_key()</code> 对同一 tensor 去重。</td><td>同一样本若同时被 GPA-Cache 与 EntropyCache 接受，只计入视觉历史分布一次。</td></tr>
+<tr><td>替换时机</td><td>GPA-Cache 未满时直接加入；已满后才计算 joint score 并尝试替换最高熵旧样本。</td><td>这保持了 E3-V2-C / E4-A 的初始化逻辑，避免早期分布样本不足导致无法启动。</td></tr>
+<tr><td>最终预测公式</td><td><code>final_logits = clip_logits + entropy_global_logits + gpa_local_logits - negative_logits</code></td><td>E4-C 只改变 GPA-local-cache 的准入与替换，不改变 Point-Cache 的最终加权公式。</td></tr>
+</tbody>
+</table>
+<p>当前 E4-C 的最终 logits 公式为：</p>
+<div class="math-block">
+  <div class="formula">logits_final = logits_zs + logits_entropy-global + logits_gpa-local - logits_negative</div>
+  <div class="formula">logits_cache(x) = α · Σ_j exp[-β(1 - x^T k_j)] · y_j</div>
+  <div class="caption"><code>α</code> 控制 cache logits 强度，<code>β</code> 控制相似度核的尖锐程度。当前 ModelNet-C 配置中 positive cache 使用 <code>α=2.0, β=3.0</code>，negative cache 使用 <code>α=0.117, β=1.0</code>。</div>
+</div>
+<p>其中：</p>
+<ul>
+  <li><code>logits_zs</code>：zero-shot 文本分类器输出。</li>
+  <li><code>logits_entropy-global</code>：Global Entropy Cache 产生的全局 cache logits。</li>
+  <li><code>logits_gpa-local</code>：由 GPA-Cache 准入控制的 local cache logits。</li>
+  <li><code>logits_negative</code>：Negative Cache 产生的反向修正 logits。</li>
+  <li><code>k_j</code>：cache 中第 <code>j</code> 个特征。</li>
+  <li><code>y_j</code>：cache 中第 <code>j</code> 个特征对应的类别 one-hot 或 negative mask。</li>
+</ul>
+<h3>3.6 运行时序</h3>
+<ol>
+  <li><strong>构建文本分布</strong>：每个 corruption 开始前复用固定 classnames 与 prompt 模板，为 40 个类别构建 <code>text_dist</code>。</li>
+  <li><strong>预构建正缓存</strong>：遍历 test loader，构建 <code>entropy_cache</code>、<code>gpa_cache</code> 和 <code>gpa_local_cache</code>，直到 Global Entropy Cache 达到容量上限或数据遍历结束。</li>
+  <li><strong>测试时在线更新</strong>：每个测试样本先尝试更新 GPA-Cache 和 EntropyCache，再根据当前缓存计算 global/local/negative logits。</li>
+  <li><strong>保存诊断统计</strong>：每个 corruption 结束后保存最终 accuracy、缓存类别覆盖、visual distribution 摘要和 GPA 替换事件。</li>
+</ol>
+</section>
+
+<section id="variants">
+<h2>4. E4-A / E4-B / E4-C 版本边界</h2>
+<table>
+<thead><tr><th>版本</th><th>视觉分布来源</th><th>文本分布</th><th>核心问题 / 目的</th><th>状态</th></tr></thead>
+<tbody>
+<tr><td><strong>E4-A</strong></td><td>进入 GPA-Cache 的视觉样本，历史累计</td><td>无</td><td>验证视觉分布替代单中心是否有效</td><td><span class="pill done">完成</span></td></tr>
+<tr><td><strong>E4-B</strong></td><td>当前 <code>EntropyCache ∪ GPACache</code> 截面</td><td>prompt-level text_dist</td><td>尝试文本-视觉分布联合，但当前截面样本太少导致分布过窄</td><td><span class="pill warn">仅 add_global 跑过</span></td></tr>
+<tr><td><strong>E4-C</strong></td><td>被 EntropyCache 或 GPA-Cache 接受过的历史可信样本</td><td>prompt-level text_dist</td><td>保留可信历史多样性，同时避免未接受样本污染分布</td><td><span class="pill new">当前主候选</span></td></tr>
+</tbody>
+</table>
+</section>
+
+<section id="results">
+<h2>5. 结果对比</h2>
+<h3>5.1 总表</h3>
+<p class="section-note">E2、E3、E3-V2-C、E4-A 为前序 severity=2 对照实验结果；E4-B 只完成了 <code>add_global_2</code>，因此不能把它的 46.39 当作七类 corruption 平均值。</p>
+<table><thead><tr><th>方法</th><th>Avg</th><th>完成项</th><th>add_global</th><th>add_local</th><th>dropout_global</th><th>dropout_local</th><th>rotate</th><th>scale</th><th>jitter</th></tr></thead><tbody><tr class=""><td><strong>E2 / Point-Cache</strong></td><td class="num-cell">54.00</td><td class="num-cell">7</td><td class="num-cell">47.81</td><td class="num-cell">46.68</td><td class="num-cell">59.20</td><td class="num-cell">56.69</td><td class="num-cell">62.07</td><td class="num-cell">55.23</td><td class="num-cell">50.32</td></tr><tr class=""><td><strong>E3 sequential GPA</strong></td><td class="num-cell">53.44</td><td class="num-cell">7</td><td class="num-cell">50.36</td><td class="num-cell">48.22</td><td class="num-cell">56.12</td><td class="num-cell">56.81</td><td class="num-cell">60.09</td><td class="num-cell">54.13</td><td class="num-cell">48.34</td></tr><tr class=""><td><strong>E3-V2-C union center</strong></td><td class="num-cell">54.04</td><td class="num-cell">7</td><td class="num-cell">46.84</td><td class="num-cell">50.49</td><td class="num-cell">58.31</td><td class="num-cell">56.04</td><td class="num-cell">61.67</td><td class="num-cell">55.06</td><td class="num-cell">49.88</td></tr><tr class=""><td><strong>E4-A visual distribution</strong></td><td class="num-cell">53.22</td><td class="num-cell">7</td><td class="num-cell">50.73</td><td class="num-cell">47.85</td><td class="num-cell">56.56</td><td class="num-cell">56.48</td><td class="num-cell">59.97</td><td class="num-cell">53.48</td><td class="num-cell">47.45</td></tr><tr class=""><td><strong>E4-B current union dist</strong></td><td class="num-cell">46.39</td><td class="num-cell">1</td><td class="num-cell">46.39</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">—</td><td class="num-cell">—</td></tr><tr class="highlight"><td><strong>E4-C accepted-history</strong></td><td class="num-cell">54.50</td><td class="num-cell">7</td><td class="num-cell">47.81</td><td class="num-cell">50.77</td><td class="num-cell">58.51</td><td class="num-cell">56.85</td><td class="num-cell">60.98</td><td class="num-cell">56.16</td><td class="num-cell">50.41</td></tr></tbody></table>
+<h3>5.2 E4-C 相比 E2 / Point-Cache</h3>
+<table><thead><tr><th>Corruption</th><th>Delta</th><th>判断</th></tr></thead><tbody><tr><td>add_global</td><td class="num-cell zero">+0.00</td><td>持平</td></tr><tr><td>add_local</td><td class="num-cell pos">+4.09</td><td>提升</td></tr><tr><td>dropout_global</td><td class="num-cell neg">-0.69</td><td>下降</td></tr><tr><td>dropout_local</td><td class="num-cell pos">+0.16</td><td>提升</td></tr><tr><td>rotate</td><td class="num-cell neg">-1.09</td><td>下降</td></tr><tr><td>scale</td><td class="num-cell pos">+0.93</td><td>提升</td></tr><tr><td>jitter</td><td class="num-cell pos">+0.09</td><td>提升</td></tr><tr class="summary"><td><strong>平均</strong></td><td class="num-cell pos"><strong>+0.50</strong></td><td>整体变化</td></tr></tbody></table>
+<h3>5.3 E4-C 相比 E3-V2-C union center</h3>
+<table><thead><tr><th>Corruption</th><th>Delta</th><th>判断</th></tr></thead><tbody><tr><td>add_global</td><td class="num-cell pos">+0.97</td><td>提升</td></tr><tr><td>add_local</td><td class="num-cell pos">+0.28</td><td>提升</td></tr><tr><td>dropout_global</td><td class="num-cell pos">+0.20</td><td>提升</td></tr><tr><td>dropout_local</td><td class="num-cell pos">+0.81</td><td>提升</td></tr><tr><td>rotate</td><td class="num-cell neg">-0.69</td><td>下降</td></tr><tr><td>scale</td><td class="num-cell pos">+1.10</td><td>提升</td></tr><tr><td>jitter</td><td class="num-cell pos">+0.53</td><td>提升</td></tr><tr class="summary"><td><strong>平均</strong></td><td class="num-cell pos"><strong>+0.46</strong></td><td>整体变化</td></tr></tbody></table>
+<h3>5.4 E4-C 相比 E4-A</h3>
+<table><thead><tr><th>Corruption</th><th>Delta</th><th>判断</th></tr></thead><tbody><tr><td>add_global</td><td class="num-cell neg">-2.92</td><td>下降</td></tr><tr><td>add_local</td><td class="num-cell pos">+2.92</td><td>提升</td></tr><tr><td>dropout_global</td><td class="num-cell pos">+1.95</td><td>提升</td></tr><tr><td>dropout_local</td><td class="num-cell pos">+0.37</td><td>提升</td></tr><tr><td>rotate</td><td class="num-cell pos">+1.01</td><td>提升</td></tr><tr><td>scale</td><td class="num-cell pos">+2.68</td><td>提升</td></tr><tr><td>jitter</td><td class="num-cell pos">+2.96</td><td>提升</td></tr><tr class="summary"><td><strong>平均</strong></td><td class="num-cell pos"><strong>+1.28</strong></td><td>整体变化</td></tr></tbody></table>
+<div class="callout success"><span class="label">结果解读</span>E4-C 相比 E3-V2-C 在 7 个 corruption 中 6 个为正收益，仅 <code>rotate_2</code> 下降。相比 E2，它在 <code>add_local</code>、<code>dropout_local</code>、<code>scale</code>、<code>jitter</code> 上有收益，<code>add_global</code> 持平，<code>dropout_global</code> 和 <code>rotate</code> 下降。</div>
+</section>
+
+<section id="diagnosis">
+<h2>6. 机制诊断</h2>
+<h3>6.1 E4-C 的 visual distribution 是否真的变得更多样？</h3>
+<p>是。E4-B 当前缓存截面每类通常只有 4 到 6 个样本；E4-C 的 accepted-history visual distribution 每类平均约 13.5 到 14.6 个样本，显著增加了分布多样性。</p>
+<table><thead><tr><th>Corruption</th><th>Acc</th><th>Visual classes</th><th>Avg hist count/class</th><th>Max hist count</th><th>Avg var</th><th>GPA add</th><th>GPA replace</th><th>Reject(score)</th><th>Reject(entropy)</th><th>Visual updates</th></tr></thead><tbody><tr><td>add_global</td><td class="num-cell">47.81</td><td class="num-cell">31</td><td class="num-cell">13.5</td><td class="num-cell">25</td><td class="num-cell">0.000455</td><td class="num-cell">91</td><td class="num-cell">95</td><td class="num-cell">1779</td><td class="num-cell">2971</td><td class="num-cell">419</td></tr><tr><td>add_local</td><td class="num-cell">50.77</td><td class="num-cell">36</td><td class="num-cell">13.7</td><td class="num-cell">25</td><td class="num-cell">0.000848</td><td class="num-cell">107</td><td class="num-cell">108</td><td class="num-cell">1411</td><td class="num-cell">3310</td><td class="num-cell">493</td></tr><tr><td>dropout_global</td><td class="num-cell">58.51</td><td class="num-cell">39</td><td class="num-cell">13.8</td><td class="num-cell">26</td><td class="num-cell">0.000891</td><td class="num-cell">116</td><td class="num-cell">144</td><td class="num-cell">1315</td><td class="num-cell">3361</td><td class="num-cell">540</td></tr><tr><td>dropout_local</td><td class="num-cell">56.85</td><td class="num-cell">40</td><td class="num-cell">14.1</td><td class="num-cell">24</td><td class="num-cell">0.000921</td><td class="num-cell">118</td><td class="num-cell">133</td><td class="num-cell">1410</td><td class="num-cell">3275</td><td class="num-cell">565</td></tr><tr><td>rotate</td><td class="num-cell">60.98</td><td class="num-cell">40</td><td class="num-cell">14.0</td><td class="num-cell">27</td><td class="num-cell">0.000958</td><td class="num-cell">118</td><td class="num-cell">128</td><td class="num-cell">1572</td><td class="num-cell">3118</td><td class="num-cell">560</td></tr><tr><td>scale</td><td class="num-cell">56.16</td><td class="num-cell">40</td><td class="num-cell">14.6</td><td class="num-cell">26</td><td class="num-cell">0.001003</td><td class="num-cell">120</td><td class="num-cell">135</td><td class="num-cell">1387</td><td class="num-cell">3294</td><td class="num-cell">582</td></tr><tr><td>jitter</td><td class="num-cell">50.41</td><td class="num-cell">36</td><td class="num-cell">13.7</td><td class="num-cell">24</td><td class="num-cell">0.000663</td><td class="num-cell">107</td><td class="num-cell">107</td><td class="num-cell">1302</td><td class="num-cell">3420</td><td class="num-cell">492</td></tr></tbody></table>
+<p class="section-note"><code>Visual updates</code> 由三类成功事件构成：GPA 未满加入、GPA 替换成功、EntropyCache add/replace 成功。同一样本若被两个正缓存同时接受，会被去重后只计一次，因此它反映的是“进入可信历史分布的实际样本数”。</p>
+<h3>6.2 替换事件与联合分数</h3>
+<table><thead><tr><th>Corruption</th><th>Events</th><th>Scored</th><th>Replace</th><th>Mean new joint</th><th>Mean old joint</th><th>Mean margin</th></tr></thead><tbody><tr><td>add_global</td><td class="num-cell">4936</td><td class="num-cell">4845</td><td class="num-cell">95</td><td class="num-cell">-1.600</td><td class="num-cell">-0.781</td><td class="num-cell neg">-0.820</td></tr><tr><td>add_local</td><td class="num-cell">4936</td><td class="num-cell">4829</td><td class="num-cell">108</td><td class="num-cell">-1.696</td><td class="num-cell">-0.940</td><td class="num-cell neg">-0.756</td></tr><tr><td>dropout_global</td><td class="num-cell">4936</td><td class="num-cell">4820</td><td class="num-cell">144</td><td class="num-cell">-1.840</td><td class="num-cell">-0.889</td><td class="num-cell neg">-0.951</td></tr><tr><td>dropout_local</td><td class="num-cell">4936</td><td class="num-cell">4818</td><td class="num-cell">133</td><td class="num-cell">-1.781</td><td class="num-cell">-0.940</td><td class="num-cell neg">-0.842</td></tr><tr><td>rotate</td><td class="num-cell">4936</td><td class="num-cell">4818</td><td class="num-cell">128</td><td class="num-cell">-1.790</td><td class="num-cell">-0.895</td><td class="num-cell neg">-0.895</td></tr><tr><td>scale</td><td class="num-cell">4936</td><td class="num-cell">4816</td><td class="num-cell">135</td><td class="num-cell">-1.812</td><td class="num-cell">-0.932</td><td class="num-cell neg">-0.880</td></tr><tr><td>jitter</td><td class="num-cell">4936</td><td class="num-cell">4829</td><td class="num-cell">107</td><td class="num-cell">-1.765</td><td class="num-cell">-0.832</td><td class="num-cell neg">-0.933</td></tr></tbody></table>
+<p>从事件均值看，新样本的 joint score 仍整体低于旧样本，说明 E4-C 的分布裁判仍偏保守；但相比 E4-B，它不再被当前小缓存截面严重限制，能够产生足够的替换并带来平均正收益。</p>
+<h3>6.3 为什么 add_global 没有保持 E4-A 的强收益？</h3>
+<p>E4-A 在 <code>add_global_2</code> 上达到 50.73，是 E4-A 最亮眼的一项；E4-C 在该项回到 47.81，与 E2 持平。说明 accepted-history 分布增强了整体鲁棒性，但对添加型全局外点的强过滤能力不如 E4-A 的 GPA-only 视觉历史分布。一个合理解释是：EntropyCache accepted 样本进入历史分布后扩大了分布覆盖范围，也可能减弱了对 add_global 外点的严格排斥。</p>
+<h3>6.4 为什么 rotate 仍然失败？</h3>
+<p><code>rotate_2</code> 是 E4-C 唯一低于 E3-V2-C 的 corruption。旋转改变的是几何姿态与特征分布方向，accepted-history 单一对角分布仍可能把某些旋转下的正常样本视为低符合度样本。这个现象说明 E4-C 虽然比 E4-B 更合理，但仍不是几何变换的完整解法。</p>
+</section>
+
+<section id="expert-review">
+<h2>7. 专家审查与补充说明</h2>
+<h3>7.1 本文档初稿可能遗漏的问题</h3>
+<ul>
+  <li><strong>未区分 E4-C 的收益来源</strong>：E4-C 同时使用 EntropyCache accepted 和 GPACache accepted 样本，当前结果不能判断哪一个来源贡献更大。</li>
+  <li><strong>未证明文本分布有正收益</strong>：E4-C 比 E4-A 更好，但这可能主要来自 accepted-history visual distribution，而不是 text_dist。需要 <code>E4_TEXT_SCORE_WEIGHT=0</code> 消融。</li>
+  <li><strong>未证明对角高斯形式最优</strong>：当前 score 只用逐维均值和方差，未建模特征维度相关性；它是最小可验证实现，而不是最终概率建模形式。</li>
+  <li><strong>替换规则仍偏保守</strong>：所有 corruption 的平均 joint margin 都为负，说明大多数候选样本仍被旧缓存样本压制；收益来自少量更可靠替换，而不是大规模 cache 重构。</li>
+  <li><strong>只在 severity=2 上验证</strong>：当前结论不能直接推广到 severity=0/1/3/4 或 all35 全 corruption。</li>
+  <li><strong>只在 ULIP × ModelNet-C 上验证</strong>：不能直接声称跨 backbone 或跨数据集有效。</li>
+  <li><strong>没有统计显著性</strong>：目前是单次 seed / 单配置实验，没有多 seed 方差。</li>
+</ul>
+<h3>7.2 补充后的更严谨结论</h3>
+<div class="callout warn"><span class="label">严谨表述</span>E4-C 目前可以作为“ULIP × ModelNet-C severity=2 下的阶段性正结果”，而不是最终方法结论。它证明 accepted-history distribution 是比 current-cache snapshot distribution 更合理的分布来源，并在 7 corruption 平均上超过 E2/E3-V2-C。</div>
+<h3>7.3 审稿人可能追问的问题</h3>
+<table>
+<thead><tr><th>问题</th><th>当前回答</th><th>需要补的证据</th></tr></thead>
+<tbody>
+<tr><td>为什么 E4-C 优于 E4-B？</td><td>E4-B 使用当前缓存截面，shot=3 导致每类样本过少；E4-C 累计正缓存接受历史，平均每类约 13.5 到 14.6 个样本。</td><td>保留 E4-B 的 add_global 负结果，并补一组小规模 E4-B 多 corruption 或只在文中作为失败分支。</td></tr>
+<tr><td>文本分布是否真的有帮助？</td><td>现在不能确定。E4-C 的提升可能主要来自 accepted-history visual distribution。</td><td>跑 <code>E4_TEXT_SCORE_WEIGHT=0</code> 和权重 sweep。</td></tr>
+<tr><td>EntropyCache accepted 是否引入污染？</td><td>add_global 从 E4-A 的 50.73 回落到 47.81，提示 Entropy accepted 可能放宽了外点噪声下的分布边界。</td><td>跑 Entropy-only / GPA-only / union 三组 accepted-source 消融。</td></tr>
+<tr><td>为什么 rotate 仍然弱？</td><td>单一对角分布不能充分表达旋转引起的几何姿态变化；局部缓存也可能引入姿态不一致的 patch evidence。</td><td>做 rotate 专项：统计被替换样本的 visual/text score 分布和错误类别转移。</td></tr>
+<tr><td>能否写进论文主方法？</td><td>可以作为候选主线，但必须先补消融；目前更适合作为“accepted-history distribution improves distribution-guided cache purification”的阶段性结论。</td><td>完成 P0/P1 后再决定是否升级为主方法。</td></tr>
+</tbody>
+</table>
+<h3>7.4 当前最可信的论文叙事</h3>
+<ol>
+  <li>E3 单中心原型方法可以改善某些外点噪声，但对几何变化不稳定。</li>
+  <li>E4-A 说明“视觉分布替代单中心”有潜力，但 GPA-only 视觉分布整体不稳定。</li>
+  <li>E4-B 说明“当前缓存截面分布”在小 shot cache 下会过窄，导致错误拒绝低熵候选。</li>
+  <li>E4-C 说明“正缓存接受过的历史可信样本”更适合作为类别分布来源，能够保留多样性并避免未接受样本污染。</li>
+  <li>下一步论文叙事的关键不是继续盲目加模块，而是证明“可信历史分布”“文本分布约束”“accepted source 选择”各自的独立贡献。</li>
+</ol>
+</section>
+
+<section id="next">
+<h2>8. 下一步计划</h2>
+<table>
+<thead><tr><th>优先级</th><th>实验</th><th>目的</th><th>建议</th></tr></thead>
+<tbody>
+<tr><td><span class="pill todo">P0 待做</span></td><td>E4-C visual-only：<code>E4_TEXT_SCORE_WEIGHT=0</code></td><td>判断文本分布是否真的有贡献</td><td>必须做，先跑 7 corruption severity=2</td></tr>
+<tr><td><span class="pill todo">P0 待做</span></td><td>E4-C text weight sweep：<code>0 / 0.02 / 0.05 / 0.1</code></td><td>找到文本约束强度</td><td>优先做 severity=2；若 0 最好，则文本分布暂不进主方法</td></tr>
+<tr><td><span class="pill plan">P1</span></td><td>accepted source 消融</td><td>区分 EntropyCache accepted 与 GPACache accepted 的贡献</td><td>三组：Entropy-only / GPA-only / union</td></tr>
+<tr><td><span class="pill plan">P1</span></td><td>rotate 专项诊断</td><td>解决唯一明显负项</td><td>检查 rotate 下 visual_score 与 local cache 错误替换</td></tr>
+<tr><td><span class="pill warn">P2</span></td><td>all35 severity 全量</td><td>验证泛化性</td><td>等 P0 消融后再跑，避免浪费算力</td></tr>
+</tbody>
+</table>
+<div class="callout info"><span class="label">建议顺序</span>下一步先做 <code>E4_TEXT_SCORE_WEIGHT=0</code>。如果 visual-only 不低于当前 54.50，说明文本分布暂时不是收益来源，应先把主线收敛到 accepted-history visual distribution；如果 0.02 或 0.05 更好，再考虑保留轻量文本先验。</div>
+</section>
+
+<section id="sources">
+<h2>9. 文件索引</h2>
+<h3>实验结果</h3>
+<ul>
+  <li><code>/root/autodl-tmp/MCM-PC-2/Point-Cache/results/E4_distribution_guided_cache/02_1_ulip_modelnetc_s2_zs_global_local_e4_c_accepted_history_text_visual_distribution_guided_gpa_manual_full/summary.csv</code></li>
+  <li><code>/root/autodl-tmp/MCM-PC-2/Point-Cache/results/E4_distribution_guided_cache/02_1_ulip_modelnetc_s2_zs_global_local_e4_c_accepted_history_text_visual_distribution_guided_gpa_manual_full/gpa_stats/</code></li>
+</ul>
+<h3>代码与脚本</h3>
+<ul>
+  <li><code>/root/autodl-tmp/MCM-PC-2/Point-Cache/configs/modelnet_c.yaml</code></li>
+  <li><code>/root/autodl-tmp/MCM-PC-2/Point-Cache/runners/E4_distribution_guided_cache/model_e4_c_accepted_history_text_visual_distribution_guided_gpa.py</code></li>
+  <li><code>/root/autodl-tmp/MCM-PC-2/Point-Cache/runners/E4_distribution_guided_cache/run_e4_c_ulip_modelnetc_s2_accepted_history_text_visual_distribution_guided_gpa.py</code></li>
+  <li><code>/root/autodl-tmp/MCM-PC-2/Point-Cache/scripts/E4_distribution_guided_cache/02_1_ulip_modelnetc_s2_zs_global_local_e4_c_accepted_history_text_visual_distribution_guided_gpa_manual_full.sh</code></li>
+  <li><code>/root/autodl-tmp/MCM-PC-2/Point-Cache/scripts/E4_distribution_guided_cache/02_run_e4_c_ulip_modelnetc_s2_common.sh</code></li>
+</ul>
+<h3>说明文档</h3>
+<ul>
+  <li><code>/root/autodl-tmp/MCM-PC-2/docs/experiments/E4_distribution_guided_cache/README.md</code></li>
+  <li><code>/root/autodl-tmp/MCM-PC-2/docs/experiments/E4_distribution_guided_cache/plan.md</code></li>
+  <li><code>/root/autodl-tmp/MCM-PC-2/docs/experiments/E4_distribution_guided_cache/log.md</code></li>
+</ul>
+</section>
+
+<footer>
+  <p>生成时间：2026-06-08。本文档为阶段性实验说明，不替代最终论文实验表。后续应根据 E4-C 消融和 all35 全量结果更新。</p>
+</footer>
+</main>
+</div>
+</body>
+</html>
