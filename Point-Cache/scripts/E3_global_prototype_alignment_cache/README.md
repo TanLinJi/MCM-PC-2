@@ -92,11 +92,12 @@ E3-02 将 Global Entropy Cache 与 GPA Cache 改为并列更新。
 
 实验脚本：
 
-| 脚本 | 关系 | 中心来源 | 文本方法 |
-|---|---|---|---|
-| `02_1_ulip_modelnetc_s2_zs_global_local_parallel_gpa_gpa_only_center_manual_full.sh` | 并列式 | GPA-only center | manual_full |
-| `02_2_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_only_center_manual_full.sh` | 并列式 | Entropy-only center | manual_full |
-| `02_3_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_manual_full.sh` | 并列式 | Entropy+GPA union center | manual_full |
+| 脚本 | 关系 | 中心来源 | 更新规则 | 文本方法 |
+|---|---|---|---|---|
+| `02_1_ulip_modelnetc_s2_zs_global_local_parallel_gpa_gpa_only_center_manual_full.sh` | 并列式 | GPA-only center | 低熵 + 替换最高熵样本 | manual_full |
+| `02_2_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_only_center_manual_full.sh` | 并列式 | Entropy-only center | 低熵 + 替换最高熵样本 | manual_full |
+| `02_3_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_manual_full.sh` | 并列式 | Entropy+GPA union center | 低熵 + 替换最高熵样本 | manual_full |
+| `02_4_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_replace_farthest_manual_full.sh` | 并列式 | Entropy+GPA union center | 低熵 + 替换最远样本 | manual_full |
 
 运行方式：
 
@@ -105,6 +106,14 @@ E3-02 将 Global Entropy Cache 与 GPA Cache 改为并列更新。
     bash Point-Cache/scripts/E3_global_prototype_alignment_cache/02_2_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_only_center_manual_full.sh 1
 
     bash Point-Cache/scripts/E3_global_prototype_alignment_cache/02_3_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_manual_full.sh 0
+
+    bash Point-Cache/scripts/E3_global_prototype_alignment_cache/02_4_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_replace_farthest_manual_full.sh 0
+
+说明：
+
+- `02_3` 对应 E3-V2-C，即 `2+C+a`：并列式 + Entropy/GPA union center + 低熵门控 + 替换最高熵样本；
+- `02_4` 对应 E3-V2-Cb，即 `2+C+b`：并列式 + Entropy/GPA union center + 低熵门控 + 替换离中心最远样本；
+- `02_4` 会在 `gpa_replacement_events_*.jsonl` 中记录最高熵样本、最远样本、二者是否重合，以及缓存内每个样本的熵和距离，用于后续统计熵与原型距离的关系。
 
 ## 8. E3-03：GPA Cache 候选池初始化脚本
 

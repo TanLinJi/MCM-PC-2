@@ -387,3 +387,108 @@ E3-V2-TextProto-Guard-C 的核心规则：
     必须检查 build 后 gpa_cache 不被清空；
     必须检查 GPA-Cache 和 GPA-local-cache 同步；
     必须记录 visual branch 与 text guard branch 的替换事件。
+
+## 2026-06-09：补做 E3-V2-Cb，即 2+C+b 更新规则消融
+
+当前复盘发现，E3-V2 已完成以下组合：
+
+```text
+2 + A + a
+2 + B + a
+2 + C + a
+```
+
+但尚未在原始 E3-V2 并列式设置下补做：
+
+```text
+2 + C + b
+```
+
+其中：
+
+```text
+2 = 并列式 GPA Cache；
+C = Entropy Cache 与 GPA Cache 并集构造原型中心；
+b = 低熵门控 + 新样本距离小于当前最远样本距离 + 替换最远样本。
+```
+
+因此新增独立补实验：
+
+```text
+E3-V2-Cb
+```
+
+对应代码：
+
+```text
+Point-Cache/runners/E3_global_prototype_alignment_cache/model_with_hierarchical_caches_parallel_gpa_entropy_gpa_union_center_replace_farthest.py
+Point-Cache/runners/E3_global_prototype_alignment_cache/run_e3_ulip_modelnetc_s2_parallel_gpa_entropy_gpa_union_center_replace_farthest.py
+```
+
+对应脚本：
+
+```text
+Point-Cache/scripts/E3_global_prototype_alignment_cache/02_4_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_replace_farthest_manual_full.sh
+```
+
+结果目录：
+
+```text
+Point-Cache/results/E3_global_prototype_alignment_cache/02_4_ulip_modelnetc_s2_zs_global_local_parallel_gpa_entropy_gpa_union_center_replace_farthest_manual_full
+```
+
+本次实现保持以下内容不变：
+
+- 仍然使用 ULIP；
+- 仍然使用 ModelNet-C severity=2 的 7 corruption smoke test；
+- 仍然使用 manual_full；
+- 仍然使用 zs_global_local；
+- 仍然使用 Global Entropy Cache 计算 global logits；
+- 仍然使用 GPA-controlled local cache 计算 local logits；
+- 最终 logits 公式不变。
+
+本次只改变 GPA-Cache 满后的替换规则：
+
+```text
+E3-V2-C / 2+C+a:
+    entropy_new < entropy_high
+    and
+    d_new < d_high
+    -> replace highest-entropy sample
+
+E3-V2-Cb / 2+C+b:
+    entropy_new < entropy_high
+    and
+    d_new < d_far
+    -> replace farthest-to-center sample
+```
+
+其中：
+
+```text
+entropy_high = GPA-Cache[c] 中最高熵样本的熵；
+d_high       = 最高熵样本到原型中心的距离；
+d_far        = GPA-Cache[c] 中最远样本到原型中心的距离；
+d_new        = 新样本到原型中心的距离。
+```
+
+本次补实验同时增强了事件日志，`gpa_replacement_events_*.jsonl` 会记录：
+
+- 新样本熵；
+- 新样本到中心距离；
+- 当前最高熵样本索引、熵、距离；
+- 当前最远样本索引、熵、距离；
+- 最高熵样本是否同时也是最远样本；
+- 当前 GPA-Cache 内所有样本的熵和距离。
+
+这样后续可以直接统计：
+
+```text
+高熵样本是否通常离原型中心更远？
+低熵样本是否通常离原型中心更近？
+替换最高熵样本和替换最远样本是否在多数情况下等价？
+```
+
+注意：
+
+旧 E3-V2-C 代码中存在一个历史实现风险：测试阶段注释写“继承预构建 GPA global cache”，但实际曾将 `gpa_cache` 置空，仅保留 `gpa_local_cache`。对于 `2+C+b`，如果 GPA global cache 和 GPA-local-cache 不一一对应，则“替换最远样本”的索引不可解释。因此本次 E3-V2-Cb 明确继承 build 阶段的 GPA global cache，并在替换前检查 GPA-Cache 与 GPA-local-cache 长度一致。
