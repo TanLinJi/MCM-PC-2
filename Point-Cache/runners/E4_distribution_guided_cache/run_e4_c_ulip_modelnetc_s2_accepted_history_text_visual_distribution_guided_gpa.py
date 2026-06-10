@@ -350,6 +350,10 @@ def main():
     args.e4_text_dist_eps = float(os.environ.get("E4_TEXT_DIST_EPS", str(args.e4_dist_eps)))
     args.e4_text_dist_min_var = float(os.environ.get("E4_TEXT_DIST_MIN_VAR", str(args.e4_dist_min_var)))
     args.e4_text_score_weight = float(os.environ.get("E4_TEXT_SCORE_WEIGHT", "0.1"))
+    args.e4_score_norm_mode = os.environ.get("E4_SCORE_NORM_MODE", "none")
+    args.e4_score_norm_min_count = int(os.environ.get("E4_SCORE_NORM_MIN_COUNT", "8"))
+    args.e4_score_norm_eps = float(os.environ.get("E4_SCORE_NORM_EPS", "1e-6"))
+    args.e4_score_norm_clip = float(os.environ.get("E4_SCORE_NORM_CLIP", "0"))
 
     data_root = args.modelnet_c_root
     backbone = "ULIP"
@@ -375,6 +379,10 @@ def main():
         print(f"E4_TEXT_DIST_EPS: {args.e4_text_dist_eps}")
         print(f"E4_TEXT_DIST_MIN_VAR: {args.e4_text_dist_min_var}")
         print(f"E4_TEXT_SCORE_WEIGHT: {args.e4_text_score_weight}")
+        print(f"E4_SCORE_NORM_MODE: {args.e4_score_norm_mode}")
+        print(f"E4_SCORE_NORM_MIN_COUNT: {args.e4_score_norm_min_count}")
+        print(f"E4_SCORE_NORM_EPS: {args.e4_score_norm_eps}")
+        print(f"E4_SCORE_NORM_CLIP: {args.e4_score_norm_clip}")
         print("Model will be loaded once, then 7 severity=2 cor_type values will be evaluated.")
         print("============================================================")
 

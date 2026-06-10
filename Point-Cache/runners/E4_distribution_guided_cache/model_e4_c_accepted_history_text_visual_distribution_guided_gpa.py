@@ -129,6 +129,13 @@ DIST_MIN_VAR = float(os.environ.get("E4_DIST_MIN_VAR", "1e-4"))
 TEXT_DIST_EPS = float(os.environ.get("E4_TEXT_DIST_EPS", str(DIST_EPS)))
 TEXT_DIST_MIN_VAR = float(os.environ.get("E4_TEXT_DIST_MIN_VAR", str(DIST_MIN_VAR)))
 TEXT_SCORE_WEIGHT = float(os.environ.get("E4_TEXT_SCORE_WEIGHT", "0.1"))
+SCORE_NORM_MODE = os.environ.get("E4_SCORE_NORM_MODE", "none").strip().lower()
+SCORE_NORM_MIN_COUNT = int(os.environ.get("E4_SCORE_NORM_MIN_COUNT", "8"))
+SCORE_NORM_EPS = float(os.environ.get("E4_SCORE_NORM_EPS", "1e-6"))
+SCORE_NORM_CLIP = float(os.environ.get("E4_SCORE_NORM_CLIP", "0"))
+
+if SCORE_NORM_MODE not in {"none", "running_zscore"}:
+    raise ValueError(f"Unsupported E4_SCORE_NORM_MODE: {SCORE_NORM_MODE}")
 
 
 def _feature_float(feat):
@@ -139,6 +146,100 @@ def _feature_key(feat):
     x = feat.detach()
     storage = x.untyped_storage() if hasattr(x, "untyped_storage") else x.storage()
     return (int(x.data_ptr()), int(storage.data_ptr()), tuple(x.shape), str(x.device))
+
+
+def _make_score_norm_state():
+    return {
+        "visual": {"count": 0, "mean": 0.0, "m2": 0.0},
+        "text": {"count": 0, "mean": 0.0, "m2": 0.0},
+    }
+
+
+def _running_std(entry):
+    count = int(entry["count"])
+    if count < 2:
+        return None
+    return (float(entry["m2"]) / float(count - 1)) ** 0.5
+
+
+def _score_for_joint(score_norm_state, modality, raw_score):
+    if raw_score is None:
+        return None, False
+    if SCORE_NORM_MODE == "none" or score_norm_state is None:
+        return float(raw_score), False
+
+    entry = score_norm_state[modality]
+    count = int(entry["count"])
+    std = _running_std(entry)
+    if count < SCORE_NORM_MIN_COUNT or std is None or std < SCORE_NORM_EPS:
+        return float(raw_score), False
+
+    score = (float(raw_score) - float(entry["mean"])) / (std + SCORE_NORM_EPS)
+    if SCORE_NORM_CLIP > 0:
+        score = max(min(score, SCORE_NORM_CLIP), -SCORE_NORM_CLIP)
+    return float(score), True
+
+
+def _score_norm_ready(score_norm_state, modalities):
+    if SCORE_NORM_MODE == "none" or score_norm_state is None:
+        return False
+
+    for modality in modalities:
+        entry = score_norm_state[modality]
+        count = int(entry["count"])
+        std = _running_std(entry)
+        if count < SCORE_NORM_MIN_COUNT or std is None or std < SCORE_NORM_EPS:
+            return False
+    return True
+
+
+def _update_running_score(entry, value):
+    value = float(value)
+    count_old = int(entry["count"])
+    count_new = count_old + 1
+
+    if count_old == 0:
+        entry["count"] = 1
+        entry["mean"] = value
+        entry["m2"] = 0.0
+        return
+
+    delta = value - float(entry["mean"])
+    mean_new = float(entry["mean"]) + delta / float(count_new)
+    delta2 = value - mean_new
+
+    entry["count"] = count_new
+    entry["mean"] = mean_new
+    entry["m2"] = float(entry["m2"]) + delta * delta2
+
+
+def _update_score_norm_state(score_norm_state, score):
+    if SCORE_NORM_MODE == "none" or score_norm_state is None or score is None:
+        return 0
+
+    updates = 0
+    for modality in ("visual", "text"):
+        value = score.get(modality)
+        if value is None:
+            continue
+        _update_running_score(score_norm_state[modality], value)
+        updates += 1
+    return updates
+
+
+def _summarize_score_norm_state(score_norm_state):
+    if score_norm_state is None:
+        return {}
+
+    summary = {}
+    for modality, entry in score_norm_state.items():
+        std = _running_std(entry)
+        summary[modality] = {
+            "count": int(entry["count"]),
+            "mean": float(entry["mean"]),
+            "std": None if std is None else float(std),
+        }
+    return summary
 
 
 def _update_visual_distribution(visual_dist, pred, feat, stats=None, phase=None, reason=None):
@@ -233,7 +334,7 @@ def _distribution_score_from_entry(entry, feat, eps):
     return float((-raw).detach().cpu().item())
 
 
-def _joint_distribution_score(visual_dist, text_dist, pred, feat):
+def _joint_distribution_score(visual_dist, text_dist, pred, feat, score_norm_state=None):
     """
     计算 E4-C 的 text-visual joint score。
 
@@ -250,14 +351,33 @@ def _joint_distribution_score(visual_dist, text_dist, pred, feat):
         return None
 
     if text_score is None:
-        joint_score = visual_score
+        use_normalized_scores = _score_norm_ready(score_norm_state, ("visual",))
+        visual_joint_score, visual_score_normalized = (
+            _score_for_joint(score_norm_state, "visual", visual_score)
+            if use_normalized_scores
+            else (float(visual_score), False)
+        )
+        text_joint_score = None
+        text_score_normalized = False
+        joint_score = visual_joint_score
     else:
-        joint_score = visual_score + TEXT_SCORE_WEIGHT * text_score
+        use_normalized_scores = _score_norm_ready(score_norm_state, ("visual", "text"))
+        if use_normalized_scores:
+            visual_joint_score, visual_score_normalized = _score_for_joint(score_norm_state, "visual", visual_score)
+            text_joint_score, text_score_normalized = _score_for_joint(score_norm_state, "text", text_score)
+        else:
+            visual_joint_score, visual_score_normalized = float(visual_score), False
+            text_joint_score, text_score_normalized = float(text_score), False
+        joint_score = visual_joint_score + TEXT_SCORE_WEIGHT * text_joint_score
 
     return {
         "joint": float(joint_score),
         "visual": float(visual_score),
         "text": None if text_score is None else float(text_score),
+        "visual_for_joint": float(visual_joint_score),
+        "text_for_joint": None if text_joint_score is None else float(text_joint_score),
+        "visual_score_normalized": bool(visual_score_normalized),
+        "text_score_normalized": bool(text_score_normalized),
         "visual_count": 0 if visual_entry is None else int(visual_entry["count"]),
         "text_count": 0 if text_entry is None else int(text_entry["count"]),
     }
@@ -300,7 +420,20 @@ def _summarize_text_distribution(text_dist):
     return summary
 
 
-def _update_gpa_cache(gpa_cache, gpa_local_cache, visual_dist, text_dist, pred, global_item, local_item, shot_capacity, stats, phase, event_records=None):
+def _update_gpa_cache(
+    gpa_cache,
+    gpa_local_cache,
+    visual_dist,
+    text_dist,
+    score_norm_state,
+    pred,
+    global_item,
+    local_item,
+    shot_capacity,
+    stats,
+    phase,
+    event_records=None,
+):
     """
     E4-C：Accepted-History Text-Visual 类别概率分布引导的 GPA-Cache 更新。
 
@@ -334,6 +467,15 @@ def _update_gpa_cache(gpa_cache, gpa_local_cache, visual_dist, text_dist, pred, 
             "old_visual_score": None if old_score is None else float(old_score["visual"]),
             "new_text_score": None if new_score is None or new_score["text"] is None else float(new_score["text"]),
             "old_text_score": None if old_score is None or old_score["text"] is None else float(old_score["text"]),
+            "new_visual_score_for_joint": None if new_score is None else float(new_score["visual_for_joint"]),
+            "old_visual_score_for_joint": None if old_score is None else float(old_score["visual_for_joint"]),
+            "new_text_score_for_joint": None if new_score is None or new_score["text_for_joint"] is None else float(new_score["text_for_joint"]),
+            "old_text_score_for_joint": None if old_score is None or old_score["text_for_joint"] is None else float(old_score["text_for_joint"]),
+            "new_visual_score_normalized": None if new_score is None else bool(new_score["visual_score_normalized"]),
+            "old_visual_score_normalized": None if old_score is None else bool(old_score["visual_score_normalized"]),
+            "new_text_score_normalized": None if new_score is None else bool(new_score["text_score_normalized"]),
+            "old_text_score_normalized": None if old_score is None else bool(old_score["text_score_normalized"]),
+            "score_norm_mode": SCORE_NORM_MODE,
             "joint_score_margin": None if new_score is None or old_score is None else float(new_score["joint"] - old_score["joint"]),
             "visual_count": None if new_score is None else int(new_score["visual_count"]),
             "text_count": None if new_score is None else int(new_score["text_count"]),
@@ -354,8 +496,8 @@ def _update_gpa_cache(gpa_cache, gpa_local_cache, visual_dist, text_dist, pred, 
     worst_global_item = gpa_cache[pred][-1]
     worst_ent = _loss_value(worst_global_item[1])
 
-    curr_score = _joint_distribution_score(visual_dist, text_dist, pred, global_item[0])
-    worst_score = _joint_distribution_score(visual_dist, text_dist, pred, worst_global_item[0])
+    curr_score = _joint_distribution_score(visual_dist, text_dist, pred, global_item[0], score_norm_state)
+    worst_score = _joint_distribution_score(visual_dist, text_dist, pred, worst_global_item[0], score_norm_state)
 
     if curr_score is None or worst_score is None:
         stats[f"{phase}_gpa_reject_no_accepted_history_text_visual_distribution"] += 1
@@ -367,6 +509,12 @@ def _update_gpa_cache(gpa_cache, gpa_local_cache, visual_dist, text_dist, pred, 
         stats[f"{phase}_gpa_reject_entropy_accepted_history_text_visual_distribution"] += 1
         record_event(decision="reject_entropy_accepted_history_text_visual_distribution", old_entropy=worst_ent, new_score=curr_score, old_score=worst_score)
         return False
+
+    norm_updates = _update_score_norm_state(score_norm_state, curr_score)
+    norm_updates += _update_score_norm_state(score_norm_state, worst_score)
+    if norm_updates:
+        stats[f"{phase}_score_norm_update"] += norm_updates
+        stats[f"{phase}_score_norm_observed_pairs"] += 1
 
     if curr_score["joint"] > worst_score["joint"]:
         gpa_cache[pred][-1] = global_item
@@ -388,7 +536,18 @@ def _summarize_cache(cache):
     return {str(k): len(v) for k, v in sorted(cache.items(), key=lambda kv: kv[0])}
 
 
-def _save_gpa_stats(args, stats, entropy_cache, gpa_cache, gpa_local_cache, visual_dist=None, text_dist=None, acc=None, event_records=None):
+def _save_gpa_stats(
+    args,
+    stats,
+    entropy_cache,
+    gpa_cache,
+    gpa_local_cache,
+    visual_dist=None,
+    text_dist=None,
+    score_norm_state=None,
+    acc=None,
+    event_records=None,
+):
     if not _get_gpa_stats_enabled():
         return
 
@@ -416,6 +575,11 @@ def _save_gpa_stats(args, stats, entropy_cache, gpa_cache, gpa_local_cache, visu
         "e4_text_dist_eps": float(TEXT_DIST_EPS),
         "e4_text_dist_min_var": float(TEXT_DIST_MIN_VAR),
         "e4_text_score_weight": float(TEXT_SCORE_WEIGHT),
+        "e4_score_norm_mode": SCORE_NORM_MODE,
+        "e4_score_norm_min_count": int(SCORE_NORM_MIN_COUNT),
+        "e4_score_norm_eps": float(SCORE_NORM_EPS),
+        "e4_score_norm_clip": float(SCORE_NORM_CLIP),
+        "score_normalization_summary": _summarize_score_norm_state(score_norm_state),
         "center_source": CENTER_SOURCE_LABEL,
         "final_acc": acc,
         "stats": dict(stats),
@@ -487,6 +651,7 @@ def build_cache_in_advance(args, test_loader, lm3d_model, clip_weights, shot_cap
     gpa_local_cache = {}
     gpa_event_records = []
     visual_dist = {}
+    score_norm_state = _make_score_norm_state()
 
     for pc, _, _, rgb in test_loader:
         feature = torch.cat([pc, rgb], dim=-1).half()
@@ -501,6 +666,7 @@ def build_cache_in_advance(args, test_loader, lm3d_model, clip_weights, shot_cap
             gpa_local_cache,
             visual_dist,
             text_dist,
+            score_norm_state,
             pred,
             global_item,
             local_item,
@@ -522,7 +688,7 @@ def build_cache_in_advance(args, test_loader, lm3d_model, clip_weights, shot_cap
             print("*" * 10, "Building [global entropy] cache is full.", "*" * 10, "\n")
             break
 
-    return entropy_cache, gpa_cache, gpa_local_cache, visual_dist, stats, gpa_event_records
+    return entropy_cache, gpa_cache, gpa_local_cache, visual_dist, score_norm_state, stats, gpa_event_records
 
 
 @torch.no_grad()
@@ -600,7 +766,7 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights, 
     Negative cache:
         保持原始 Point-Cache 逻辑。
     """
-    entropy_cache, gpa_cache, gpa_local_cache, visual_dist, build_stats, gpa_event_records = build_cache_in_advance(
+    entropy_cache, gpa_cache, gpa_local_cache, visual_dist, score_norm_state, build_stats, gpa_event_records = build_cache_in_advance(
         args, test_loader, lm3d_model, clip_weights, pos_cfg["shot_capacity"], text_dist=text_dist
     )
 
@@ -612,6 +778,8 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights, 
     print("[E4-C] gpa local cache total:", sum(len(v) for v in gpa_local_cache.values()))
     print("[E4-C] visual distribution classes:", len(visual_dist))
     print("[E4-C] text distribution classes:", 0 if text_dist is None else len(text_dist))
+    print("[E4-C] score norm mode:", SCORE_NORM_MODE)
+    print("[E4-C] score norm state:", _summarize_score_norm_state(score_norm_state))
 
     neg_cache = {}
     gpa_cache_stats = defaultdict(int)
@@ -645,6 +813,7 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights, 
                 gpa_local_cache,
                 visual_dist,
                 text_dist,
+                score_norm_state,
                 pred,
                 global_item,
                 local_item,
@@ -709,6 +878,17 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights, 
     final_acc = sum(accuracies) / len(accuracies)
     print("---- ***Final*** E4-C test accuracy: {:.2f}. ----\n".format(final_acc))
 
-    _save_gpa_stats(args, gpa_cache_stats, entropy_cache, gpa_cache, gpa_local_cache, visual_dist, text_dist, final_acc, gpa_event_records)
+    _save_gpa_stats(
+        args,
+        gpa_cache_stats,
+        entropy_cache,
+        gpa_cache,
+        gpa_local_cache,
+        visual_dist,
+        text_dist,
+        score_norm_state,
+        final_acc,
+        gpa_event_records,
+    )
 
     return final_acc
