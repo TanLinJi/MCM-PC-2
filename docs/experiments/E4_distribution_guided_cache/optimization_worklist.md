@@ -94,15 +94,18 @@ This is a log-linear / product-of-experts style approximation, not full BayesMM 
 | E4-C-O2 | Text weight ablation | Current text contribution is unproven; `0.1` may help or hurt depending on score scale. | Not started | Current E4-C only ran `E4_TEXT_SCORE_WEIGHT=0.1`. This should be evaluated after score normalization is tested. | Unknown. |
 | E4-C-O3 | Text weight sweep | Test whether `0.05`, `0.10`, `0.15` or `0` is best. | Not started | User proposed `0.05` and `0.15`; current report recommends adding these. | Unknown. |
 | E4-C-O4 | Accepted source ablation | Need to know whether `EntropyCache accepted`, `GPACache accepted`, or their union gives the best visual distribution. | Not started | E4-C union improves average but loses E4-A's add_global strength, suggesting possible source contamination. | Unknown. |
-| E4-C-O5 | GPA global logits branch | Current GPA-Cache controls only `GPA-local-cache`; GPA global features do not directly contribute to final logits. | Backlog / specified as E4-C-c1 | Current final formula uses EntropyCache global logits and GPA-local logits only. User requested a dual-output implementation that compares original logits and GPA-global-included logits in one pass. | Unknown. |
-| E4-C-O6 | Dual-output evaluation in one pass | Avoid re-running full inference when only final-logit combination changes. Save original-formula results and GPA-global-included results separately while also writing both sections into `summary.csv`. | Backlog / specified as E4-C-c1 | User requested `summary.csv` to contain the original formula rows first and the GPA-global formula rows below them, with results separated in `results/`. | Unknown. |
+| E4-C-O5 | GPA global logits branch | Current GPA-Cache controls only `GPA-local-cache`; GPA global features do not directly contribute to final logits. | Implemented / pending run as E4-C-A0-c1 | Based on A0 z-score normalization. New run returns both original logits and `with_gpa_global_logits` in one pass. Script: `Point-Cache/scripts/E4_distribution_guided_cache/02_4_ulip_modelnetc_s2_zs_global_local_e4_c_a0_c1_gpa_global_logits_manual_full.sh`. | Unknown until run completes. |
+| E4-C-O6 | Dual-output evaluation in one pass | Avoid re-running full inference when only final-logit combination changes. Save original-formula results and GPA-global-included results separately while also writing both sections into `summary.csv`. | Implemented / pending run as E4-C-A0-c1 | Writes `summary_original.csv`, `summary_with_gpa_global.csv`, and combined `summary.csv`; combined summary keeps original-formula rows first and GPA-global rows below. | Unknown until run completes. |
 | E4-C-O7 | Full Gaussian log-likelihood | Current score omits `log |Σ|` and constant terms. Including log determinant may penalize over-broad distributions. | Not started | Current score is simplified negative diagonal Mahalanobis distance. | Unknown. |
 | E4-C-O8 | Full/shared covariance instead of diagonal covariance | Diagonal covariance ignores feature correlations. Shared covariance may better approximate BayesMM while controlling memory. | Not started | BayesMM discusses covariance and shared covariance; current E4-C uses diagonal variance only. | Unknown. |
 | E4-C-O9 | Multi-modal visual distribution | One class may have multiple visual subtypes; single Gaussian can over-smooth class modes. If activated later, start with at most \(K=3\) modes per class. | Deferred | Current model is single-modal Gaussian; rotate remains weak and add_global regresses from E4-A. User confirmed this is not part of the immediate implementation. | Unknown. |
 | E4-C-O10 | Bayesian text-visual weighting | Manual \(\lambda_t\) is heuristic; BayesMM uses Bayesian model averaging to adjust modality weights. | Not started | Current `joint_score = visual_score + lambda * text_score`. | Unknown. |
 | E4-C-O11 | Distribution score as final logits | Current distribution score is only used for GPA replacement, not final classification. | Not started | E4-C changes cache admission only; final logits formula is unchanged. | Unknown. |
 | E4-C-O12 | Rotation-specific distribution diagnostics | Rotate remains below E2/E3-V2-C. Need to inspect whether distribution scores reject valid rotated samples. | Not started | E4-C `rotate_2=60.98`, below E2 `62.07` and E3-V2-C `61.67`. | Unknown. |
-| E4-C-O13 | Text/visual score normalization before fusion | Current visual and text scores have different numeric ranges; direct addition with a manual text weight may be scale-sensitive. Normalize or calibrate both scores before applying the fusion rule. | P0 / First priority | Current replacement events show text scores are often around `-3.x`, while visual scores vary more with accepted-history statistics. User confirmed this should be the first priority before ordinary text-weight sweeping. | Unknown. |
+| E4-C-O13 | Text/visual score normalization before fusion | Current visual and text scores have different numeric ranges; direct addition with a manual text weight may be scale-sensitive. Normalize or calibrate both scores before applying the fusion rule. | Done for A0 / weak positive | A0 uses `E4_SCORE_NORM_MODE=running_zscore`. Result: avg `54.52`, only `+0.02` over E4-C avg `54.50`; main small gains are `scale_2 +0.24` and `rotate_2 +0.08`, while `add_global_2` and `add_local_2` each drop `-0.08`. | Weak positive / not significant. |
+| E4-C-O14 | Robust score normalization before fusion | Running z-score is sensitive to long-tailed replacement scores and outliers; robust median/IQR normalization may be more stable for online cache replacement. | Implemented / pending run as E4-C-A0b | A0b uses an independent model/runner/script and `E4_SCORE_NORM_MODE=running_robust_iqr`. Script: `Point-Cache/scripts/E4_distribution_guided_cache/02_3_ulip_modelnetc_s2_zs_global_local_e4_c_a0b_robust_score_norm_accepted_history_text_visual_distribution_guided_gpa_manual_full.sh`. | Unknown until run completes. |
+| E4-C-O15 | Prior-corrected normalized GPA global logits | Raw GPA global logits hurt average accuracy because they are unnormalized, uncalibrated, and over-count correlated cache evidence. Convert GPA global cache into \(q_G(c\mid x)\), then fuse \(\gamma\log(q_G(c\mid x)/\pi_c)\). | Implemented / awaiting run | Design doc: `docs/experiments/E4_distribution_guided_cache/prior_corrected_gpa_global_logits_design.md`. Variant: E4-C-A0-c2. New independent code and scripts added; no A0/A0b/c1 files were overwritten. | Unknown until E4-C-A0-c2 finishes. |
+| E4-C-O16 | One-vs-rest GPA global log-odds | E4-C-A0-c2's \(-\log m(x)\) term is class-independent and is cancelled by softmax / argmax. Replace it with a class-dependent rest density \(r_{\neg c}(x)=\frac{1}{C-1}\sum_{j\ne c}r_j(x)\), then fuse \(\gamma[\log r_c(x)-\log r_{\neg c}(x)]\). | Implementing / awaiting run | Design doc: `docs/experiments/E4_distribution_guided_cache/one_vs_rest_gpa_global_log_odds_design.md`. Variant: E4-C-A0-c3. Keep c2 running untouched; create independent files. | Unknown. |
 
 ## 5. Confirmed Optimization Order
 
@@ -146,7 +149,7 @@ s_{\text{joint}}(x,c)
 \lambda_t \tilde{s}_t(x,c).
 \]
 
-Recommended first implementation:
+First implementation:
 
 \[
 \tilde{s}
@@ -161,11 +164,170 @@ Where:
 - \(\sigma_s\): running or candidate-set standard deviation of that score type.
 - \(\epsilon\): numerical stabilizer.
 
+Implemented setting:
+
+```text
+E4_SCORE_NORM_MODE=running_zscore
+E4_SCORE_NORM_MIN_COUNT=8
+E4_SCORE_NORM_EPS=1e-6
+E4_SCORE_NORM_CLIP=0
+```
+
+A0 result:
+
+```text
+E4-C-A0 avg = 54.52
+E4-C avg    = 54.50
+Delta       = +0.02
+```
+
+This indicates that running z-score normalization is valid as a scale-calibration baseline, but it is not a strong source of accuracy gain.
+
+Second implementation, E4-C-A0b:
+
+\[
+\tilde{s}
+=
+\frac{s-\mathrm{median}(S)}
+{\mathrm{IQR}(S)+\epsilon}.
+\]
+
+Where:
+
+- \(s\): current raw visual or text distribution score.
+- \(S\): trusted replacement-score history for the same modality.
+- \(\mathrm{median}(S)\): median of the modality-specific score history.
+- \(\mathrm{IQR}(S)\): \(Q_3(S)-Q_1(S)\), the interquartile range.
+- \(\epsilon\): numerical stabilizer.
+
+Implemented setting:
+
+```text
+E4_SCORE_NORM_MODE=running_robust_iqr
+E4_SCORE_NORM_MIN_COUNT=8
+E4_SCORE_NORM_EPS=1e-6
+E4_SCORE_NORM_CLIP=0
+```
+
+The A0b robust-normalization experiment uses:
+
+```text
+Point-Cache/scripts/E4_distribution_guided_cache/02_3_ulip_modelnetc_s2_zs_global_local_e4_c_a0b_robust_score_norm_accepted_history_text_visual_distribution_guided_gpa_manual_full.sh
+```
+
+The baseline E4-C script keeps `E4_SCORE_NORM_MODE=none` by default. The A0 normalization experiment uses:
+
+```text
+Point-Cache/scripts/E4_distribution_guided_cache/02_2_ulip_modelnetc_s2_zs_global_local_e4_c_a0_score_norm_accepted_history_text_visual_distribution_guided_gpa_manual_full.sh
+```
+
+The event log records both raw scores and the values actually used in the joint score:
+
+- `new_visual_score`, `old_visual_score`
+- `new_text_score`, `old_text_score`
+- `new_visual_score_for_joint`, `old_visual_score_for_joint`
+- `new_text_score_for_joint`, `old_text_score_for_joint`
+- `new_visual_score_normalized`, `old_visual_score_normalized`
+- `new_text_score_normalized`, `old_text_score_normalized`
+
+The running normalization state is updated only after the candidate passes the low-entropy replacement gate. Candidates rejected by entropy do not update the score-normalization statistics.
+
 Interpretation:
 
 - If normalization improves accuracy, previous text-weight sensitivity was partly caused by score-scale mismatch.
 - If normalization hurts, the raw score magnitude may already carry useful reliability information.
 - If normalization plus \(\lambda_t=0\) is best, text distribution should not be claimed as a positive contributor.
+
+### P0-c1: GPA Global Logits Branch After A0
+
+E4-C-A0-c1 keeps A0's running z-score normalization:
+
+```text
+E4_SCORE_NORM_MODE=running_zscore
+```
+
+It evaluates two final-logit formulas in one pass.
+
+Original formula:
+
+\[
+z_{\mathrm{orig}}
+=
+z_{\mathrm{clip}}
++
+z_{\mathrm{entropy\_global}}
++
+z_{\mathrm{gpa\_local}}
+-
+z_{\mathrm{negative}}.
+\]
+
+GPA-global formula:
+
+\[
+z_{\mathrm{gpa\_global}}
+=
+z_{\mathrm{clip}}
++
+z_{\mathrm{entropy\_global}}
++
+z_{\mathrm{gpa\_global\_cache}}
++
+z_{\mathrm{gpa\_local}}
+-
+z_{\mathrm{negative}}.
+\]
+
+Where:
+
+- \(z_{\mathrm{clip}}\): zero-shot CLIP/ULIP logits.
+- \(z_{\mathrm{entropy\_global}}\): original PointCache global entropy cache logits.
+- \(z_{\mathrm{gpa\_global\_cache}}\): GPA-Cache global feature logits.
+- \(z_{\mathrm{gpa\_local}}\): GPA-controlled local patch cache logits.
+- \(z_{\mathrm{negative}}\): original negative cache logits.
+
+Script:
+
+```text
+Point-Cache/scripts/E4_distribution_guided_cache/02_4_ulip_modelnetc_s2_zs_global_local_e4_c_a0_c1_gpa_global_logits_manual_full.sh
+```
+
+Output files:
+
+```text
+summary_original.csv
+summary_with_gpa_global.csv
+summary.csv
+```
+
+The combined `summary.csv` writes original-formula rows first, followed by GPA-global rows.
+
+### P0-c2: Prior-Corrected Normalized GPA Global Logits
+
+E4-C-A0-c2 is a design proposal that replaces raw GPA global logits with a prior-corrected normalized evidence term:
+
+\[
+z_{\mathrm{new}}(c)
+=
+z_{\mathrm{orig}}(c)
++
+\gamma
+\log
+\frac{q_G(c\mid x)}
+{\pi_c}.
+\]
+
+Detailed derivation and experiment settings are recorded in:
+
+```text
+docs/experiments/E4_distribution_guided_cache/prior_corrected_gpa_global_logits_design.md
+```
+
+Status:
+
+```text
+Awaiting user review and confirmation before implementation.
+```
 
 ### P1: Text Weight Ablation After Normalization
 
