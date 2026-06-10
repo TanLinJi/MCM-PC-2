@@ -1,85 +1,85 @@
-# D001: Experiment Numbering Reset and Documentation Rules
+# D001: 实验编号重置与文档规则
 
-## Date
+## 日期
 
 2026-06-02
 
-## Background
+## 背景
 
-The project previously contained several exploratory experiments, including early text prompt enhancement, entropy/margin reliability, global-local conflict analysis, and negative cache attempts. These experiments were useful for understanding failure modes, but they are no longer part of the formal MCM-PC experiment sequence.
+项目之前包含若干探索性实验，包括早期文本 prompt 增强、entropy/margin 可靠性、全局-局部冲突分析，以及负缓存尝试。这些实验有助于理解失败模式，但它们不再属于正式的 MCM-PC 实验序列。
 
-The current project is now reorganized around the paper direction:
+当前项目已经重新围绕论文方向组织：
 
 **MCM-PC: Reliability-Aware Multi-Cache Matrix for Test-Time Adaptation of 3D Point Cloud Vision-Language Models**
 
-To avoid confusion between historical exploratory experiments and the new formal experiment sequence, the experiment numbering is reset.
+为避免历史探索性实验与新的正式实验序列混淆，实验编号被重置。
 
-## Decision
+## 决策
 
-The formal experiment sequence is defined as follows:
+正式实验序列定义如下：
 
-- **E0**: Point-Cache baseline reproduction and baseline result analysis.
-- **E1**: Text Prototype Enhancement with point-cloud-aware and dynamically generated prompts.
-- **E2**: Reliability-Gated Local Cache.
-- **E3**: Conflict-Aware Negative Suppression.
-- **E4**: Reliability-Aware Multi-Cache Matrix.
-- **E5**: Ablation studies and visualization.
+- **E0**：Point-Cache baseline 的复现与基线结果分析。
+- **E1**：面向点云感知与动态生成 prompt 的文本原型增强。
+- **E2**：可靠性门控的局部缓存。
+- **E3**：冲突感知的负向抑制。
+- **E4**：可靠性感知的多缓存矩阵。
+- **E5**：消融实验与可视化。
 
-Historical exploratory experiments are archived and do not occupy the new experiment numbering.
+历史探索性实验会被归档，不占用新的实验编号。
 
-## Experiment Numbering Rules
+## 实验编号规则
 
-1. E0 refers only to Point-Cache baseline reproduction and baseline result analysis.
-2. New MCM-PC method experiments start from E1.
-3. Archived legacy experiments must not affect the new experiment numbering.
-4. New experiment directories, scripts, and documents should follow the new numbering scheme.
-5. Baseline results must remain reproducible and should not be overwritten by E1 or later experiments.
+1. E0 仅指 Point-Cache baseline 的复现与基线结果分析。
+2. 新的 MCM-PC 方法实验从 E1 开始。
+3. 归档的历史实验不得影响新的实验编号。
+4. 新的实验目录、脚本和文档应遵循新的编号方案。
+5. 基线结果必须保持可复现，且不应被 E1 或更晚的实验覆盖。
 
-## Documentation Rules
+## 文档规则
 
-Each formal experiment must include two synchronized documents:
+每个正式实验都必须包含两个同步文档：
 
-1. **Experiment Log**  
-   Records the exact commands, scripts, configuration, dataset, backbone, checkpoint, prompt source, runtime notes, errors, fixes, and git commit information.
+1. **实验日志**
+   记录精确的命令、脚本、配置、数据集、骨干模型、检查点、prompt 来源、运行备注、错误、修复以及 git commit 信息。
 
-2. **Experiment Analysis**  
-   Summarizes the quantitative results, compares them with E0 baseline, identifies gains or failures, and explains whether the experiment supports the MCM-PC hypothesis.
+2. **实验分析**
+   总结量化结果，将其与 E0 基线比较，识别收益或失败，并解释该实验是否支持 MCM-PC 假设。
 
-In addition, the complete paper manuscript should be maintained and updated throughout the project.
+此外，完整的论文手稿应在整个项目过程中持续维护和更新。
 
-## Paper Draft Rule
+## 论文草稿规则
 
-The complete ICASSP paper draft should be maintained separately under:
+完整的 ICASSP 论文草稿应单独维护在：
 
 `paper/ICASSP/`
 
-The paper draft should be updated alongside experiments, including motivation, related work, method, experiments, ablations, figures, tables, limitations, and references. Experimental findings should be gradually converted into paper-ready writing rather than remaining only as notes.
+论文草稿应与实验同步更新，包括动机、相关工作、方法、实验、消融、图表、局限性和参考文献。实验发现应逐步转化为适合论文使用的写作，而不是只停留在笔记层面。
 
-## Recommended Document Layout
+## 推荐文档结构
 
-For each experiment, use the following structure:
+每个实验请使用如下结构：
 
 `docs/experiments/E*_name/`
 
-with at least:
+至少包含：
 
 - `log.md`
 - `analysis.md`
 
-For E0, use:
+对于 E0，请使用：
 
 `docs/experiments/E0_baseline/`
 
-For archived legacy experiments, use:
+对于归档的历史实验，请使用：
 
 `docs/experiments/archive/legacy_pre_mcmpc_restart/`
 
-## Immediate Next Step
+## 立即下一步
 
-After this decision document is committed, legacy experiment documents should be moved into:
+在这份决策文档确认后，应将历史实验文档移动到：
 
 `docs/experiments/archive/legacy_pre_mcmpc_restart/`
 
-The ICASSP paper workspace should then be initialized under:
+随后应在以下位置初始化 ICASSP 论文工作区：
 
 `paper/ICASSP/`
