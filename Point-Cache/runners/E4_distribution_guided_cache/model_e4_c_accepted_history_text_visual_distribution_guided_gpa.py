@@ -129,10 +129,15 @@ DIST_MIN_VAR = float(os.environ.get("E4_DIST_MIN_VAR", "1e-4"))
 TEXT_DIST_EPS = float(os.environ.get("E4_TEXT_DIST_EPS", str(DIST_EPS)))
 TEXT_DIST_MIN_VAR = float(os.environ.get("E4_TEXT_DIST_MIN_VAR", str(DIST_MIN_VAR)))
 TEXT_SCORE_WEIGHT = float(os.environ.get("E4_TEXT_SCORE_WEIGHT", "0.1"))
+TEXT_GATE_MODE = os.environ.get("E4_TEXT_GATE_MODE", "distribution").strip().lower()
+TEXT_PROTO_SCORE_SCALE = float(os.environ.get("E4_TEXT_PROTO_SCORE_SCALE", "1.0"))
 SCORE_NORM_MODE = os.environ.get("E4_SCORE_NORM_MODE", "none").strip().lower()
 SCORE_NORM_MIN_COUNT = int(os.environ.get("E4_SCORE_NORM_MIN_COUNT", "8"))
 SCORE_NORM_EPS = float(os.environ.get("E4_SCORE_NORM_EPS", "1e-6"))
 SCORE_NORM_CLIP = float(os.environ.get("E4_SCORE_NORM_CLIP", "0"))
+
+if TEXT_GATE_MODE not in {"distribution", "fused_prototype"}:
+    raise ValueError(f"Unsupported E4_TEXT_GATE_MODE: {TEXT_GATE_MODE}")
 
 if SCORE_NORM_MODE not in {"none", "running_zscore"}:
     raise ValueError(f"Unsupported E4_SCORE_NORM_MODE: {SCORE_NORM_MODE}")
@@ -318,11 +323,19 @@ def _text_distribution(text_dist, pred, ref_feat):
         return None
 
     entry = text_dist[pred]
-    return {
+    result = {
         "count": int(entry["count"]),
         "mean": entry["mean"].to(device=ref_feat.device, dtype=ref_feat.dtype),
         "var": entry["var"].to(device=ref_feat.device, dtype=ref_feat.dtype),
     }
+    if "prototype" in entry and entry["prototype"] is not None:
+        prototype = entry["prototype"]
+        if not torch.is_tensor(prototype):
+            prototype = torch.as_tensor(prototype)
+        result["prototype"] = prototype.to(device=ref_feat.device, dtype=ref_feat.dtype)
+    if "prototype_source" in entry:
+        result["prototype_source"] = entry["prototype_source"]
+    return result
 
 
 def _distribution_score_from_entry(entry, feat, eps):
@@ -334,18 +347,45 @@ def _distribution_score_from_entry(entry, feat, eps):
     return float((-raw).detach().cpu().item())
 
 
+def _prototype_score_from_entry(entry, feat):
+    if entry is None or "prototype" not in entry or entry["prototype"] is None:
+        return None
+
+    prototype = entry["prototype"]
+    if prototype.dim() == 1:
+        prototype = prototype.view(1, -1)
+
+    x = _feature_float(feat).to(device=prototype.device, dtype=prototype.dtype)
+    if x.dim() == 1:
+        x = x.view(1, -1)
+
+    if x.size(-1) != prototype.size(-1):
+        return None
+
+    x = x / x.norm(dim=-1, keepdim=True).clamp_min(1e-12)
+    prototype = prototype / prototype.norm(dim=-1, keepdim=True).clamp_min(1e-12)
+    score = (x * prototype).sum(dim=-1).mean() * TEXT_PROTO_SCORE_SCALE
+    return float(score.detach().cpu().item())
+
+
 def _joint_distribution_score(visual_dist, text_dist, pred, feat, score_norm_state=None):
     """
     计算 E4-C 的 text-visual joint score。
 
     visual_dist 来自被正缓存接受过的可信历史样本；
-    text_dist 来自固定 prompt-level embeddings。
+    text_dist 默认来自固定 prompt-level embeddings；当 E4_TEXT_GATE_MODE=fused_prototype
+    时，文本分数改用 E1 branch-wise fused prototype cosine score。
     """
     visual_entry = _visual_distribution(visual_dist, pred)
     text_entry = _text_distribution(text_dist, pred, feat)
 
     visual_score = _distribution_score_from_entry(visual_entry, feat, DIST_EPS)
-    text_score = _distribution_score_from_entry(text_entry, feat, TEXT_DIST_EPS)
+    if TEXT_GATE_MODE == "fused_prototype":
+        text_score = _prototype_score_from_entry(text_entry, feat)
+        text_score_kind = "fused_prototype_cosine"
+    else:
+        text_score = _distribution_score_from_entry(text_entry, feat, TEXT_DIST_EPS)
+        text_score_kind = "prompt_distribution"
 
     if visual_score is None:
         return None
@@ -380,6 +420,9 @@ def _joint_distribution_score(visual_dist, text_dist, pred, feat, score_norm_sta
         "text_score_normalized": bool(text_score_normalized),
         "visual_count": 0 if visual_entry is None else int(visual_entry["count"]),
         "text_count": 0 if text_entry is None else int(text_entry["count"]),
+        "text_gate_mode": TEXT_GATE_MODE,
+        "text_score_kind": text_score_kind,
+        "text_proto_score_scale": float(TEXT_PROTO_SCORE_SCALE),
     }
 
 
@@ -388,12 +431,23 @@ def _summarize_distribution_from_entry(entry):
         return None
 
     var = entry["var"].detach().float().cpu()
-    return {
+    summary = {
         "count": int(entry["count"]),
         "var_mean": float(var.mean().item()),
         "var_min": float(var.min().item()),
         "var_max": float(var.max().item()),
     }
+    prototype = entry.get("prototype")
+    if prototype is not None:
+        if not torch.is_tensor(prototype):
+            prototype = torch.as_tensor(prototype)
+        proto = prototype.detach().float().cpu()
+        summary["has_prototype"] = True
+        summary["prototype_norm"] = float(proto.norm(dim=-1).mean().item())
+        summary["prototype_source"] = entry.get("prototype_source")
+    else:
+        summary["has_prototype"] = False
+    return summary
 
 
 def _summarize_visual_distribution(visual_dist):
@@ -475,6 +529,9 @@ def _update_gpa_cache(
             "old_visual_score_normalized": None if old_score is None else bool(old_score["visual_score_normalized"]),
             "new_text_score_normalized": None if new_score is None else bool(new_score["text_score_normalized"]),
             "old_text_score_normalized": None if old_score is None else bool(old_score["text_score_normalized"]),
+            "text_gate_mode": TEXT_GATE_MODE,
+            "text_score_kind": None if new_score is None else new_score.get("text_score_kind"),
+            "text_proto_score_scale": float(TEXT_PROTO_SCORE_SCALE),
             "score_norm_mode": SCORE_NORM_MODE,
             "joint_score_margin": None if new_score is None or old_score is None else float(new_score["joint"] - old_score["joint"]),
             "visual_count": None if new_score is None else int(new_score["visual_count"]),
@@ -570,11 +627,13 @@ def _save_gpa_stats(
         "visual_distribution_scope": "accepted_positive_cache_history",
         "visual_distribution_history_policy": "accumulate_samples_accepted_by_entropy_or_gpa_cache_only",
         "text_distribution_enabled": True,
+        "e4_text_gate_mode": TEXT_GATE_MODE,
         "e4_dist_eps": float(DIST_EPS),
         "e4_dist_min_var": float(DIST_MIN_VAR),
         "e4_text_dist_eps": float(TEXT_DIST_EPS),
         "e4_text_dist_min_var": float(TEXT_DIST_MIN_VAR),
         "e4_text_score_weight": float(TEXT_SCORE_WEIGHT),
+        "e4_text_proto_score_scale": float(TEXT_PROTO_SCORE_SCALE),
         "e4_score_norm_mode": SCORE_NORM_MODE,
         "e4_score_norm_min_count": int(SCORE_NORM_MIN_COUNT),
         "e4_score_norm_eps": float(SCORE_NORM_EPS),
@@ -778,6 +837,8 @@ def run_test_tda(args, pos_cfg, neg_cfg, test_loader, lm3d_model, clip_weights, 
     print("[E4-C] gpa local cache total:", sum(len(v) for v in gpa_local_cache.values()))
     print("[E4-C] visual distribution classes:", len(visual_dist))
     print("[E4-C] text distribution classes:", 0 if text_dist is None else len(text_dist))
+    print("[E4-C] text gate mode:", TEXT_GATE_MODE)
+    print("[E4-C] text proto score scale:", TEXT_PROTO_SCORE_SCALE)
     print("[E4-C] score norm mode:", SCORE_NORM_MODE)
     print("[E4-C] score norm state:", _summarize_score_norm_state(score_norm_state))
 

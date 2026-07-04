@@ -119,6 +119,7 @@ def parse_prompt_list(content):
 
     prompts = []
     for line in content.splitlines():
+        cleaned = ""
         line = line.strip()
         line = re.sub(r"^[0-9]+[.)]\s*", "", line)
         line = line.strip("-• \t")
@@ -130,12 +131,36 @@ def parse_prompt_list(content):
     return prompts
 
 
+def _ratio_counts(prompt_count, prompt_mode):
+    """Return requested 2D/3D counts for ratio-controlled prompt modes."""
+    prompt_count = int(prompt_count)
+    if prompt_mode in {"multiview_2d3d_2to1", "image10_pointcloud5"}:
+        count_2d = round(prompt_count * 2 / 3)
+        count_3d = prompt_count - count_2d
+        return count_2d, count_3d
+    if prompt_mode in {"multiview_2d3d_1to2", "image5_pointcloud10"}:
+        count_2d = round(prompt_count / 3)
+        count_3d = prompt_count - count_2d
+        return count_2d, count_3d
+    if prompt_mode == "image12_pointcloud3":
+        if prompt_count != 15:
+            raise ValueError("image12_pointcloud3 requires prompt_count=15.")
+        return 12, 3
+    raise ValueError(f"Prompt mode has no fixed 2D/3D ratio: {prompt_mode}")
+
+
 def build_llm_request(classname, prompt_count, model, temperature, prompt_mode="multiview_2d3d"):
     """Build an OpenAI-compatible chat completion request for one class.
 
     prompt_mode:
     - pointcloud_geometry: mainly 3D point cloud geometry.
     - multiview_2d3d: a prompt set containing both 2D visual semantics and 3D point-cloud geometry.
+    - image4_pointcloud4_bridge2: exactly 4 image-style, 4 pointcloud-style, and 2 bridge descriptions.
+    - image10_pointcloud5: exactly 10 image-style and 5 pointcloud-style descriptions.
+    - image5_pointcloud10: exactly 5 image-style and 10 pointcloud-style descriptions.
+    - image12_pointcloud3: exactly 12 image-style and 3 pointcloud-style descriptions.
+    - multiview_2d3d_2to1: 2D visual semantics : 3D geometry = 2 : 1.
+    - multiview_2d3d_1to2: 2D visual semantics : 3D geometry = 1 : 2.
     """
     if prompt_mode == "pointcloud_geometry":
         system_prompt = (
@@ -152,13 +177,16 @@ def build_llm_request(classname, prompt_count, model, temperature, prompt_mode="
             "Return only a non-empty JSON array of strings. Do not return an empty array."
         )
 
-    elif prompt_mode == "multiview_2d3d":
+    elif prompt_mode in {"multiview_2d3d", "image4_pointcloud4_bridge2"}:
         system_prompt = (
             "You generate concise English class descriptions for vision-language recognition of 3D point clouds. "
             "The whole description set should contain both 2D visual semantics and 3D point-cloud geometry, "
             "but each individual sentence does not need to contain both. "
             "Return only a JSON array of strings. Do not include explanations, numbering, markdown, or extra text."
         )
+
+        if prompt_mode == "image4_pointcloud4_bridge2" and int(prompt_count) != 10:
+            raise ValueError("image4_pointcloud4_bridge2 requires prompt_count=10.")
 
         if int(prompt_count) == 10:
             user_prompt = (
@@ -183,6 +211,33 @@ def build_llm_request(classname, prompt_count, model, temperature, prompt_mode="
                 "Avoid very short fragments. Return only a JSON array of strings."
             )
 
+    elif prompt_mode in {
+        "multiview_2d3d_2to1",
+        "multiview_2d3d_1to2",
+        "image10_pointcloud5",
+        "image5_pointcloud10",
+        "image12_pointcloud3",
+    }:
+        if prompt_mode in {"image10_pointcloud5", "image5_pointcloud10", "image12_pointcloud3"} and int(prompt_count) != 15:
+            raise ValueError(f"{prompt_mode} requires prompt_count=15.")
+        count_2d, count_3d = _ratio_counts(prompt_count, prompt_mode)
+        ratio_label = f"{count_2d} image-style descriptions and {count_3d} pointcloud-style descriptions"
+        system_prompt = (
+            "You generate concise English class descriptions for vision-language recognition of 3D point clouds. "
+            "Return only a JSON array of strings. Do not include explanations, numbering, markdown, or extra text. "
+            "Each sentence should be complete and useful for a CLIP-like text encoder aligned with 3D point-cloud features."
+        )
+        user_prompt = (
+            f"Generate exactly {prompt_count} descriptions for the class '{classname}' with {ratio_label}. "
+            f"The first {count_2d} descriptions must focus on 2D visual semantics: common visual appearance, "
+            "recognizable parts, object identity, image-level cues, and visual context. "
+            f"The remaining {count_3d} descriptions must focus on 3D point-cloud geometry: shape, structure, "
+            "parts, symmetry, spatial layout, and point distribution. "
+            "Do not add bridge descriptions beyond these two groups. "
+            "Each description must be a complete English sentence and at least eight words long. "
+            f"Return only one flat JSON array of exactly {prompt_count} strings."
+        )
+
     else:
         raise ValueError(f"Unknown LLM prompt mode: {prompt_mode}")
 
@@ -193,7 +248,7 @@ def build_llm_request(classname, prompt_count, model, temperature, prompt_mode="
             {"role": "user", "content": user_prompt},
         ],
         "temperature": temperature,
-        "max_tokens": 1200,
+        "max_tokens": max(1200, int(prompt_count) * 110),
     }
 
 
@@ -227,8 +282,16 @@ def call_openai_compatible_api(api_key, api_base_url, payload):
 
 def get_prompt_cache_path(args, dataset_name):
     """Return the JSON path used to save or load generated prompts."""
-    cache_dir = Path(getattr(args, "prompt_cache_dir", "results/E1_text_prototype_enhancement/prompts"))
+    cache_dir = Path(getattr(args, "prompt_cache_dir", "llm"))
     cache_dir.mkdir(parents=True, exist_ok=True)
+
+    explicit_file = str(getattr(args, "prompt_cache_file", "") or "").strip()
+    if explicit_file:
+        explicit_path = Path(explicit_file)
+        if explicit_path.is_absolute():
+            explicit_path.parent.mkdir(parents=True, exist_ok=True)
+            return explicit_path
+        return cache_dir / explicit_path
 
     provider = safe_name(getattr(args, "llm_provider", "deepseek"))
     model_name = safe_name(getattr(args, "llm_model", "deepseek-v4-pro"))
@@ -301,6 +364,7 @@ def is_valid_prompt_text(text):
 def generate_one_class_prompts(classname, args, api_key, api_base_url, model, prompt_count, temperature, prompt_mode):
     """Generate prompts for one class with retry."""
     max_retries = int(getattr(args, "llm_max_retries", 3))
+    last_error = None
 
     for attempt in range(1, max_retries + 1):
         payload = build_llm_request(
@@ -311,20 +375,35 @@ def generate_one_class_prompts(classname, args, api_key, api_base_url, model, pr
             prompt_mode=prompt_mode,
         )
 
-        content = call_openai_compatible_api(
-            api_key=api_key,
-            api_base_url=api_base_url,
-            payload=payload,
-        )
+        try:
+            content = call_openai_compatible_api(
+                api_key=api_key,
+                api_base_url=api_base_url,
+                payload=payload,
+            )
+        except Exception as exc:
+            last_error = exc
+            print(
+                f"[E1] LLM request failed for {classname}. "
+                f"Retry {attempt}/{max_retries}. Error: {exc}"
+            )
+            time.sleep(min(10.0, 2.0 * attempt))
+            continue
 
         prompts = [p for p in parse_prompt_list(content) if is_valid_prompt_text(p)]
 
-        if len(prompts) > 0:
+        if len(prompts) >= prompt_count:
             return prompts[:prompt_count]
 
-        print(f"[E1] Empty or invalid LLM output for {classname}. Retry {attempt}/{max_retries}.")
+        print(
+            f"[E1] LLM returned {len(prompts)}/{prompt_count} valid prompts "
+            f"for {classname}. Retry {attempt}/{max_retries}."
+        )
 
         time.sleep(1.0)
+
+    if last_error is not None:
+        raise RuntimeError(f"LLM request failed after {max_retries} retries for class: {classname}") from last_error
 
     raise RuntimeError(f"LLM returned no valid prompts for class: {classname}")
 

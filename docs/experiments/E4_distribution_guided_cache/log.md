@@ -175,3 +175,26 @@ Point-Cache/scripts/E4_distribution_guided_cache/02_1_ulip_modelnetc_s2_zs_globa
 ```
 
 E4-B 保留为“当前缓存截面分布”对照，不再覆盖。
+
+## 2026-06-29：补充 E4-C-A0+E1 文本权重细化消融
+
+围绕当前主设置 `E4_TEXT_SCORE_WEIGHT=0.15`，继续补充细粒度消融记录。
+
+已完成并记录的结果包括：
+
+- `0.14` -> `02_9_5`
+- `0.145` -> `02_9_7`
+- `0.148` -> `02_9_9`
+- `0.149` -> `02_9_10`
+- `0.15` -> `02_9_2`
+- `0.16` -> `02_9_6`
+- `0.20` -> `02_9_3`
+- `0.25` -> `02_9_4`
+
+后续 `0.148`、`0.149` 与一次新的 `0.15` 重跑在 7 个 severity-2 corruption 上得到完全相同的精确 `final_acc`，说明 `0.148-0.15` 是一个不改变 GPA replacement hard decision 的窄平台区间。
+
+细化记录文件：
+
+```text
+docs/experiments/E4_distribution_guided_cache/02_9_7_02_9_8_text_weight_refinement.md
+```

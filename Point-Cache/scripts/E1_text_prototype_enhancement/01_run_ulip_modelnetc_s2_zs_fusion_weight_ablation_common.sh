@@ -22,7 +22,7 @@ LLM_MODEL_VALUE="${LLM_MODEL:-deepseek-v4-pro}"
 LLM_PROMPT_MODE_VALUE="${LLM_PROMPT_MODE:-multiview_2d3d}"
 DYNAMIC_PROMPT_COUNT_VALUE="${DYNAMIC_PROMPT_COUNT:-10}"
 
-SHARED_PROMPT_DIR="${SHARED_PROMPT_DIR:-results/E1_text_prototype_enhancement/shared_prompts}"
+SHARED_PROMPT_DIR="${SHARED_PROMPT_DIR:-llm/e1_prompt_bank}"
 SHARED_PROMPT_FILE="${SHARED_PROMPT_DIR}/modelnet_c_${LLM_PROVIDER_VALUE}_${LLM_MODEL_VALUE}_${LLM_PROMPT_MODE_VALUE}_${DYNAMIC_PROMPT_COUNT_VALUE}_prompts.json"
 
 if [[ ! -f "${SHARED_PROMPT_FILE}" ]]; then
@@ -41,6 +41,8 @@ export WANDB_DIR="${PC_ROOT}/results/E1_text_prototype_enhancement/${EXP_ID}/wan
 export WANDB_SILENT=true
 export PYTHONUNBUFFERED=1
 
+read -r -a E1_PYTHON <<< "${E1_PYTHON_CMD:-python}"
+
 mkdir -p "${WANDB_DIR}"
 
 echo "============================================================"
@@ -55,9 +57,10 @@ echo "PHYSICAL_GPU: ${PHYSICAL_GPU}"
 echo "Shared prompt cache: ${SHARED_PROMPT_FILE}"
 echo "Runner: runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_ablation.py"
 echo "Result root: results/E1_text_prototype_enhancement"
+echo "Python command: ${E1_PYTHON[*]}"
 echo "============================================================"
 
-python runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_ablation.py \
+"${E1_PYTHON[@]}" runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_ablation.py \
   --baseline-exp-id "${EXP_ID}" \
   --baseline-method "zs" \
   --baseline-method-full "Fusion weight ablation: manual_full=${STATIC_WEIGHT}, LLM=${DYNAMIC_WEIGHT}" \

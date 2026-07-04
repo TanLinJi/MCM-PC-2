@@ -1,17 +1,19 @@
-# Experiment Narrative Archive
+# Experiment Narrative
 
-本目录存放 MCM-PC-2 的长期实验叙事归档，用来维护从 E0 开始的研究路线、实验动机、关键结果、失败原因和后续补实验计划。
+This directory keeps long-form research narratives for the current DPC-Point
+project. These files explain why each experiment was run, what changed the
+research direction, which results are reliable, and what remains incomplete.
 
-## 当前主文件
+## Current Files
 
-| 文件 | 用途 |
+| File | Purpose |
 |---|---|
-| `e0_e3_research_narrative.md` | E0 到 E3 的完整研究路线、实验过程、问题背景、解决方案和后续补实验计划 |
+| `e0_e3_research_narrative.md` | Historical E0-E3 route from baseline reproduction through text/prototype transfer and early alignment attempts |
+| `e4_e5_research_narrative.md` | Current E4 distribution-guided cache and E5 ADAPT/PGA-inspired branch narrative |
 
-## 维护规则
+## Maintenance Rules
 
-- 每完成一个关键实验、发现一个会改变结论的 bug、修复一个影响结果解释的问题、或确定下一阶段研究计划时，都要同步更新本目录的叙事文档。
-- 本目录只维护人类可读的研究叙事和阶段判断；原始日志、CSV、JSON、权重和数据集仍放在 `Point-Cache/` 对应目录。
-- 文档必须写清楚：背景、实验目的、设置、路径、结果、对比、失败原因、可信边界和下一步。
-- 如果单个叙事文档过长，按阶段拆分，例如 `e0_e3_research_narrative.md`、`e4_e5_research_narrative.md`，并在本 README 中更新索引。
-- 更新后应及时更新 qmd 索引，保证后续检索能找到最新项目上下文。
+- Update these narratives after any result or bug fix that changes the research judgment.
+- Keep raw logs, CSV/JSON outputs, checkpoints, and datasets under `Point-Cache/`.
+- Each narrative should state background, setup, paths, results, comparison, failure reason, evidence boundary, and next action.
+- If a narrative grows too long, split it by experiment phase and update this README.

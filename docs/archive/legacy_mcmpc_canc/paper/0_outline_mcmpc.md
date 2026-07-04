@@ -1,58 +1,66 @@
-# MCP-3D 论文章节大纲与写作进度
+# DPC-Point Paper Outline
 
-> **路径**：`/root/autodl-tmp/MCM-PC/docs/paper/`
->
-> **原则 (decisions.md D12)**：每完成一个实验里程碑立即写对应段落，不延后。
+Working title:
 
-## 章节列表
+**DPC-Point: Distribution-Guided Prototype Cache for Robust Point Cloud Test-Time Adaptation**
 
-| 章节 | 内容 | 触发条件 | 状态 | 字数目标 |
-|---|---|---|---|---|
-| §1 Introduction | 动机 + 贡献概览 | W2.5 P1+P2 完成 | ⏳ blocked | ~1000 |
-| §2 Related Work | 3D 测试时适配 / 零样本 / 缓存架构 | 已有 F1-F5 | 🟡 **v0.1 草稿** | ~1500 |
-| §3 Method | C1 ICP-CD / C2 vMF / C3 2×3 矩阵 | W3-W5 各自完成 | ⏳ blocked | ~3000 |
-| §4 Experiments | ModelNet-C / ScanObjectNN-C / 消融 | W6-W10 完成 | ⏳ blocked | ~2500 |
-| §5 Discussion | 失败案例 / 紧致度诊断 / 局限 | W11-W12 完成 | ⏳ blocked | ~1500 |
-| §6 Conclusion | 总结 | W12 完成 | ⏳ blocked | ~500 |
+Target: ICASSP 2027  
+Full paper deadline: 2026-09-16  
+Current status: method direction selected; benchmark evidence still incomplete.
 
-## 触发 → 写作映射表
+## Central Thesis
 
+Online point cloud cache adaptation should not admit or replace cache samples
+using confidence alone. DPC-Point uses trusted visual history and semantic text
+prompt distributions to guide prototype cache replacement, reducing cache
+pollution under test-time corruptions.
+
+## Proposed Contributions
+
+1. We analyze Point-Cache under corrupted point cloud streams and identify that
+   confidence-based cache update can admit confidently wrong or distributionally
+   inconsistent samples.
+2. We propose a distribution-guided prototype cache replacement rule that uses
+   accepted-history visual statistics rather than a narrow current-cache snapshot.
+3. We introduce a decoupled semantic text distribution prior: LLM-generated
+   descriptions guide cache purification but do not replace the stable base text
+   classifier.
+4. We evaluate robustness across ModelNet-C, ScanObjNN-C, clean data, ablations,
+   and multiple 3D vision-language backbones.
+
+## Section Plan
+
+| Section | Content | Current Status |
+|---|---|---|
+| Abstract | Problem, method, core results | Skeleton |
+| 1 Introduction | Motivation, cache pollution, DPC-Point contributions | Skeleton |
+| 2 Related Work | Point cloud TTA, 3D vision-language models, cache adaptation, text priors | Skeleton |
+| 3 Method | Baseline Point-Cache, visual distribution, text distribution, replacement rule | Skeleton |
+| 4 Experiments | Main results, clean/corruption tradeoff, ablations, efficiency | Blocked by all35 and extra backbones |
+| 5 Discussion | Failure cases, clean regression, pseudo-label risk, limitations | Pending |
+| 6 Conclusion | Summary | Pending |
+
+## Required Result Tables
+
+| Table | Required Evidence | Status |
+|---|---|---|
+| Main ModelNet-C | ULIP all35, baseline vs DPC-Point | Running / incomplete |
+| Main ScanObjNN-C | hardest all35 or severity-2 minimum with baseline | Partial severity-2 |
+| Clean robustness | clean baseline vs DPC-Point | Current `02_9_2` clean available |
+| Backbone transfer | ULIP-2 or OpenShape at minimum | Not complete |
+| Ablation | accepted-history, textdist, text weight, score normalization | Severity-2 partial |
+| Efficiency | runtime / memory vs Point-Cache | Not complete |
+
+## Current Best Result Anchor
+
+Current strongest complete severity-2 run:
+
+```text
+02_9_2
+E4-C-A0+E1-textdist-only
+E4_TEXT_SCORE_WEIGHT=0.15
+ULIP + ModelNet-C severity=2
+Avg acc: 54.70595045
 ```
-W2.5 P1 完成 → §1 motivation 段：填入 F3 (rotate +0.58pp) + P1 旋转鲁棒性测量
-W2.5 P2 完成 → §1 motivation 段：填入 F1 (scale -0.40pp) + P2 紧致度相关性 r
-W2.5 P5 完成 → §2.1 末段：填入跨方法 scale 退化证据
-W3 完成     → §3.3 vMF 锚点
-W4 完成     → §3.4 ICP-CD 距离
-W5 完成     → §3.5 2×3 矩阵
-W6 主实验   → §4.1 ModelNet-C 主结果
-W7 真实场景 → §4.2 ScanObjectNN-C
-W8 消融     → §4.3 消融
-W9 紧致度诊断 → §5.1 诊断分析
-W10 BayesMM 对照 → §5.2 跨域对比
-W11-12      → §5.3 局限 + §6 结论
-W13-14      → 整合 + abstract + intro 收尾
-W15-16      → 投稿润色 (AAAI)
-```
 
-## 写作时间预算
-
-- 每周 3-5 小时纯写作，与实验并行
-- 每段写完即 commit：`docs(paper): write §X.Y first draft`
-- 每章节写完打 tag：`paper-§X-draft`
-
-## 章节依赖图
-
-```
-        §2 Related Work (NOW, v0.1)
-              ↓ 引用
-        §3 Method ← W3/W4/W5 里程碑
-              ↓
-        §4 Experiments ← W6-W10
-              ↓ 反向回填
-        §1 Introduction
-              ↓
-        §5 Discussion → §6 Conclusion
-```
-
-## 当前进度
-- §2 Related Work draft v0.1 (本次 2026-05-10 落盘) - 见 `02_related_work.md`
+This is a working anchor, not yet a final paper benchmark.

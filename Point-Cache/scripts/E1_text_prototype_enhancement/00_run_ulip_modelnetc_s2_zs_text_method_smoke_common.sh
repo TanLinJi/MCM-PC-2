@@ -24,6 +24,8 @@ export WANDB_DIR="${PC_ROOT}/results/E1_text_prototype_enhancement/${EXP_ID}/wan
 export WANDB_SILENT=true
 export PYTHONUNBUFFERED=1
 
+read -r -a E1_PYTHON <<< "${E1_PYTHON_CMD:-python}"
+
 mkdir -p "${WANDB_DIR}"
 
 echo "============================================================"
@@ -36,9 +38,10 @@ echo "PURPOSE: ${PURPOSE}"
 echo "PHYSICAL_GPU: ${PHYSICAL_GPU}"
 echo "Runner: runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_ablation.py"
 echo "Result root: results/E1_text_prototype_enhancement"
+echo "Python command: ${E1_PYTHON[*]}"
 echo "============================================================"
 
-python runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_ablation.py \
+"${E1_PYTHON[@]}" runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_ablation.py \
   --baseline-exp-id "${EXP_ID}" \
   --baseline-method "zs" \
   --baseline-method-full "${METHOD_FULL}" \
@@ -49,7 +52,7 @@ python runners/E1_text_prototype_enhancement/run_e1_ulip_modelnetc_s2_zs_prompt_
   --lm3d ulip \
   --cache-type "global" \
   --prompt-source "${PROMPT_SOURCE}" \
-  --prompt-cache-dir "results/E1_text_prototype_enhancement/${EXP_ID}/prompts" \
+  --prompt-cache-dir "${PROMPT_CACHE_DIR:-llm/e1_prompt_bank}" \
   --llm-provider "${LLM_PROVIDER:-deepseek}" \
   --llm-model "${LLM_MODEL:-deepseek-v4-pro}" \
   --llm-api-key-file "${LLM_API_KEY_FILE:-llm/secrets/llm_api_key.txt}" \

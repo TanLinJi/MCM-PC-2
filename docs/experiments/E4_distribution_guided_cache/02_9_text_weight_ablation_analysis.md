@@ -34,9 +34,11 @@ Exact averages below are computed from `gpa_stats/*_gpa_stats.json` `final_acc`,
 
 | Experiment | Text weight | Avg acc |
 |---|---:|---:|
+| 02_9_5 | 0.14 | 54.5771 |
 | 02_9_1 | 0.05 | 54.1514 |
 | 02_8 | 0.10 | 54.6712 |
 | 02_9_2 | 0.15 | 54.7060 |
+| 02_9_6 | 0.16 | 54.6243 |
 | 02_9_3 | 0.20 | 54.5265 |
 | 02_9_4 | 0.25 | 54.7002 |
 
@@ -63,3 +65,16 @@ joint_score = normalized_visual_score + E4_TEXT_SCORE_WEIGHT * normalized_text_s
 ```
 
 A larger text weight can help semantic corruptions or dropout-like changes, but it can also over-constrain local geometric corruptions. The current evidence supports using text distribution as a moderate prior, not as a dominant replacement signal.
+
+## Refinement Sweep
+
+We further refined the neighborhood around `0.15` with:
+
+- `0.14` -> `02_9_5`
+- `0.16` -> `02_9_6`
+- `0.145` -> `02_9_7` planned
+- `0.155` -> `02_9_8` planned
+
+The refinement record is maintained in:
+
+`docs/experiments/E4_distribution_guided_cache/02_9_7_02_9_8_text_weight_refinement.md`

@@ -1,78 +1,72 @@
-# Experiments
+# DPC-Point Experiments
 
-This directory records the formal experiment sequence and experiment documentation for the MCM-PC project.
+This directory records experiment documentation for the current paper line:
 
-Current paper direction:
+**DPC-Point: Distribution-Guided Prototype Cache for Robust Point Cloud Test-Time Adaptation**
 
-**MCM-PC: Reliability-Aware Multi-Cache Matrix for Test-Time Adaptation of 3D Point Cloud Vision-Language Models**
+The current goal is to improve Point-Cache by replacing confidence-only cache
+replacement with distribution-guided prototype cache purification.
 
-## 1. Formal Experiment Sequence
+## Current Experiment Sequence
 
-After the experiment numbering reset, the formal experiment sequence is defined as follows.
-
-| ID | Name | Purpose | Status |
+| ID | Name | Role in Current Paper | Status |
 |---|---|---|---|
-| E0 | Point-Cache Baseline Reproduction and Analysis | Reproduce Point-Cache baselines and analyze baseline behavior | In progress |
-| E1 | Text Prototype Enhancement | Study point-cloud-aware templates and dynamically generated LLM prompts | Planned |
-| E2 | Reliability-Gated Local Cache | Dynamically control local cache contribution based on reliability | Planned |
-| E3 | Conflict-Aware Negative Suppression | Use unreliable global-local conflict as negative evidence | Planned |
-| E4 | Reliability-Aware Multi-Cache Matrix | Build the full MCM-PC framework | Planned |
-| E5 | Ablation Studies and Visualization | Conduct ablations, case studies, and paper figures | Planned |
+| E0 | Point-Cache baseline reproduction | Baseline and failure-analysis foundation | Complete / maintained |
+| E1 | Text prototype enhancement | Prompt-distribution source; direct classifier replacement is not the final path | Complete as supporting evidence |
+| E2 | Text prototype transfer to Point-Cache | Tested direct prompt transfer into Point-Cache | Complete; not current main method |
+| E3 | Global prototype alignment cache | Explored visual prototype alignment and cache replacement variants | Exploratory; motivates E4 |
+| E4 | Distribution-guided cache | Current main DPC-Point method | Active main line |
+| E5 | ADAPT/PGA-inspired Gaussian alignment cache | Posterior/GDA-inspired exploratory branch | Exploratory; secondary unless it beats E4 cleanly |
 
-## 2. E0: Baseline Reproduction and Analysis
+## Current Main Anchor
 
-E0 includes the completed Point-Cache baseline reproduction and the corresponding result analysis.
+```text
+02_9_2
+E4-C-A0+E1-textdist-only
+E4_TEXT_SCORE_WEIGHT=0.15
+ULIP + ModelNet-C severity=2
+Avg acc: 54.70595045
+```
 
-Current E0 assets include:
+The E4 anchor keeps the original Point-Cache final classifier and final logits
+formula, but changes prototype/cache replacement with a joint visual-history and
+text-distribution score.
 
-- `E0_baseline/`: Point-Cache baseline 复现结果与分析文档。
-- `pointcache_repro/`: reproduction notes and commands.
-- `repro_log.md`: reproduction log.
+## Required Paper Evidence
 
-E0 is not a new MCM-PC method experiment. It is the foundation for all later comparisons.
+The current paper is not complete until the following evidence is available:
 
-## 3. Experiment Documentation Rule
+| Evidence | Minimum Requirement |
+|---|---|
+| ModelNet-C robustness | ULIP all35, baseline vs DPC-Point |
+| Clean tradeoff | clean baseline vs DPC-Point |
+| Cross-dataset robustness | ScanObjNN-C hardest and ShapeNet-C where feasible |
+| Backbone transfer | at least one additional backbone, preferably ULIP-2 or OpenShape |
+| Ablation | visual-history score, textdist score, text weight, normalization |
+| Cost/diagnostics | runtime, memory, cache replacement behavior, order sensitivity |
 
-Each formal experiment after E0 should have its own directory:
+## Documentation Rule
 
-    docs/experiments/E*_name/
+Each active experiment directory should keep human-readable records:
 
-Each experiment directory should include at least:
+```text
+docs/experiments/<experiment_name>/log.md
+docs/experiments/<experiment_name>/analysis.md
+```
 
-    log.md
-    analysis.md
+Raw logs, CSV/JSON outputs, checkpoints, datasets, and generated result folders
+stay under `Point-Cache/`.
 
-The two documents have different responsibilities:
+Update `experiments/narrative/e4_e5_research_narrative.md` whenever a result
+changes the current research judgment.
 
-- `log.md` records commands, scripts, configurations, checkpoints, datasets, backbones, prompt sources, runtime notes, errors, fixes, and git commits.
-- `analysis.md` summarizes quantitative results, compares them with E0, identifies gains or failures, and explains whether the experiment supports the MCM-PC hypothesis.
+## Archived Legacy Experiments
 
-The complete ICASSP paper draft is maintained separately under:
+Early exploratory experiments before the formal restart are archived under:
 
-    paper/ICASSP/
+```text
+docs/experiments/archive/legacy_pre_mcmpc_restart/
+```
 
-The paper draft should be updated alongside experiments, rather than being written only after all experiments are finished.
-
-## 4. Archived Legacy Experiments
-
-Early exploratory experiments before the formal MCM-PC restart have been archived under:
-
-    docs/experiments/archive/legacy_pre_mcmpc_restart/
-
-These legacy experiments do not occupy or affect the new E0-E5 numbering.
-
-Archived legacy items include:
-
-- early text prototype enhancement attempts;
-- entropy/margin reliability experiments;
-- global-local consistency experiments;
-- conservative negative cache attempts;
-- old staged experiment notes.
-
-## 5. Current Next Step
-
-The next formal work is:
-
-    E1: Text Prototype Enhancement
-
-Before modifying code, the E1 plan and prompt-source policy should be documented.
+Those files are historical context and do not define the current E0-E5 DPC-Point
+sequence.

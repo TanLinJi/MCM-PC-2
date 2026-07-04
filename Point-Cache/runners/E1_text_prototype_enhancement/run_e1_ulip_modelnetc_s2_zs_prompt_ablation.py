@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# 本 runner 用于在单个 Python 进程中复现 ULIP × ModelNet-C 全 35 个损坏设置的一种 baseline 方法，避免 35 次重复加载模型。
+# 本 runner 用于在单个 Python 进程中运行 ULIP × ModelNet-C 的
+# E1 文本原型增强方法，避免不同 cor_type 重复加载模型。
 import argparse
 import csv
 import gc
@@ -11,7 +12,11 @@ from datetime import datetime
 from pathlib import Path
 
 import torch
-import wandb
+
+try:
+    import wandb
+except ImportError:
+    wandb = None
 
 POINT_CACHE_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(POINT_CACHE_ROOT))
@@ -40,7 +45,7 @@ CORRUPTIONS = [
     "jitter",
 ]
 
-SEVERITIES = [2]
+DEFAULT_SEVERITIES = [2]
 
 
 class Tee:
@@ -64,6 +69,11 @@ def parse_args():
     baseline_parser.add_argument("--baseline-method-full", required=True)
     baseline_parser.add_argument("--baseline-gpu", default="0")
     baseline_parser.add_argument("--baseline-result-root", default="results/E0_baseline")
+    baseline_parser.add_argument(
+        "--modelnet-c-severities",
+        default="2",
+        help="Comma-separated severities for ModelNet-C, or 'all' for 0,1,2,3,4.",
+    )
 
     baseline_args, remaining = baseline_parser.parse_known_args()
 
@@ -73,6 +83,29 @@ def parse_args():
     sys.argv = old_argv
 
     return baseline_args, base_args
+
+
+def parse_modelnet_c_severities(value):
+    value = str(value).strip().lower()
+    if value == "all":
+        return [0, 1, 2, 3, 4]
+    if not value:
+        return list(DEFAULT_SEVERITIES)
+
+    severities = []
+    for item in value.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        severity = int(item)
+        if severity not in {0, 1, 2, 3, 4}:
+            raise ValueError(f"Unsupported ModelNet-C severity: {severity}")
+        severities.append(severity)
+
+    if not severities:
+        return list(DEFAULT_SEVERITIES)
+
+    return severities
 
 
 def make_wandb_run_name(args, baseline_method):
@@ -242,10 +275,15 @@ def run_one_corruption(
 def main():
     baseline_args, args = parse_args()
 
+    if args.wandb and wandb is None:
+        print("[E1] wandb is not installed; disabling wandb logging for this run.")
+        args.wandb = False
+
     exp_id = baseline_args.baseline_exp_id
     method = baseline_args.baseline_method
     method_full = baseline_args.baseline_method_full
     physical_gpu = baseline_args.baseline_gpu
+    severities = parse_modelnet_c_severities(baseline_args.modelnet_c_severities)
 
     project_root = Path("/root/autodl-tmp/MCM-PC-2")
     pc_root = project_root / "Point-Cache"
@@ -272,7 +310,7 @@ def main():
 
     with redirect_stdout(Tee(sys.__stdout__, init_log_buffer)), redirect_stderr(Tee(sys.__stderr__, init_log_buffer)):
         print("============================================================")
-        print("E1 ULIP ModelNet-C severity=2 zero-shot prompt ablation runner")
+        print("E1 ULIP ModelNet-C zero-shot text prototype runner")
         print(f"EXP_ID: {exp_id}")
         print(f"Method: {method_full}")
         print(f"Physical GPU: {physical_gpu}")
@@ -280,7 +318,8 @@ def main():
         print(f"Dataset: {args.dataset}")
         print(f"Data root: {data_root}")
         print(f"Result dir: {run_dir}")
-        print("Model will be loaded once, then 7 severity=2 cor_type values will be evaluated.")
+        print(f"Severities: {severities}")
+        print(f"Model will be loaded once, then {len(CORRUPTIONS) * len(severities)} cor_type values will be evaluated.")
         print("============================================================")
 
         set_random_seed(args.seed)
@@ -302,7 +341,7 @@ def main():
     }
 
     for corruption in CORRUPTIONS:
-        for severity in SEVERITIES:
+        for severity in severities:
             cor_type = f"{corruption}_{severity}"
             data_file = Path(data_root) / f"{cor_type}.h5"
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -385,7 +424,7 @@ def main():
 
     print()
     print("============================================================")
-    print(f"All 35 runs finished: {exp_id}")
+    print(f"All requested ModelNet-C runs finished: {exp_id}")
     print(f"summary: {summary_file}")
     print("============================================================")
     print(summary_file.read_text())

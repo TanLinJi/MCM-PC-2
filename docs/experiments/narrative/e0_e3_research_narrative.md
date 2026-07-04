@@ -1,4 +1,8 @@
-# MCM-PC 实验路线完整归档：E0 到 E3 的研究思路、实验过程、问题背景、解决方案与后续补实验计划
+# DPC-Point E0-E3 Historical Narrative
+
+本文件记录 DPC-Point 形成之前的 E0-E3 研究路线。早期文字中若出现
+MCM-PC 表述，按历史上下文理解；当前论文题目和主线已更新为
+**DPC-Point: Distribution-Guided Prototype Cache for Robust Point Cloud Test-Time Adaptation**。
 
 更新时间：2026-06-07  
 项目根目录：`/root/autodl-tmp/MCM-PC-2`  

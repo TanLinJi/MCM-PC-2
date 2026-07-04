@@ -114,8 +114,14 @@ def get_arguments():
     parser.add_argument(
         '--prompt-cache-dir',
         type=str,
-        default='results/E1_text_prototype_enhancement/prompts',
+        default='llm',
         help='Directory for saved LLM dynamic prompts.'
+    )
+    parser.add_argument(
+        '--prompt-cache-file',
+        type=str,
+        default='',
+        help='Optional explicit LLM prompt JSON file name or path.'
     )
     parser.add_argument(
         '--llm-api-base-url',
@@ -133,8 +139,17 @@ def get_arguments():
         '--llm-prompt-mode',
         type=str,
         default='multiview_2d3d',
-        choices=['pointcloud_geometry', 'multiview_2d3d'],
-        help='LLM description style. multiview_2d3d includes both visual semantics and 3D geometry.'
+        choices=[
+            'pointcloud_geometry',
+            'multiview_2d3d',
+            'image4_pointcloud4_bridge2',
+            'image10_pointcloud5',
+            'image5_pointcloud10',
+            'image12_pointcloud3',
+            'multiview_2d3d_2to1',
+            'multiview_2d3d_1to2',
+        ],
+        help='LLM description style. Ratio modes fix 2D visual semantics vs 3D geometry counts.'
     )
     parser.add_argument(
         '--force-regenerate-prompts',
@@ -364,7 +379,7 @@ def _encode_weighted_prompt_fusion(classname, template, clip_model):
     """Encode and fuse two text prototype branches for one class.
 
     In E1, the two branches are:
-    1. manual_3d point-cloud-aware manual prompts;
+    1. manual_full hand-written prompts;
     2. LLM-generated class-level descriptions.
     """
     static_template = template["static_template"]

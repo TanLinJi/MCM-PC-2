@@ -1,0 +1,71 @@
+{
+  "prompt_source": "manualfull_llm_dynamic_init",
+  "llm_provider": "deepseek",
+  "llm_model": "deepseek-v4-pro",
+  "llm_api_base_url": "https://api.deepseek.com/chat/completions",
+  "llm_prompt_mode": "multiview_2d3d",
+  "generation_time": "2026-06-10 15:26:17",
+  "dataset_name": "snv2_c",
+  "dynamic_prompt_count": 10,
+  "temperature": 0.3,
+  "class_names": [
+    "airplane",
+    "bag",
+    "cap",
+    "car",
+    "chair",
+    "earphone",
+    "guitar",
+    "knife",
+    "lamp",
+    "laptop",
+    "motorbike",
+    "mug",
+    "pistol",
+    "rocket",
+    "skateboard",
+    "table"
+  ],
+  "completed_class_names": [
+    "airplane",
+    "bag",
+    "cap"
+  ],
+  "failed_classes": [],
+  "prompts": {
+    "airplane": [
+      "An airplane is a powered flying vehicle with fixed wings and a fuselage, often seen with jet engines under the wings and a tail fin.",
+      "From a side view, an airplane typically shows a long cylindrical body, swept-back wings, and a vertical stabilizer at the rear.",
+      "Common visual features of an airplane include a cockpit windshield, round passenger windows, and the airline's livery painted along the fuselage.",
+      "In photographs, airplanes are frequently depicted against clear skies or runways, with their landing gear visible when on the ground.",
+      "The 3D structure of an airplane consists of a central elongated fuselage, a pair of large flat wings extending symmetrically from the midsection, and a tail assembly with horizontal and vertical stabilizers.",
+      "In a point cloud, an airplane exhibits bilateral symmetry along its longitudinal axis, with wings as thin planar regions and the fuselage as a dense tubular cluster.",
+      "The point distribution of an airplane captured from ground-based LiDAR often highlights the wing leading edges, engine nacelles, and the tail section as distinct geometric sub-clusters.",
+      "The overall shape can be approximated by a combination of a cylinder for the fuselage, two planar slabs for the wings, and a smaller cross-shaped structure for the tail.",
+      "Visually, the airplane's silhouette is dominated by the long body and wide wings, which in 3D geometry translate to a central elongated axis and large planar lateral extensions.",
+      "The recognizable visual cues of cockpit windows and tail fins correspond to distinct geometric features at the front and rear of the point cloud, helping to orient the object."
+    ],
+    "bag": [
+      "A bag is a flexible container often made of fabric, leather, or plastic, featuring handles or straps that are clearly visible in photographs and used for carrying items.",
+      "The tote bag is characterized by a large open top, two parallel handles, and a spacious rectangular body, commonly seen in images of everyday shopping or casual settings.",
+      "A handbag typically appears in images as a compact accessory with a top zipper closure, a shoulder strap, and decorative hardware like buckles or metal logos, crafted from smooth leather or fabric.",
+      "Backpacks in photographs display two padded shoulder straps, a main zippered compartment, and often external pockets, with a shape that conforms to the wearer’s back.",
+      "In 3D point clouds, a bag is represented by a closed or partially open hollow volume with overall rounded cuboid or cylindrical geometry, and distinct thin, loop-like structures for handles.",
+      "The point cloud of a bag shows approximate bilateral symmetry, with the main pouch forming a dense, slightly convex cluster and the handles projecting as two curved, sparse tubular sets above it.",
+      "A bag’s geometry is characterized by a smooth but irregular surface without sharp edges, with handle attachments merging into the body and creating regions of higher point density where straps connect.",
+      "When scanned, the bag’s interior remains largely empty in point clouds, while the exterior points define a deformable shell; handles may appear as elongated curvilinear features that extend outward and often return to the main body.",
+      "The visual sag or drape of a bag in photographs correlates directly with the soft, non-rigid deformation seen in its 3D point cloud, where the body lowers asymmetrically under gravity while handles retain their arched form.",
+      "Whether in images or point clouds, the recognizable identity of a bag is built upon the combination of a hollow vessel and protruding handles, with the 3D structure revealing the thickness and curvature of straps that in 2D are indicated by highlights and shadows."
+    ],
+    "cap": [
+      "A soft fabric cap with a curved brim and an adjustable strap at the back, often made of wool or cotton blend.",
+      "The baseball cap features a stitched logo on the front panel and a mesh crown structure.",
+      "A close-fitting dome shape that covers the head and protects from sun, often worn outdoors.",
+      "A peaked hat with a visor and a flat top, made of polyester materials.",
+      "The cap has a rounded crown and a stiff bill, often seen from the side view.",
+      "A dome-shaped head covering with a small button on top of the front.",
+      "A curved cap with a visor and a flat brim.",
+      "The cap has a curved bill and a flat top."
+    ]
+  }
+}

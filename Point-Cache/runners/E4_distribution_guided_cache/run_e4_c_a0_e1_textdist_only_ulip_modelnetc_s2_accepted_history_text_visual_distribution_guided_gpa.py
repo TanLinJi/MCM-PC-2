@@ -37,6 +37,7 @@ from runners.zs_infer import infer as run_zero_shot
 from runners.model_with_global_cache import run_test_tda as run_global_cache
 from runners.E4_distribution_guided_cache.model_e4_c_accepted_history_text_visual_distribution_guided_gpa import run_test_tda as run_hierarchical_cache
 
+TEXT_GATE_MODE = os.environ.get("E4_TEXT_GATE_MODE", "distribution").strip().lower()
 
 CORRUPTIONS = [
     "add_global",
@@ -248,6 +249,15 @@ def build_text_distribution_once(args, clip_model, clip_weights_state, classname
 
     min_var = float(os.environ.get("E4_TEXT_DIST_MIN_VAR", os.environ.get("E4_DIST_MIN_VAR", "1e-4")))
     text_dist = {}
+    fused_prototypes = None
+
+    if TEXT_GATE_MODE == "fused_prototype":
+        fused_prototypes = clip_classifier(args, classnames, template, clip_model)
+        if fused_prototypes.dim() != 2 or fused_prototypes.size(1) != len(classnames):
+            raise RuntimeError(
+                "Unexpected fused prototype shape from clip_classifier: "
+                f"{tuple(fused_prototypes.shape)}"
+            )
 
     for class_index, classname in enumerate(classnames):
         if _is_weighted_prompt_fusion(template):
@@ -262,6 +272,10 @@ def build_text_distribution_once(args, clip_model, clip_weights_state, classname
             texts = _build_prompt_texts(classname, template)
             class_embeddings = _encode_prompt_embeddings(args, clip_model, texts)
             text_dist[int(class_index)] = _distribution_from_prompt_embeddings(class_embeddings, min_var)
+
+        if fused_prototypes is not None:
+            text_dist[int(class_index)]["prototype"] = fused_prototypes[:, class_index].detach().cpu().tolist()
+            text_dist[int(class_index)]["prototype_source"] = "weighted_fusion_clip_classifier"
 
     clip_weights_state["text_dist"] = text_dist
     return text_dist

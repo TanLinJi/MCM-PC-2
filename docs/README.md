@@ -1,156 +1,94 @@
-# MCM-PC-2 Documentation
+# DPC-Point Documentation
 
-> **项目**：MCM-PC: Reliability-Aware Multi-Cache Matrix for Test-Time Adaptation of 3D Point Cloud Vision-Language Models
+> Project: **DPC-Point: Distribution-Guided Prototype Cache for Robust Point Cloud Test-Time Adaptation**
 >
-> **路径**：`/root/autodl-tmp/MCM-PC-2/docs/`
+> Path: `/root/autodl-tmp/MCM-PC-2/docs/`
 
-`docs/` 是本项目所有人类可读文档的统一入口。代码、原始日志、模型权重、数据集留在 `Point-Cache/` 等代码目录，不放这里。
+`docs/` is the human-readable documentation home for the current DPC-Point
+paper line. Code, raw logs, datasets, checkpoints, and result artifacts remain
+under `Point-Cache/` and related code directories.
 
----
+## Current Reading Order
 
-## 目录结构
+For the active ICASSP 2027 paper direction, read these files first:
 
+1. `proposals/current_direction.md` - current DPC-Point positioning, method anchor, evidence, and near-term work.
+2. `experiments/narrative/e4_e5_research_narrative.md` - current E4/E5 research narrative and evidence boundary.
+3. `experiments/E4_distribution_guided_cache/02_9_text_weight_ablation_analysis.md` - selected DPC anchor setting.
+4. `experiments/E5_adapt_inspired_gaussian_alignment_cache/E5_BCD_posterior_prototype_residual_design.md` - exploratory posterior/GDA branch.
+5. `experiments/experiment_registry.md` - experiment status registry.
+6. `paper/0_outline.md` - paper outline, contribution plan, and required result tables.
+7. `project/glossary.md` - current terminology and archived-term boundary.
+8. `project/conventions/user_preferences_workflow_conventions.md` - collaboration, experiment, and documentation rules.
+
+## Directory Map
+
+| Directory | Current Role |
+|---|---|
+| `paper/` | Current DPC-Point paper outline and section drafts |
+| `proposals/` | Current research direction and method-positioning notes |
+| `experiments/` | Experiment plans, analyses, registry, and long-form research narrative |
+| `project/` | Project rules, glossary, progress log, and navigation aids |
+| `decisions/` | Locked project decisions, including the rename to DPC-Point |
+| `reports/` | Current self-contained HTML reports |
+| `references/` | Paper PDFs and reference material |
+| `assets/figures/` | Figures and figure sources used by docs or paper drafts |
+| `context/windsurf/` | Conversation/context archive |
+| `archive/` | Historical material that should not drive the current paper |
+
+## Current Paper State
+
+The active method is the E4 distribution-guided prototype cache:
+
+```text
+E4-C-A0+E1-textdist-only
+E4_TEXT_SCORE_WEIGHT=0.15
 ```
-docs/
-├── README.md                      ← 本文件，目录索引
-├── project/                       ← 项目管理：偏好规则、术语、进度、长期协作规范
-├── proposals/                     ← 创新点、研究方案、路线规划
-├── paper/                         ← 论文章节草稿
-├── experiments/                   ← 实验设计、结果、阶段总结、长期实验叙事
-├── reports/                       ← 自包含 HTML 报告
-├── context/windsurf/              ← AI 对话归档、上下文恢复
-├── archive/                       ← 旧版本方案、参考代码副本
-└── assets/figures/                ← 图、流程图、图源文件
+
+The current strongest complete severity-2 anchor is:
+
+```text
+02_9_2
+ULIP + ModelNet-C severity=2
+Avg acc: 54.70595045
 ```
 
----
+This is a working anchor, not yet a final paper benchmark. The paper still needs
+all35, clean tradeoff, ScanObjNN-C, ShapeNet-C, and backbone-transfer evidence.
 
-## 一、`project/` — 项目管理
+## Archive Boundary
 
-| 文件 | 用途 |
-|---|---|
-| `user_preferences.md` | 用户工作偏好与项目规则（commit 规则、命名规则、跑分规则） |
-| `conventions/` | 长期协作规范、用户偏好、路径命名、实验推进和 Git 工作流归档 |
-| `glossary.md` | 术语表（D/P/F/G/W 编号、anchor pollution、EMR/GLC/CANC 等中英文对照） |
-| `progress_log.md` | 关键里程碑数字日志 |
-| `project_tree.md` | 项目目录树（根目录与关键子树） |
+The current DPC-Point line supersedes the older MCM-PC / Multi-Cache Matrix /
+CANC / MCP-3D framing. Those documents are preserved under:
 
-## 二、`proposals/` — 创新点和方案
+```text
+docs/archive/legacy_mcmpc_canc/
+```
 
-| 文件 | 用途 |
-|---|---|
-| `core_innovations.md` | 4 个核心创新点（Multi-Cache Matrix / Compactness-Margin / Global-Local Consistency / Adaptive Fusion） |
-| `auxiliary_innovation_3.md` | 辅助创新 3：Confusion-Aware Negative Cache 详细推导 |
-| `matrix_idea_v0.md` | 3×2 缓存矩阵最初想法草稿（Entropy/Align/Negative × Global/Local） |
-| `ideas_log.md` | 想法零碎记录 |
-| `top_conference_proposal_v1.html` | 顶会论文方案 v1（41 KB，含 14-18 周路线） |
-| `project_roadmap_v1.html` | 项目 roadmap v1（25 KB，7 节）|
+Early pre-restart experiments are preserved under:
 
-## 三、`paper/` — 论文章节草稿
+```text
+docs/experiments/archive/legacy_pre_mcmpc_restart/
+```
 
-| 文件 | 章节 | 状态 |
-|---|---|---|
-| `0_outline.md` | 大纲、章节依赖、写作时间预算 | v0.1 |
-| `abstract.md` | 摘要 + 流程图骨架 | 占位 |
-| `1_introduction.md` | 引言 | 草稿 |
-| `2_related_work.md` | 相关工作（3D TTA / 零样本 / 缓存）| v0.1 草稿 |
-| `3_method.md` | 方法 | 占位 |
+Archived files are retained for traceability only. If an archived idea becomes
+active again, summarize it in a current DPC-Point document instead of editing the
+old archived file.
 
-## 四、`experiments/` — 实验
+## Documentation Rules
 
-详见 `experiments/README.md`。粗略：
-
-| 子目录/文件 | 内容 |
-|---|---|
-| `narrative/` | E0 起始的长期实验路线叙事、研究判断和后续补实验计划 |
-| `stages/` | stage0~4 实验阶段 .md 归档（按 baseline → EMR → GLC → CANC 顺序） |
-| `e0_tpe/` | 文本原型增强（zero-shot 阶段） |
-| `e2_emr/` | Entropy-Margin Reliability cache admission |
-| `e3_glc/` | Global-Local Consistency reliability |
-| `e4_canc/` | Confusion-Aware / Conflict-Aware Negative Cache（含 v0 / v1 / DIAG） |
-| `pointcache_repro/` | Point-Cache 复现说明、命令、项目结构 |
-| `experiment_summary.md` | 跨阶段实验总结 |
-| `repro_log.md` | 复现日志 |
-
-## 五、`reports/` — HTML 报告
-
-| 文件 | 类型 |
-|---|---|
-| `2026-05-15_top_conference_progress.html` | 顶会论文阶段进展报告（浅色主题） |
-| `2026-05-17_global_roadmap_v2.html` | 全局路线图 v2（39 KB，最详细） |
-| `2026-05-17_task_specification.html` | 任务说明书 v1.0（暗黑主题，含 6 周路线 / 风险 / 立即行动） |
-
-后续所有说明类 HTML 文档默认沿用 `2026-05-17_task_specification.html` 的暗色侧边栏风格，除非用户明确要求更换风格。
-
-## 六、`context/windsurf/`
-
-`conversation_archive.md/.html` — Cascade 对话归档，恢复上下文用。
-
-## 七、`archive/`
-
-| 文件 | 用途 |
-|---|---|
-| `README.md` | MCM-PC 项目原 docs 目录设计规范（参考） |
-| `mcp3d_framework_proposal.md` | MCP-3D 论文方案（旧版，MCM-PC 项目分支） |
-| `reference_code/model_with_hierarchical_caches.py` | Point-Cache 原版 hierarchical cache runner 副本（参考用） |
-
-## 八、`assets/figures/`
-
-| 文件 | 引用位置 |
-|---|---|
-| `confusion_aware_negative_cache.png` | `proposals/core_innovations.md` 创新点示意 |
-| `e2_emr_delta_chart.png` | `experiments/e2_emr/e2_emr_admission.md` Δ 可视化 |
-
----
-
-## 命名规范
-
-- **目录名**：英文小写 + 下划线
-- **MD 文件名**：英文小写 + 下划线（如 `auxiliary_innovation_3.md`）
-- **HTML 报告**：日期前缀 + 描述（如 `2026-05-17_task_specification.html`）
-- **方案 HTML**：版本后缀（如 `top_conference_proposal_v1.html`）
-- **实验编号**：`e<n>_<short_name>`（如 `e2_emr`、`e4_canc`）
-- **stage 编号**：`stage<n>_<topic>.md`（如 `stage4_canc_diag.md`）
-
-## 推荐阅读顺序
-
-新读者按下面顺序读，30 分钟摸清项目：
-
-1. `project/conventions/user_preferences_workflow_conventions.md` — 最新协作规范与用户偏好
-2. `project/user_preferences.md` — 旧版工作规则摘要
-3. `project/glossary.md` — 术语和实验编号
-4. `experiments/narrative/e0_e3_research_narrative.md` — E0-E3 研究路线完整叙事
-5. `reports/2026-05-17_task_specification.html` — 当前局势 + 6 周路线
-6. `proposals/core_innovations.md` — 核心创新点
-7. `experiments/stages/` 全部（按编号顺序）
-8. `reports/2026-05-17_global_roadmap_v2.html` — 全局路线图
-9. `paper/0_outline.md` — 论文大纲和写作进度
-
-## 新增文档怎么放
-
-- 新论文章节 / 摘要 / 段落：`paper/`
-- 新实验数据汇总（不是原始日志）：`experiments/<eN_topic>/`；原始 .log/.csv/.json 留在 `Point-Cache/logs/`
-- 新长期实验路线叙事：`experiments/narrative/`
-- 新协作规范、用户偏好、工作流规则：`project/conventions/`
-- 新创新点或方法草稿：`proposals/`
-- 新 HTML 自包含报告：`reports/`，加日期前缀
-- 新对话归档：`context/windsurf/`
-- 新图源（svg / png / mmd）：`assets/figures/`
-- 旧版方案、参考代码：`archive/`
-
-## 维护规则
-
-- 文件命名变更必须用 `git mv` 保留 history
-- 重复或失效文件移到 `archive/` 而非直接删除（除非确认是空文件或日志副本）
-- 关键实验进展、会改变结论的 bug 修复、用户新增偏好和文档风格要求，要同步更新 `experiments/narrative/` 或 `project/conventions/`
-- 结构调整和关键文档更新后，及时更新 qmd 索引，保证后续检索能命中新路径和新内容
-- 每次结构调整在本文件 changelog 末尾追加一行
-
----
+- New paper sections go under `paper/`.
+- New method proposals or positioning notes go under `proposals/`.
+- New experiment summaries go under `experiments/<experiment_name>/`; raw logs and result files stay in `Point-Cache/`.
+- New long-form research narratives go under `experiments/narrative/`.
+- New collaboration rules or user preferences go under `project/conventions/`.
+- Deprecated plans should be moved to `archive/`, not deleted, unless they are empty placeholders.
+- High-level indexes must use DPC-Point terminology and should not point readers to archived MCM-PC/CANC plans as current work.
 
 ## Changelog
 
-- **2026-06-06** v1.3：新增 `experiments/narrative/` 和 `project/conventions/` 两个长期维护目录，归档 E0-E3 实验叙事与项目协作规范；补充 HTML 报告风格和 qmd 更新要求。
-- **2026-06-02** v1.2：将 `project/project_tree.md` 扩展为叶子样例版，补充 Point-Cache、docs/experiments、weights 等深层结构。
-- **2026-06-02** v1.1：新增 `project/project_tree.md`，整理当前仓库的目录树。
-- **2026-05-17** v1.0：初始结构落盘。归档了 `docs/new/` 中所有用户上传的资料，按 8 大类目录重新分类，统一英文命名。同时合并 E2-EMR 三份重复、两份代号说明，删除日志副本（原版在 `Point-Cache/logs/recur-pc/`）。
+- **2026-06-10** v2.0: Adopted DPC-Point as the current paper title and reorganized the docs entrypoint around the E4 distribution-guided prototype cache line. Archived old MCM-PC/CANC paper and proposal material under `docs/archive/legacy_mcmpc_canc/`.
+- **2026-06-06** v1.3: Added long-term experiment narrative and project convention directories.
+- **2026-06-02** v1.2: Expanded project tree documentation.
+- **2026-06-02** v1.1: Added `project/project_tree.md`.
+- **2026-05-17** v1.0: Initial docs structure.

@@ -189,7 +189,7 @@
 
 LLM prompt 缓存目录：
 
-    Point-Cache/results/E1_text_prototype_enhancement/00_3_ulip_modelnetc_s2_zs_llm_only_smoke/prompts/
+    Point-Cache/llm/e1_prompt_bank/
 
 当前已知结果：
 
@@ -242,7 +242,7 @@ LLM prompt 缓存目录：
 
 LLM prompt 缓存目录：
 
-    Point-Cache/results/E1_text_prototype_enhancement/00_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_smoke/prompts/
+    Point-Cache/llm/e1_prompt_bank/
 
 当前已知结果：
 
@@ -303,13 +303,11 @@ LLM 生成的类别描述会保存为 JSON 缓存。
 - 保证重复实验时使用相同描述；
 - 支持续跑，已经生成的类别不会重新生成。
 
-当前阶段 prompt 缓存先放在实验结果目录下：
-
-    Point-Cache/results/E1_text_prototype_enhancement/<EXP_ID>/prompts/
-
-后续如果 E1 方法稳定，再考虑把最终选定版本归档到：
+E1 重启后的 prompt 缓存统一放在：
 
     Point-Cache/llm/e1_prompt_bank/
+
+旧的 `results/E1_text_prototype_enhancement/shared_prompts/` 只作为历史结果追溯。
 
 ## 7. 当前结论
 
@@ -350,6 +348,7 @@ E1-S1 用于寻找 `manual_full_llm_fusion` 的更优融合比例。
 | `01_2_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w085_015.sh` | 0.85 | 0.15 | 中等保守融合 |
 | `01_3_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w075_025.sh` | 0.75 | 0.25 | smoke test 中已取得正结果的默认权重 |
 | `01_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w050_050.sh` | 0.50 | 0.50 | 检查较高 LLM 权重是否导致文本原型偏移 |
+| `01_5_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w080_020.sh` | 0.80 | 0.20 | 补充 0.85:0.15 与 0.75:0.25 之间的中间权重 |
 
 运行示例：
 
@@ -360,4 +359,39 @@ E1-S1 用于寻找 `manual_full_llm_fusion` 的更优融合比例。
 - 权重消融统一读取共享 prompt 缓存；
 - 不应重新生成 LLM prompt；
 - 共享 prompt 缓存路径为：
-  `Point-Cache/results/E1_text_prototype_enhancement/shared_prompts/`
+  `Point-Cache/llm/e1_prompt_bank/`
+
+## 10. E1-S2：LLM 描述数量与 2D/3D 比例消融
+
+本阶段补充每类 15 条 LLM 描述，并测试两种 2D/3D 比例：
+
+| 脚本 | 作用 |
+|---|---|
+| `02_1_generate_modelnetc_llm_prompts_p15_2d3d_2to1.sh` | 生成 15 条描述，2D:3D = 2:1 |
+| `02_2_generate_modelnetc_llm_prompts_p15_2d3d_1to2.sh` | 生成 15 条描述，2D:3D = 1:2 |
+| `02_3_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w080_020_p15_2d3d_2to1.sh` | 评估 15 条描述，2D:3D = 2:1 |
+| `02_4_ulip_modelnetc_s2_zs_manual_full_llm_fusion_w080_020_p15_2d3d_1to2.sh` | 评估 15 条描述，2D:3D = 1:2 |
+
+这两个 15 prompts 消融默认使用：
+
+    manual_full:LLM = 0.80:0.20
+
+## 11. 当前候选配置跨数据集验证
+
+E1_36 已固定为当前正式候选配置：
+
+    15 prompts/class = 10 image + 5 pointcloud
+    manual_full:LLM = 0.60:0.40
+
+clean ModelNet 验证脚本：
+
+    modelnet_clean_validation/E1_40_modelnet_clean_15_prompts_10_image_5_pointcloud_manual60_llm40.sh
+
+运行方式：
+
+    cd /root/autodl-tmp/MCM-PC-2/Point-Cache
+    bash scripts/E1_text_prototype_enhancement/modelnet_clean_validation/E1_40_modelnet_clean_15_prompts_10_image_5_pointcloud_manual60_llm40.sh 0
+
+结果目录：
+
+    Point-Cache/results/E1_text_prototype_enhancement/E1_40_modelnet_clean_15_prompts_10_image_5_pointcloud_manual60_llm40/
