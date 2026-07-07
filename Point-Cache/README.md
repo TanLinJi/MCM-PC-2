@@ -169,6 +169,43 @@ Point-Cache is totally *training-free* and can operate in comparable efficiency 
     - `hierarchical` $\rightarrow$ `global`
     - **NOTE:** also remember to replace other arguments related to this cache type
 
+### DPC-Point experimental runners
+This repository also includes experimental runners for our DPC-Point line. These runners keep the Point-Cache online inference protocol and add decoupled cache capacities plus an explicit final-score formula:
+```text
+y = y_zs + alpha_g * y_g + alpha_l * y_l - alpha_n * y_n
+```
+
+The cache capacities and final-score weights are intentionally kept in the script arrays, so users can change them without editing the runner code:
+- `COMBINATIONS`: cache-capacity combinations
+- `FINAL_SCORE_WEIGHTS`: final-score coefficient combinations
+
+For **ULIP on ModelNet-C all35**, run:
+```sh
+bash scripts/E4_distribution_guided_cache/09_2_ulip_modelnetc_all35_explicit_final_score_ablation.sh 0
+```
+
+For **ULIP on ScanObjNN-C hardest all35**, run:
+```sh
+bash scripts/E4_distribution_guided_cache/09_2_ulip_scanobjnnc_hardest_all35_explicit_final_score_best.sh 0
+```
+
+For the same ScanObjNN-C hardest all35 protocol with other backbones, run:
+```sh
+bash scripts/E4_distribution_guided_cache/09_2_ulip2_scanobjnnc_hardest_all35_explicit_final_score_best.sh 0
+bash scripts/E4_distribution_guided_cache/09_2_openshape_scanobjnnc_hardest_all35_explicit_final_score_best.sh 0
+bash scripts/E4_distribution_guided_cache/09_2_uni3d_scanobjnnc_hardest_all35_explicit_final_score_best.sh 0
+```
+
+Selected ULIP results are shown below. The ScanObjNN-C paper-aligned row uses the hardest split and corruption severity level 2, matching Table 7 in the Point-Cache paper.
+
+| Dataset / protocol | ULIP | PointCache | DPC-Point |
+|---|---:|---:|---:|
+| ModelNet-C all35 | - | - | 53.71 |
+| ScanObjNN-C hardest, severity 2 | 23.97 | 28.42 | 30.53 |
+| ScanObjNN-C hardest, all35 | 23.66 | 27.51 | 29.67 |
+
+For ScanObjNN-C hardest all35, the original paper reports Table 7 at severity level 2 rather than all35. The all35 comparison above uses the local Point-Cache all35 reproduction, with the severity-2 cells calibrated to the paper Table 7 values for ULIP and PointCache.
+
 ### Generalization evaluation on _a dataset suite_
 1. This part corresponds to the experiments in Section 4.2 (Table 2). 
 
